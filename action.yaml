@@ -1,0 +1,163 @@
+name: 'Deploy Docker to AWS (EC2)'
+description: 'Deploy a Docker app to an AWS Virtual Machine (EC2) with Docker Compose'
+branding:
+  icon: upload-cloud
+  color: red
+inputs:
+  # Checkout
+  checkout:
+    description: 'Specifies if this action should checkout the code'
+    required: false
+    default: 'true'
+  
+  # AWS
+  aws_access_key_id:
+    description: 'AWS access key ID'
+    required: true
+  aws_secret_access_key:
+    description: 'AWS secret access key'
+    required: true
+  aws_session_token:
+    description: 'AWS session token'
+    required: false
+  aws_default_region:
+    description: 'AWS default region'
+    default: us-east-1
+    required: false
+
+  # Domains
+  domain_name:
+    description: 'Define the root domain name for the application. e.g. app.com'
+    required: false
+  sub_domain:
+    description: 'Define the sub-domain part of the URL. Defaults to `${org}-${repo}-{branch}`'
+  root_domain:
+    description: 'Deploy to root domain. Will generate two DNS recrods, one for root, another for www'
+    required: false
+  cert_arn:
+    description: 'Define the certificate ARN to use for the application'
+    required: false
+  create_root_cert:
+    description: 'Generates and manage the root cert for the application'
+    required: false
+  create_sub_cert: 
+    description: 'Generates and manage the sub-domain certificate for the application'
+    required: false
+  no_cert:
+    description: 'Makes the application not to use a certificate by disabling certificate lookup.'
+    required: false
+    
+outputs:
+  vm_url:
+    description: "The URL of the generated app"
+    value: ${{ steps.deploy.outputs.vm_url }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: AWS Login
+      id: aws_login
+
+
+
+    - name: Deploy with BitOps
+      id: deploy
+      shell: bash
+      env:
+        AWS_DEFAULT_REGION: ${{ inputs.aws_default_region }}
+        AWS_AMI_ID: ${{ inputs.aws_ami_id }}
+        TF_STATE_BUCKET: ${{ inputs.tf_state_bucket }}
+        TF_STATE_BUCKET_DESTROY: ${{ inputs.tf_state_bucket_destroy }}
+        REPO_ENV: ${{ inputs.repo_env }}
+        GHS_ENV: ${{ inputs.dot_env }}
+        GHV_ENV: ${{ inputs.ghv_env }}
+        AWS_SECRET_ENV: ${{ inputs.aws_secret_env }}
+        APP_PORT: ${{ inputs.app_port }}
+        LB_PORT: ${{ inputs.lb_port }}
+        LB_HEALTHCHECK: ${{ inputs.lb_healthcheck }}
+        EC2_INSTANCE_PROFILE: ${{ inputs.ec2_instance_profile }}
+        EC2_INSTANCE_TYPE: ${{ inputs.ec2_instance_type }}
+        EC2_VOLUME_SIZE: ${{ inputs.ec2_volume_size }}
+        STACK_DESTROY: ${{ inputs.stack_destroy }}
+        AWS_RESOURCE_IDENTIFIER: ${{ inputs.aws_resource_identifier }}
+        DOMAIN_NAME: ${{ inputs.domain_name }}
+        SUB_DOMAIN: ${{ inputs.sub_domain }}
+        ROOT_DOMAIN: ${{ inputs.root_domain }}
+        CERT_ARN: ${{ inputs.cert_arn }}
+        CREATE_ROOT_CERT: ${{ inputs.create_root_cert }}
+        CREATE_SUB_CERT: ${{ inputs.create_sub_cert }}
+        NO_CERT: ${{ inputs.no_cert }}
+        BITOPS_FAST_FAIL: true
+        DOCKER_FULL_CLEANUP: ${{ inputs.docker_full_cleanup }}
+        APP_DIRECTORY: ${{ inputs.app_directory }}
+        APP_DIRECTORY_CLEANUP: ${{ inputs.app_directory_cleanup }}
+        CREATE_KEYPAIR_SM_ENTRY: ${{ inputs.create_keypair_sm_entry }}
+        ADDITIONAL_TAGS: ${{ inputs.additional_tags }}
+        AWS_ENABLE_POSTGRES: ${{ inputs.aws_enable_postgres }}
+        AWS_POSTGRES_ENGINE:  ${{ inputs.aws_postgres_engine }}
+        AWS_POSTGRES_ENGINE_VERSION:  ${{ inputs.aws_postgres_engine_version }}
+        AWS_POSTGRES_DATABASE_GROUP_FAMILY: ${{ inputs.aws_postgres_database_group_family }}
+        AWS_POSTGRES_INSTANCE_CLASS: ${{ inputs.aws_postgres_instance_class }}
+        AWS_POSTGRES_SUBNETS: ${{ inputs.aws_postgres_subnets }}
+        AWS_POSTGRES_DATABASE_NAME: ${{ inputs.aws_postgres_database_name }}
+        AWS_POSTGRES_DATABASE_PORT: ${{ inputs.aws_postgres_database_port}}
+        AWS_POSTGRES_DATABASE_PROTECTION: ${{ inputs.aws_postgres_database_protection }}
+        AWS_POSTGRES_DATABASE_FINAL_SNAPSHOT: ${{ inputs.aws_postgres_database_final_snapshot }}
+        AWS_CREATE_EFS: ${{ inputs.aws_create_efs }}
+        AWS_CREATE_HA_EFS: ${{ inputs.aws_create_ha_efs }}
+        AWS_CREATE_EFS_REPLICA: ${{ inputs.aws_create_efs_replica }}
+        AWS_ENABLE_EFS_BACKUP_POLICY: ${{ inputs.aws_enable_efs_backup_policy }}
+        AWS_EFS_ZONE_MAPPING: ${{ inputs.aws_efs_zone_mapping }}
+        AWS_EFS_TRANSITION_TO_INACTIVE: ${{ inputs.aws_efs_transition_to_inactive }}
+        AWS_EFS_REPLICA_DESTINATION: ${{ inputs.aws_replication_configuration_destination }}
+        AWS_MOUNT_EFS_ID: ${{ inputs.aws_mount_efs_id }}
+        AWS_MOUNT_EFS_SECURITY_GROUP_ID: ${{ inputs.aws_mount_efs_security_group_id }}
+        APPLICATION_MOUNT_TARGET: ${{ inputs.application_mount_target }}
+        EFS_MOUNT_TARGET: ${{ inputs.efs_mount_target }}
+        DATA_MOUNT_TARGET: ${{ inputs.data_mount_target }}
+
+      run: |
+        echo "running operations/_scripts/deploy/deploy.sh"
+        $GITHUB_ACTION_PATH/operations/_scripts/deploy/deploy.sh
+        echo "running operations/_scripts/deploy/export_vars.sh"
+        $GITHUB_ACTION_PATH/operations/_scripts/deploy/export_vars.sh
+
+    # output results to GitHub
+    - if: ${{ success() && steps.deploy.outputs.vm_url != '' }}
+      name: Print result created
+      shell: bash
+      run: |
+        echo "## VM Created! :rocket:" >> $GITHUB_STEP_SUMMARY
+        echo " ${{ steps.deploy.outputs.vm_url }}" >> $GITHUB_STEP_SUMMARY
+    - if: ${{ success() && steps.deploy.outputs.vm_url == '' && inputs.stack_destroy == 'true' && inputs.tf_state_bucket_destroy == 'false' }}
+      name: Print result destroyed
+      shell: bash
+      run: |
+        echo "## VM Destroyed! :boom:" >> $GITHUB_STEP_SUMMARY
+        echo "Infrastructure should be gone now!" >> $GITHUB_STEP_SUMMARY
+    - if: ${{ success() && steps.deploy.outputs.vm_url == '' && inputs.stack_destroy == 'true' && inputs.tf_state_bucket_destroy == 'true' }}
+      name: Print result destroyed
+      shell: bash
+      run: |
+        echo "## VM Destroyed! :boom:" >> $GITHUB_STEP_SUMMARY
+        echo "Buckets and infrastructure should be gone now!" >> $GITHUB_STEP_SUMMARY
+    - if: ${{ success() && steps.deploy.outputs.vm_url == '' && inputs.stack_destroy == 'false' }}
+      name: Print result destroyed
+      shell: bash
+      run: |
+        echo "## Deploy finished! But no URL found. :thinking: " >> $GITHUB_STEP_SUMMARY
+        echo "If expecting an URL, please check the logs for possible  errors." >> $GITHUB_STEP_SUMMARY
+        echo "If you consider this is a bug in the Github Action, please submit an issue to our repo." >> $GITHUB_STEP_SUMMARY
+
+$aws_additional_tags
+$aws_tf_state_bucket
+$aws_spa_website_bucket_name
+$aws_spa_cdn_enabled
+$aws_spa_cdn_root_object
+$aws_r53_domain_name
+$aws_r53_sub_domain_name
+$aws_r53_root_domain_deploy
+$aws_r53_enable_cert
+$aws_r53_cert_arn
+$aws_r53_create_root_cert
+$aws_r53_create_sub_cert

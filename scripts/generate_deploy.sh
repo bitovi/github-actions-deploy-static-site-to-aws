@@ -68,13 +68,6 @@ aws_tf_state_bucket=$(generate_var aws_tf_state_bucket $TF_STATE_BUCKET)
 #-- AWS Specific --#
 aws_additional_tags=$(generate_var aws_additional_tags $AWS_ADDITIONAL_TAGS)
 aws_default_region=$(generate_var aws_default_region $AWS_DEFAULT_REGION)
-#-- EC2 Instance --#
-if [[ $(alpha_only "$AWS_EC2_INSTANCE_CREATE") == true ]]; then
-  aws_ec2_instance_create=$(generate_var aws_ec2_instance_create $AWS_EC2_INSTANCE_CREATE)
-  aws_ec2_ami_filter=$(generate_var aws_ec2_ami_filter $AWS_EC2_AMI_FILTER)
-
-fi
-
 aws_spa_website_bucket_name=$(generate_var aws_spa_website_bucket_name $AWS_SPA_WEBSITE_BUCKET_NAME)
 aws_spa_cdn_enabled=$(generate_var aws_spa_cdn_enabled $AWS_SPA_CDN_ENABLED)
 aws_spa_cdn_root_object=$(generate_var aws_spa_cdn_root_object $AWS_SPA_CDN_ROOT_OBJECT)

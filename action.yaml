@@ -17,147 +17,156 @@ inputs:
   aws_secret_access_key:
     description: 'AWS secret access key'
     required: true
-  aws_session_token:
-    description: 'AWS session token'
-    required: false
   aws_default_region:
     description: 'AWS default region'
     default: us-east-1
     required: false
+  aws_role_to_assume:
+    description: 'AWS Role to assume.'
+    required: false
+  aws_resource_identifier:
+    description: 'Set to override the AWS resource identifier for the deployment.  Defaults to `${org}-{repo}-{branch}`.  Use with destroy to destroy specific resources.'
+    required: false
+  aws_additional_tags:
+    description: 'A JSON object of additional tags that will be included on created resources. Example: `{"key1": "value1", "key2": "value2"}`'
+    required: false
 
-  # Domains
-  domain_name:
+  # Terraform options
+  tf_action: 
+    desctiption: 'Option to run Terraform apply / destroy option. Will run plan if nothing defined.'
+    required: false
+  tf_plan_show_details:
+    description: 'Set to true to show a detailed output from Terraform plan.'
+    required: false
+  tf_state_bucket:
+    description: 'AWS S3 bucket to use for Terraform state. Defaults to `${org}-${repo}-{branch}-tf-state`'
+    required: false
+  tf_state_bucket_destroy:
+    description: 'Force purge and deletion of S3 bucket defined if terraform destroy action succeded.'
+    required: false
+
+  # SPA Settings
+  aws_spa_website_bucket_name:
+    description: 'AWS secret access key'
+    required: true
+  aws_spa_cdn_enabled:
+    description: 'AWS session token'
+    required: false
+  aws_spa_cdn_root_object:
+    description: 'AWS default region'
+    default: us-east-1
+    required: false
+
+  # AWS Route53 Domains abd Certificates
+  aws_r53_domain_name:
     description: 'Define the root domain name for the application. e.g. app.com'
     required: false
-  sub_domain:
+  aws_r53_sub_domain_name:
     description: 'Define the sub-domain part of the URL. Defaults to `${org}-${repo}-{branch}`'
-  root_domain:
+  aws_r53_root_domain_deploy:
     description: 'Deploy to root domain. Will generate two DNS recrods, one for root, another for www'
     required: false
-  cert_arn:
+  aws_r53_enable_cert:
+    description: 'Makes the application use a certificate by enabling a certificate lookup.'
+    required: false
+  aws_r53_cert_arn:
     description: 'Define the certificate ARN to use for the application'
     required: false
-  create_root_cert:
+  aws_r53_create_root_cert:
     description: 'Generates and manage the root cert for the application'
     required: false
-  create_sub_cert: 
+  aws_r53_create_sub_cert: 
     description: 'Generates and manage the sub-domain certificate for the application'
     required: false
-  no_cert:
-    description: 'Makes the application not to use a certificate by disabling certificate lookup.'
-    required: false
     
+
 outputs:
   vm_url:
     description: "The URL of the generated app"
     value: ${{ steps.deploy.outputs.vm_url }}
 
+defaults:
+  run:
+    working-directory: terraform_code
+
 runs:
   using: 'composite'
   steps:
-    - name: AWS Login
-      id: aws_login
-
-
+    - name: Configure AWS Credentials
+      if: ${{ inputs.aws_access_key_id != '' }}
+      uses: aws-actions/configure-aws-credentials@v2
+      with:
+        aws-access-key-id: ${{ inputs.aws_access_key_id }}
+        aws-secret-access-key: ${{ inputs.aws_secret_access_key }}
+        aws-region: ${{ inputs.aws_default_region }}
+        role-to-assume: ${{ inputs.aws_role_to_assume }}
 
     - name: Deploy with BitOps
       id: deploy
       shell: bash
       env:
+        # AWS
         AWS_DEFAULT_REGION: ${{ inputs.aws_default_region }}
-        AWS_AMI_ID: ${{ inputs.aws_ami_id }}
+        AWS_RESOURCE_IDENTIFIER: ${{ inputs.aws_resource_identifier }}
+        AWS_ADDITIONAL_TAGS: ${{ inputs.aws_additional_tags }}
+        # TF
         TF_STATE_BUCKET: ${{ inputs.tf_state_bucket }}
         TF_STATE_BUCKET_DESTROY: ${{ inputs.tf_state_bucket_destroy }}
-        REPO_ENV: ${{ inputs.repo_env }}
-        GHS_ENV: ${{ inputs.dot_env }}
-        GHV_ENV: ${{ inputs.ghv_env }}
-        AWS_SECRET_ENV: ${{ inputs.aws_secret_env }}
-        APP_PORT: ${{ inputs.app_port }}
-        LB_PORT: ${{ inputs.lb_port }}
-        LB_HEALTHCHECK: ${{ inputs.lb_healthcheck }}
-        EC2_INSTANCE_PROFILE: ${{ inputs.ec2_instance_profile }}
-        EC2_INSTANCE_TYPE: ${{ inputs.ec2_instance_type }}
-        EC2_VOLUME_SIZE: ${{ inputs.ec2_volume_size }}
-        STACK_DESTROY: ${{ inputs.stack_destroy }}
-        AWS_RESOURCE_IDENTIFIER: ${{ inputs.aws_resource_identifier }}
-        DOMAIN_NAME: ${{ inputs.domain_name }}
-        SUB_DOMAIN: ${{ inputs.sub_domain }}
-        ROOT_DOMAIN: ${{ inputs.root_domain }}
-        CERT_ARN: ${{ inputs.cert_arn }}
-        CREATE_ROOT_CERT: ${{ inputs.create_root_cert }}
-        CREATE_SUB_CERT: ${{ inputs.create_sub_cert }}
-        NO_CERT: ${{ inputs.no_cert }}
-        BITOPS_FAST_FAIL: true
-        DOCKER_FULL_CLEANUP: ${{ inputs.docker_full_cleanup }}
-        APP_DIRECTORY: ${{ inputs.app_directory }}
-        APP_DIRECTORY_CLEANUP: ${{ inputs.app_directory_cleanup }}
-        CREATE_KEYPAIR_SM_ENTRY: ${{ inputs.create_keypair_sm_entry }}
-        ADDITIONAL_TAGS: ${{ inputs.additional_tags }}
-        AWS_ENABLE_POSTGRES: ${{ inputs.aws_enable_postgres }}
-        AWS_POSTGRES_ENGINE:  ${{ inputs.aws_postgres_engine }}
-        AWS_POSTGRES_ENGINE_VERSION:  ${{ inputs.aws_postgres_engine_version }}
-        AWS_POSTGRES_DATABASE_GROUP_FAMILY: ${{ inputs.aws_postgres_database_group_family }}
-        AWS_POSTGRES_INSTANCE_CLASS: ${{ inputs.aws_postgres_instance_class }}
-        AWS_POSTGRES_SUBNETS: ${{ inputs.aws_postgres_subnets }}
-        AWS_POSTGRES_DATABASE_NAME: ${{ inputs.aws_postgres_database_name }}
-        AWS_POSTGRES_DATABASE_PORT: ${{ inputs.aws_postgres_database_port}}
-        AWS_POSTGRES_DATABASE_PROTECTION: ${{ inputs.aws_postgres_database_protection }}
-        AWS_POSTGRES_DATABASE_FINAL_SNAPSHOT: ${{ inputs.aws_postgres_database_final_snapshot }}
-        AWS_CREATE_EFS: ${{ inputs.aws_create_efs }}
-        AWS_CREATE_HA_EFS: ${{ inputs.aws_create_ha_efs }}
-        AWS_CREATE_EFS_REPLICA: ${{ inputs.aws_create_efs_replica }}
-        AWS_ENABLE_EFS_BACKUP_POLICY: ${{ inputs.aws_enable_efs_backup_policy }}
-        AWS_EFS_ZONE_MAPPING: ${{ inputs.aws_efs_zone_mapping }}
-        AWS_EFS_TRANSITION_TO_INACTIVE: ${{ inputs.aws_efs_transition_to_inactive }}
-        AWS_EFS_REPLICA_DESTINATION: ${{ inputs.aws_replication_configuration_destination }}
-        AWS_MOUNT_EFS_ID: ${{ inputs.aws_mount_efs_id }}
-        AWS_MOUNT_EFS_SECURITY_GROUP_ID: ${{ inputs.aws_mount_efs_security_group_id }}
-        APPLICATION_MOUNT_TARGET: ${{ inputs.application_mount_target }}
-        EFS_MOUNT_TARGET: ${{ inputs.efs_mount_target }}
-        DATA_MOUNT_TARGET: ${{ inputs.data_mount_target }}
+        # SPA
+        AWS_SPA_WEBSITE_BUCKET_NAME: aws_spa_website_bucket_name
+        AWS_SPA_CDN_ENABLED: aws_spa_cdn_enabled
+        AWS_SPA_CDN_ROOT_OBJECT: aws_spa_cdn_root_object
+        # AWS Route53 Domains abd Certificates
+        AWS_R53_DOMAIN_NAME: ${{ inputs.aws_r53_domain_name }}
+        AWS_R53_SUB_DOMAIN_NAME: ${{ inputs.aws_r53_sub_domain_name }}
+        AWS_R53_ROOT_DOMAIN_DEPLOY: ${{ inputs.aws_r53_root_domain_deploy }}
+        AWS_R53_ENABLE_CERT: ${{ inputs.aws_r53_enable_cert }}
+        AWS_R53_CERT_ARN: ${{ inputs.aws_r53_cert_arn }}
+        AWS_R53_CREATE_ROOT_CERT: ${{ inputs.aws_r53_create_root_cert }}
+        AWS_R53_CREATE_SUB_CERT: ${{ inputs.aws_r53_create_sub_cert }}
+      run: |
+        echo "running scripts/generate_deploy.sh"
+        $GITHUB_ACTION_PATH/scripts/generate_deploy.sh
 
-      run: |
-        echo "running operations/_scripts/deploy/deploy.sh"
-        $GITHUB_ACTION_PATH/operations/_scripts/deploy/deploy.sh
-        echo "running operations/_scripts/deploy/export_vars.sh"
-        $GITHUB_ACTION_PATH/operations/_scripts/deploy/export_vars.sh
+    - name: Terraform fmt
+      uses: hashicorp/setup-terraform@v2
+      id: fmt
+      run: terraform fmt -check
+      continue-on-error: true
+    
+    - name: Terraform Init
+      uses: hashicorp/setup-terraform@v2
+      id: init
+      run: terraform init
+    
+    - name: Terraform Validate
+      uses: hashicorp/setup-terraform@v2
+      id: validate
+      run: terraform validate
+    
+    - name: Terraform Plan
+      uses: hashicorp/setup-terraform@v2
+      id: plan
+      run: terraform plan
 
-    # output results to GitHub
-    - if: ${{ success() && steps.deploy.outputs.vm_url != '' }}
-      name: Print result created
-      shell: bash
-      run: |
-        echo "## VM Created! :rocket:" >> $GITHUB_STEP_SUMMARY
-        echo " ${{ steps.deploy.outputs.vm_url }}" >> $GITHUB_STEP_SUMMARY
-    - if: ${{ success() && steps.deploy.outputs.vm_url == '' && inputs.stack_destroy == 'true' && inputs.tf_state_bucket_destroy == 'false' }}
-      name: Print result destroyed
-      shell: bash
-      run: |
-        echo "## VM Destroyed! :boom:" >> $GITHUB_STEP_SUMMARY
-        echo "Infrastructure should be gone now!" >> $GITHUB_STEP_SUMMARY
-    - if: ${{ success() && steps.deploy.outputs.vm_url == '' && inputs.stack_destroy == 'true' && inputs.tf_state_bucket_destroy == 'true' }}
-      name: Print result destroyed
-      shell: bash
-      run: |
-        echo "## VM Destroyed! :boom:" >> $GITHUB_STEP_SUMMARY
-        echo "Buckets and infrastructure should be gone now!" >> $GITHUB_STEP_SUMMARY
-    - if: ${{ success() && steps.deploy.outputs.vm_url == '' && inputs.stack_destroy == 'false' }}
-      name: Print result destroyed
-      shell: bash
-      run: |
-        echo "## Deploy finished! But no URL found. :thinking: " >> $GITHUB_STEP_SUMMARY
-        echo "If expecting an URL, please check the logs for possible  errors." >> $GITHUB_STEP_SUMMARY
-        echo "If you consider this is a bug in the Github Action, please submit an issue to our repo." >> $GITHUB_STEP_SUMMARY
+    - name: Terraform Show Plan Details
+      if ${{ success () && inputs.tf_show_plan_details == 'true' }}
+      - run: |
+        echo ${{ steps.plan.outputs.stdout }}
+        echo ${{ steps.plan.outputs.stderr }}
+        echo ${{ steps.plan.outputs.exitcode }}
 
-$aws_additional_tags
-$aws_tf_state_bucket
-$aws_spa_website_bucket_name
-$aws_spa_cdn_enabled
-$aws_spa_cdn_root_object
-$aws_r53_domain_name
-$aws_r53_sub_domain_name
-$aws_r53_root_domain_deploy
-$aws_r53_enable_cert
-$aws_r53_cert_arn
-$aws_r53_create_root_cert
-$aws_r53_create_sub_cert
+    - name: Terraform Apply
+      if: ${{ success() && inputs.tf_action == 'apply' }}
+      uses: shell
+      run: terraform apply -auto-approve
+
+    - name: Terraform Destroy
+      if: ${{ success() && inputs.tf_action == 'destroy' }}
+      uses: shell
+      run: terraform destroy -auto-approve
+
+    - name: Terraform Destroy
+      if: ${{ success() && inputs.tf_action == 'destroy' && inputs.tf_state_bucket_destroy == 'true' }}
+      uses: shell
+      run: aws s3 rb s3://$TF_STATE_BUCKET --force

@@ -59,7 +59,7 @@ resource "aws_cloudfront_distribution" "cdn_static_site" {
   enabled             = true
   is_ipv6_enabled     = true
   default_root_object = var.aws_spa_cdn_root_object 
-  comment.            = "CDN for $[var.aws_spa_website_bucket_name}"
+  comment             = "CDN for ${var.aws_spa_website_bucket_name}"
 
   origin {
     domain_name              = aws_s3_bucket.aws_spa_website_bucket.bucket_regional_domain_name

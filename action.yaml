@@ -145,23 +145,28 @@ runs:
       
     - name: Terraform fmt
       id: fmt
+      shell: bash
       run: terraform fmt -check
       continue-on-error: true
     
     - name: Terraform Init
       id: init
+      shell: bash
       run: terraform init
     
     - name: Terraform Validate
       id: validate
+      shell: bash
       run: terraform validate
     
     - name: Terraform Plan
       id: plan
+      shell: bash
       run: terraform plan
 
     - name: Terraform Show Plan Details
       if ${{ success () && inputs.tf_show_plan_details == 'true' }}
+      shell: bash
       - run: |
         echo ${{ steps.plan.outputs.stdout }}
         echo ${{ steps.plan.outputs.stderr }}
@@ -169,18 +174,18 @@ runs:
 
     - name: Terraform Apply
       if: ${{ success() && inputs.tf_action == 'apply' }}
-      uses: shell
+      shell: bash
       run: |
         terraform apply -auto-approve
 
     - name: Terraform Destroy
       if: ${{ success() && inputs.tf_action == 'destroy' }}
-      uses: shell
+      shell: bash
       run: |
         terraform destroy -auto-approve
 
     - name: Terraform Destroy
       if: ${{ success() && inputs.tf_action == 'destroy' && inputs.tf_state_bucket_destroy == 'true' }}
-      uses: shell
+      shell: bash
       run: |
         aws s3 rb s3://$TF_STATE_BUCKET --force

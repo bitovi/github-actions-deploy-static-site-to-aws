@@ -177,5 +177,8 @@ runs:
     - name: Terraform Destroy
       if: ${{ success() && inputs.tf_action == 'destroy' && inputs.tf_state_bucket_destroy == 'true' }}
       shell: bash
+      env: 
+        TF_STATE_BUCKET: ${{ inputs.tf_state_bucket }}
       run: |
-        aws s3 rb s3://$TF_STATE_BUCKET --force
+        echo "running scripts/destroy_tf_state_bucket.sh"
+        $GITHUB_ACTION_PATH/scripts/destroy_tf_state_bucket.sh

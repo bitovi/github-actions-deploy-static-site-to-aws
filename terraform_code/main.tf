@@ -64,7 +64,7 @@ resource "aws_cloudfront_distribution" "cdn_static_site" {
   origin {
     domain_name              = aws_s3_bucket.aws_spa_website_bucket.bucket_regional_domain_name
     origin_id                = "aws_spa_bucket_origin"
-    origin_access_control_id = aws_cloudfront_origin_access_control.default.id
+    origin_access_control_id = aws_cloudfront_origin_access_control.default[0].id
   }
 
   default_cache_behavior {

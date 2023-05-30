@@ -15,11 +15,14 @@ resource "aws_s3_account_public_access_block" "aws_spa_website_bucket" {
   restrict_public_buckets = true
 }
 
-resource "aws_s3_object" "aws_spa_website_bucket" {  ### ADD an iteration here
-  count          = local.aws_spa_files_length
+resource "aws_s3_object" "aws_spa_website_bucket" {  
+  for_each = fileset(var.aws_spa_source_folder, "**")
+
   bucket         = aws_s3_bucket.aws_spa_website_bucket.id
-  key            = local.aws_spa_file_keys[count.index]
-  source         = local.aws_spa_file_sources[count.index]
+  key            = each.key
+  source         = "${var.aws_spa_source_folder}/${each.key}"
+  source_hash    = filemd5("${var.aws_spa_source_folder}/${each.key}")
+  #acl            = "public-read"
   ##content_type = "text/html"####
 }
 
@@ -27,11 +30,11 @@ output "bucket_url" {
   value = aws_s3_bucket.aws_spa_website_bucket.bucket_regional_domain_name
 }
 
-locals {
-  aws_spa_file_sources = var.aws_spa_file_sources != "" ? [for n in split(",", var.aws_spa_file_sources) : n] : []
-  aws_spa_file_keys    = var.aws_spa_file_keys == "" ? ["${var.aws_spa_file_sources}"] : [for n in split(",", var.aws_spa_file_sources) : n]
-  aws_spa_files_length = length(local.aws_spa_file_sources) < length(local.aws_spa_file_keys) ? length(local.aws_spa_file_sources) : length(local.aws_spa_file_keys)
-}
+#locals {
+#  aws_spa_file_sources = var.aws_spa_file_sources != "" ? [for n in split(",", var.aws_spa_file_sources) : n] : []
+#  aws_spa_file_keys    = var.aws_spa_file_keys == "" ? ["${var.aws_spa_file_sources}"] : [for n in split(",", var.aws_spa_file_sources) : n]
+#  aws_spa_files_length = length(local.aws_spa_file_sources) < length(local.aws_spa_file_keys) ? length(local.aws_spa_file_sources) : length(local.aws_spa_file_keys)
+#}
 
 ## SPA Bucket Policies
 

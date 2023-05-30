@@ -11,7 +11,7 @@ resource "aws_s3_account_public_access_block" "aws_spa_website_bucket" {
   restrict_public_buckets = true
 }
 
-resource "aws_s3_object" "aws_spa_website_bucket" {.  ### ADD an iteration here
+resource "aws_s3_object" "aws_spa_website_bucket" {  ### ADD an iteration here
   count          = local.aws_spa_files_length
   bucket         = aws_s3_bucket.aws_spa_website_bucket.id
   key            = local.aws_spa_file_keys[count.index]
@@ -176,8 +176,10 @@ locals {
       "${local.protocol}${var.aws_r53_domain_name}" :
       "${local.protocol}${var.aws_r53_sub_domain_name}.${var.aws_r53_domain_name}"
     ) :
-  aws_spa_cdn_enabled ? "${local.protocol}${aws_cloudfront_distribution.cdn_static_site.domain_name}"
-  ) : aws_s3_bucket.aws_spa_website_bucket.bucket_regional_domain_name
+    (aws_spa_cdn_enabled ? "${local.protocol}${aws_cloudfront_distribution.cdn_static_site.domain_name}" :
+     aws_s3_bucket.aws_spa_website_bucket.bucket_regional_domain_name
+    )
+  )
 
 
   fqdn_provided = (

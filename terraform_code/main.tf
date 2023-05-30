@@ -16,8 +16,12 @@ resource "aws_s3_account_public_access_block" "aws_spa_website_bucket" {
 }
 
 resource "aws_s3_object" "aws_spa_website_bucket" {  
-  for_each = fileset(var.aws_spa_source_folder, "**")
-
+  for_each = {
+    for file in fileset(var.aws_spa_source_folder, "**") :
+    file => file
+    if !startswith(file, ".")  # Ignore files starting with a dot
+  }
+  
   bucket         = aws_s3_bucket.aws_spa_website_bucket.id
   key            = each.key
   source         = "${var.aws_spa_source_folder}/${each.key}"

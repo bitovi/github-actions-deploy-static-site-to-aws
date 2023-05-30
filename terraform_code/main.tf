@@ -9,10 +9,10 @@ locals {
 }
 
 resource "aws_s3_account_public_access_block" "aws_spa_website_bucket" {
-  block_public_acls       = true
-  block_public_policy     = true
-  ignore_public_acls      = true
-  restrict_public_buckets = true
+  block_public_acls       = var.aws_spa_cdn_enabled ? true : false
+  block_public_policy     = var.aws_spa_cdn_enabled ? true : false
+  ignore_public_acls      = var.aws_spa_cdn_enabled ? true : false
+  restrict_public_buckets = var.aws_spa_cdn_enabled ? true : false
 }
 
 resource "aws_s3_object" "aws_spa_website_bucket" {  

@@ -42,7 +42,7 @@ data "aws_iam_policy_document" "aws_spa_website_bucket" {
     condition {
       test     = "StringEquals"
       variable = "aws:SourceArn"
-      values   = [aws_cloudfront_distribution.cdn_static_site.arn]
+      values   = [aws_cloudfront_distribution.cdn_static_site[0].arn]
     }
   }
 }
@@ -115,7 +115,7 @@ resource "aws_cloudfront_origin_access_control" "default" {
 }
 
 output "cloudfront_url" {
-  value = aws_cloudfront_distribution.cdn_static_site.domain_name
+  value = aws_cloudfront_distribution.cdn_static_site[0].domain_name
 }
 
 ## ALL DNS
@@ -135,8 +135,8 @@ resource "aws_route53_record" "dev" {
   type    = "A"
 
   alias {
-    name                   = aws_cloudfront_distribution.cdn_static_site.domain_name
-    zone_id                = aws_cloudfront_distribution.cdn_static_site.hosted_zone_id
+    name                   = aws_cloudfront_distribution.cdn_static_site[0].domain_name
+    zone_id                = aws_cloudfront_distribution.cdn_static_site[0].hosted_zone_id
     evaluate_target_health = false
   }
 }
@@ -148,8 +148,8 @@ resource "aws_route53_record" "root-a" {
   type    = "A"
 
   alias {
-    name                   = aws_cloudfront_distribution.cdn_static_site.domain_name
-    zone_id                = aws_cloudfront_distribution.cdn_static_site.hosted_zone_id
+    name                   = aws_cloudfront_distribution.cdn_static_site[0].domain_name
+    zone_id                = aws_cloudfront_distribution.cdn_static_site[0].hosted_zone_id
     evaluate_target_health = false
   }
 }
@@ -161,8 +161,8 @@ resource "aws_route53_record" "www-a" {
   type    = "A"
 
   alias {
-    name                   = aws_cloudfront_distribution.cdn_static_site.domain_name
-    zone_id                = aws_cloudfront_distribution.cdn_static_site.hosted_zone_id
+    name                   = aws_cloudfront_distribution.cdn_static_site[0].domain_name
+    zone_id                = aws_cloudfront_distribution.cdn_static_site[0].hosted_zone_id
     evaluate_target_health = false
   }
 }
@@ -175,7 +175,7 @@ locals {
       "${local.protocol}${var.aws_r53_domain_name}" :
       "${local.protocol}${var.aws_r53_sub_domain_name}.${var.aws_r53_domain_name}"
     ) :
-    (aws_spa_cdn_enabled ? "${local.protocol}${aws_cloudfront_distribution.cdn_static_site.domain_name}" :
+    (aws_spa_cdn_enabled ? "${local.protocol}${aws_cloudfront_distribution.cdn_static_site[0].domain_name}" :
      aws_s3_bucket.aws_spa_website_bucket.bucket_regional_domain_name
     )
   )

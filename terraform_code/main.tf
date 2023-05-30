@@ -25,7 +25,8 @@ output "bucket_url" {
 
 locals {
  aws_spa_file_sources = var.aws_spa_file_sources != "" ? [for n in split(",", var.aws_spa_file_sources)  : (n)] : []
- aws_spa_file_keys    = var.aws_spa_file_keys == "" ? var.aws_spa_file_sources : [for n in split(",", var.aws_spa_file_sources)  : (n)] : []
+ aws_spa_file_keys    = var.aws_spa_file_keys == "" ? var.aws_spa_file_sources : [for n in split(",", var.aws_spa_file_sources)  : (n)] 
+ : []
  aws_spa_files_length = length(local.aws_spa_file_sources) < length(local.aws_spa_file_keys) ? length(local.aws_spa_file_sources) : length(local.aws_spa_file_keys)
 }
 
@@ -200,7 +201,6 @@ output "vm_url" {
 # Lookup for main domain.
 
 data "aws_acm_certificate" "issued" {
-  count  = var.aws_r53_enable_cert == "true" ? 1 : (var.create_root_cert != "true" ? (var.create_sub_cert != "true" ? (local.fqdn_provided ? 1 : 0) : 0) : 0)
   for_each = var.aws_r53_enable_cert ? {
     "domain" : var.aws_r53_domain_name,
     "wildcard" : "*.${var.aws_r53_domain_name}"

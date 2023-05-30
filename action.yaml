@@ -119,9 +119,9 @@ runs:
         # SPA
         AWS_SPA_FILE_SOURCE: ${{ inputs.aws_spa_file_sources }}
         AWS_SPA_FILE_KEYS: ${{ inputs.aws_spa_file_keys }}
-        AWS_SPA_WEBSITE_BUCKET_NAME: aws_spa_website_bucket_name
-        AWS_SPA_CDN_ENABLED: aws_spa_cdn_enabled
-        AWS_SPA_CDN_ROOT_OBJECT: aws_spa_cdn_root_object
+        AWS_SPA_WEBSITE_BUCKET_NAME: ${{ inputs.aws_spa_website_bucket_name }}
+        AWS_SPA_CDN_ENABLED: ${{ inputs.aws_spa_cdn_enabled }}
+        AWS_SPA_CDN_ROOT_OBJECT: ${{ inputs.aws_spa_cdn_root_object }}
         # AWS Route53 Domains abd Certificates
         AWS_R53_DOMAIN_NAME: ${{ inputs.aws_r53_domain_name }}
         AWS_R53_SUB_DOMAIN_NAME: ${{ inputs.aws_r53_sub_domain_name }}

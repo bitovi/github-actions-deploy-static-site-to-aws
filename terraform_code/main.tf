@@ -1,7 +1,11 @@
 ### SPA Bucket
 
 resource "aws_s3_bucket" "aws_spa_website_bucket" {
-  bucket = "var.aws_spa_website_bucket_name" ####
+  bucket = local.spa_bucket_name
+}
+
+locals {
+  spa_bucket_name = var.aws_spa_website_bucket_name != "" ? var.aws_spa_website_bucket_name : "${var.aws_resource_identifier}-sp"
 }
 
 resource "aws_s3_account_public_access_block" "aws_spa_website_bucket" {

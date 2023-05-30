@@ -165,7 +165,7 @@ runs:
       run: terraform plan
 
     - name: Terraform Show Plan Details
-      if ${{ success () && inputs.tf_show_plan_details == 'true' }}
+      if: ${{ success () && inputs.tf_show_plan_details == 'true' }}
       shell: bash
       - run: |
         echo ${{ steps.plan.outputs.stdout }}

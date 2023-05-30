@@ -92,8 +92,7 @@ resource "aws_cloudfront_distribution" "cdn_static_site" {
     }
   }
 
-  aliases = local.cdn_aliases
-  ]
+  aliases = [local.cdn_aliases]
 
   viewer_certificate {
     acm_certificate_arn      = local.selected_arn

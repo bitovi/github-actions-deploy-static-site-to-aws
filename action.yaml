@@ -142,13 +142,7 @@ runs:
 
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v2
-      
-    - name: Terraform fmt
-      id: fmt
-      shell: bash
-      run: terraform -chdir=$GITHUB_ACTION_PATH/terraform_code fmt -check
-      continue-on-error: true
-    
+
     - name: Terraform Init
       id: init
       shell: bash

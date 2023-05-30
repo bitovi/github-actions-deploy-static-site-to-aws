@@ -69,7 +69,7 @@ aws_tf_state_bucket=$(generate_var aws_tf_state_bucket $TF_STATE_BUCKET)
 aws_additional_tags=$(generate_var aws_additional_tags $AWS_ADDITIONAL_TAGS)
 aws_default_region=$(generate_var aws_default_region $AWS_DEFAULT_REGION)
 #aws_spa_source_folder=$(generate_var aws_spa_source_folder $AWS_SPA_SOURCE_FOLDER)
-aws_spa_source_folder="aws_spa_source_folder = \"${GITHUB_WORKSPACE}\${AWS_SPA_SOURCE_FOLDER}\"
+aws_spa_source_folder="aws_spa_source_folder = \"${GITHUB_WORKSPACE}\\${AWS_SPA_SOURCE_FOLDER}\"
 aws_spa_website_bucket_name=$(generate_var aws_spa_website_bucket_name $AWS_SPA_WEBSITE_BUCKET_NAME)
 aws_spa_cdn_enabled=$(generate_var aws_spa_cdn_enabled $AWS_SPA_CDN_ENABLED)
 aws_spa_cdn_root_object=$(generate_var aws_spa_cdn_root_object $AWS_SPA_CDN_ROOT_OBJECT)

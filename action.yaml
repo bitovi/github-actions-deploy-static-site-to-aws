@@ -135,6 +135,11 @@ runs:
         $GITHUB_ACTION_PATH/scripts/generate_deploy.sh
 
 
+    - name: Terraform fmt
+      id: fmt
+      shell: bash
+      run: env
+
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v2
       

@@ -139,30 +139,26 @@ runs:
         echo "running scripts/generate_deploy.sh"
         $GITHUB_ACTION_PATH/scripts/generate_deploy.sh
 
-    - name: Terraform fmt
+
+    - name: Setup Terraform
       uses: hashicorp/setup-terraform@v2
+      
+    - name: Terraform fmt
       id: fmt
-      run: |
-        terraform fmt -check
+      run: terraform fmt -check
       continue-on-error: true
     
     - name: Terraform Init
-      uses: hashicorp/setup-terraform@v2
       id: init
-      run: |
-        terraform init
+      run: terraform init
     
     - name: Terraform Validate
-      uses: hashicorp/setup-terraform@v2
       id: validate
-      run: |
-        terraform validate
+      run: terraform validate
     
     - name: Terraform Plan
-      uses: hashicorp/setup-terraform@v2
       id: plan
-      run: |
-        terraform plan
+      run: terraform plan
 
     - name: Terraform Show Plan Details
       if ${{ success () && inputs.tf_show_plan_details == 'true' }}

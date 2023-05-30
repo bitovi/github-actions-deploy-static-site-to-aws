@@ -90,11 +90,6 @@ outputs:
     description: "The URL of the generated app"
     value: ${{ steps.deploy.outputs.vm_url }}
 
-defaults:
-  run:
-    working-directory: terraform_code
-    shell: bash
-
 runs:
   using: 'composite'
   steps:
@@ -146,32 +141,27 @@ runs:
     - name: Terraform fmt
       id: fmt
       shell: bash
-      working-directory: terraform_code
-      run: terraform fmt -check
+      run: terraform -chdir=terraform_code fmt -check
       continue-on-error: true
     
     - name: Terraform Init
       id: init
       shell: bash
-      working-directory: terraform_code
-      run: terraform init
+      run: terraform -chdir=terraform_code init
     
     - name: Terraform Validate
       id: validate
       shell: bash
-      working-directory: terraform_code
-      run: terraform validate
+      run: terraform -chdir=terraform_code validate
     
     - name: Terraform Plan
       id: plan
       shell: bash
-      working-directory: terraform_code
-      run: terraform plan
+      run: terraform -chdir=terraform_code plan
 
     - name: Terraform Show Plan Details
       if: ${{ success () && inputs.tf_show_plan_details == 'true' }}
       shell: bash
-      working-directory: terraform_code
       run: |
         echo ${{ steps.plan.outputs.stdout }}
         echo ${{ steps.plan.outputs.stderr }}
@@ -180,16 +170,14 @@ runs:
     - name: Terraform Apply
       if: ${{ success() && inputs.tf_action == 'apply' }}
       shell: bash
-      working-directory: terraform_code
       run: |
-        terraform apply -auto-approve
+        terraform -chdir=terraform_code apply -auto-approve
 
     - name: Terraform Destroy
       if: ${{ success() && inputs.tf_action == 'destroy' }}
       shell: bash
-      working-directory: terraform_code
       run: |
-        terraform destroy -auto-approve
+        terraform -chdir=terraform_code destroy -auto-approve
 
     - name: Terraform Destroy
       if: ${{ success() && inputs.tf_action == 'destroy' && inputs.tf_state_bucket_destroy == 'true' }}

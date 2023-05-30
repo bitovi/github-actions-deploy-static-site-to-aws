@@ -106,5 +106,5 @@ $app_branch_name
 " > "${GITHUB_ACTION_PATH}/terraform_code/terraform.tfvars"
 
 echo "Creating TF-STATE bucket"
-/bin/bash $GITHUB_ACTION_PATH/operations/_scripts/deploy/check_bucket_name.sh $TF_STATE_BUCKET
+/bin/bash $GITHUB_ACTION_PATH/oscripts/check_bucket_name.sh $TF_STATE_BUCKET
 /bin/bash $GITHUB_ACTION_PATH/scripts/create_tf_state_bucket.sh 

@@ -1,9 +1,9 @@
 #!/bin/bash
 
-set -e
+set -ex
 
 GITHUB_IDENTIFIER="$($GITHUB_ACTION_PATH/scripts/generate_identifier.sh)"
-GITHUB_IDENTIFIER="$($GITHUB_ACTION_PATH/scripts/generate_identifier.sh 30)"
+GITHUB_IDENTIFIER_SS="$($GITHUB_ACTION_PATH/scripts/generate_identifier.sh 30)"
 
 # Generate TF_STATE_BUCKET ID if empty 
 if [ -z "${TF_STATE_BUCKET}" ]; then

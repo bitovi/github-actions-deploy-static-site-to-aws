@@ -142,23 +142,27 @@ runs:
     - name: Terraform fmt
       uses: hashicorp/setup-terraform@v2
       id: fmt
-      run: terraform fmt -check
+      run: |
+        terraform fmt -check
       continue-on-error: true
     
     - name: Terraform Init
       uses: hashicorp/setup-terraform@v2
       id: init
-      run: terraform init
+      run: |
+        terraform init
     
     - name: Terraform Validate
       uses: hashicorp/setup-terraform@v2
       id: validate
-      run: terraform validate
+      run: |
+        terraform validate
     
     - name: Terraform Plan
       uses: hashicorp/setup-terraform@v2
       id: plan
-      run: terraform plan
+      run: |
+        terraform plan
 
     - name: Terraform Show Plan Details
       if ${{ success () && inputs.tf_show_plan_details == 'true' }}
@@ -170,14 +174,17 @@ runs:
     - name: Terraform Apply
       if: ${{ success() && inputs.tf_action == 'apply' }}
       uses: shell
-      run: terraform apply -auto-approve
+      run: |
+        terraform apply -auto-approve
 
     - name: Terraform Destroy
       if: ${{ success() && inputs.tf_action == 'destroy' }}
       uses: shell
-      run: terraform destroy -auto-approve
+      run: |
+        terraform destroy -auto-approve
 
     - name: Terraform Destroy
       if: ${{ success() && inputs.tf_action == 'destroy' && inputs.tf_state_bucket_destroy == 'true' }}
       uses: shell
-      run: aws s3 rb s3://$TF_STATE_BUCKET --force
+      run: |
+        aws s3 rb s3://$TF_STATE_BUCKET --force

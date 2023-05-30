@@ -108,3 +108,6 @@ $app_branch_name
 echo "Creating TF-STATE bucket"
 /bin/bash $GITHUB_ACTION_PATH/scripts/check_bucket_name.sh $TF_STATE_BUCKET
 /bin/bash $GITHUB_ACTION_PATH/scripts/create_tf_state_bucket.sh 
+
+echo "Creating provider.tf"
+/bin/bash $GITHUB_ACTION_PATH/scripts/generate_provider.sh 

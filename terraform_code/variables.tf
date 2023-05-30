@@ -110,3 +110,14 @@ variable "app_branch_name" {
   type        = string
   description = "GitHub Branch Name"
 }
+
+locals {
+  aws_tags = {
+    AWSResourceIdentifier     = "${var.aws_resource_identifier}"
+    GitHubOrgName             = "${var.app_org_name}"
+    GitHubRepoName            = "${var.app_repo_name}"
+    GitHubBranchName          = "${var.app_branch_name}"
+    GitHubAction              = "bitovi/github-actions-deploy-serverless-website"
+    created_with              = "terraform"
+  }
+}

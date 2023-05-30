@@ -54,7 +54,7 @@ data "aws_iam_policy_document" "aws_spa_website_bucket" {
     condition {
       test     = "StringEquals"
       variable = "aws:SourceArn"
-      values   = [aws_cloudfront_distribution.cdn_static_site[0].arn]
+      values   = length(aws_cloudfront_distribution.cdn_static_site) > 0 ? [aws_cloudfront_distribution.cdn_static_site[0].arn] : [aws_cloudfront_distribution.cdn_static_site_default_cert[0].arn]
     }
   }
 }

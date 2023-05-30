@@ -186,7 +186,7 @@ resource "aws_cloudfront_origin_access_control" "default" {
 
 data "aws_route53_zone" "selected" {
   count        = var.aws_r53_domain_name != "" ? 1 : 0
-  name         = ${var.aws_r53_domain_name}.
+  name         = "${var.aws_r53_domain_name}."
   private_zone = false
 }
 

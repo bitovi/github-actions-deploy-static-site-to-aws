@@ -14,8 +14,8 @@ resource "aws_s3_account_public_access_block" "aws_spa_website_bucket" {
 resource "aws_s3_object" "aws_spa_website_bucket" {.  ### ADD an iteration here
   count          = local.aws_spa_files_length
   bucket         = aws_s3_bucket.aws_spa_website_bucket.id
-  key            = aws_spa_file_keys[count.index]
-  source         = aws_spa_file_sources[count.index]
+  key            = local.aws_spa_file_keys[count.index]
+  source         = local.aws_spa_file_sources[count.index]
   ##content_type = "text/html"####
 }
 

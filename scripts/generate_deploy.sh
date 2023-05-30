@@ -68,6 +68,8 @@ aws_tf_state_bucket=$(generate_var aws_tf_state_bucket $TF_STATE_BUCKET)
 #-- AWS Specific --#
 aws_additional_tags=$(generate_var aws_additional_tags $AWS_ADDITIONAL_TAGS)
 aws_default_region=$(generate_var aws_default_region $AWS_DEFAULT_REGION)
+aws_spa_file_sources=$(generate_var aws_spa_file_sources $AWS_SPA_FILE_SOURCE)
+aws_spa_file_keys=$(generate_var aws_spa_file_keys $AWS_SPA_FILE_KEYS)
 aws_spa_website_bucket_name=$(generate_var aws_spa_website_bucket_name $AWS_SPA_WEBSITE_BUCKET_NAME)
 aws_spa_cdn_enabled=$(generate_var aws_spa_cdn_enabled $AWS_SPA_CDN_ENABLED)
 aws_spa_cdn_root_object=$(generate_var aws_spa_cdn_root_object $AWS_SPA_CDN_ROOT_OBJECT)
@@ -85,6 +87,8 @@ $aws_resource_identifier
 $aws_resource_identifier_supershort
 $aws_additional_tags
 $aws_tf_state_bucket
+$aws_spa_file_sources
+$aws_spa_file_keys
 $aws_spa_website_bucket_name
 $aws_spa_cdn_enabled
 $aws_spa_cdn_root_object

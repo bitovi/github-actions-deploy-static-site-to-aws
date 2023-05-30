@@ -24,6 +24,18 @@ variable "aws_tf_state_bucket" {
   description = "Bucket to store tf-state file for the deployment"
 }
 
+variable "aws_spa_file_sources {
+  description = "Sources to be stored in the bucket. Coma sepparated list of files possible."
+  type        = string
+  default     = ""
+}
+
+variable "aws_spa_file_keys {
+  description = "Key names for stored objects in the bucket. Will be the names in the bucket."
+  type        = string
+  default     = ""
+}
+
 variable "aws_spa_website_bucket_name" {
   description = "Bucket name where all the files will be stored."
   type        = string

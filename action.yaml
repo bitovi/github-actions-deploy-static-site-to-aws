@@ -46,6 +46,12 @@ inputs:
     required: false
 
   # SPA Settings
+  aws_spa_file_sources:
+    description: 'Sources to be stored in the bucket. Coma sepparated list of files possible.'
+    required: true
+  aws_spa_file_keys:
+    description: 'Key names for stored objects in the bucket. Will be the names in the bucket.'
+    required: false
   aws_spa_website_bucket_name:
     description: 'AWS secret access key'
     required: true
@@ -54,7 +60,6 @@ inputs:
     required: false
   aws_spa_cdn_root_object:
     description: 'AWS default region'
-    default: us-east-1
     required: false
 
   # AWS Route53 Domains abd Certificates
@@ -117,6 +122,8 @@ runs:
         TF_STATE_BUCKET: ${{ inputs.tf_state_bucket }}
         TF_STATE_BUCKET_DESTROY: ${{ inputs.tf_state_bucket_destroy }}
         # SPA
+        AWS_SPA_FILE_SOURCE: ${{ inputs.aws_spa_file_sources }}
+        AWS_SPA_FILE_KEYS: ${{ inputs.aws_spa_file_keys }}
         AWS_SPA_WEBSITE_BUCKET_NAME: aws_spa_website_bucket_name
         AWS_SPA_CDN_ENABLED: aws_spa_cdn_enabled
         AWS_SPA_CDN_ROOT_OBJECT: aws_spa_cdn_root_object

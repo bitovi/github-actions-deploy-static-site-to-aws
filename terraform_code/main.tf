@@ -175,7 +175,7 @@ locals {
       "${local.protocol}${var.aws_r53_domain_name}" :
       "${local.protocol}${var.aws_r53_sub_domain_name}.${var.aws_r53_domain_name}"
     ) :
-    (aws_spa_cdn_enabled ? "${local.protocol}${aws_cloudfront_distribution.cdn_static_site[0].domain_name}" :
+    (var.aws_spa_cdn_enabled ? "${local.protocol}${aws_cloudfront_distribution.cdn_static_site[0].domain_name}" :
      aws_s3_bucket.aws_spa_website_bucket.bucket_regional_domain_name
     )
   )

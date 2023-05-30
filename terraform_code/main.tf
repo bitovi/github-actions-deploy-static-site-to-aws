@@ -175,7 +175,7 @@ output "cloudfront_url" {
 
 resource "aws_cloudfront_origin_access_control" "default" {
   count                             = var.aws_spa_cdn_enabled ? 1 : 0
-  name                              = "${var.aws_resource_identifier} - Cloudfront OAC"
+  name                              = "${var.aws_resource_identifier_supershort} - Cloudfront OAC"
   description                       = "Cloudfront OAC for ${var.aws_resource_identifier}"
   origin_access_control_origin_type = "s3"
   signing_behavior                  = "always"

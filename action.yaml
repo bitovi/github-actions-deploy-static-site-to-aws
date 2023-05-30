@@ -150,12 +150,13 @@ runs:
       run: terraform -chdir=$GITHUB_ACTION_PATH/terraform_code validate
     
     - name: Terraform Plan
+      if: ${{ success () && inputs.tf_show_plan_details == 'true' && inputs.tf_action != 'destroy' }}
       id: plan
       shell: bash
       run: terraform -chdir=$GITHUB_ACTION_PATH/terraform_code plan
 
     - name: Terraform Show Plan Details
-      if: ${{ success () && inputs.tf_show_plan_details == 'true' }}
+      if: ${{ success () && inputs.tf_show_plan_details == 'true' && inputs.tf_action != 'destroy' }}
       shell: bash
       run: |
         echo ${{ steps.plan.outputs.stdout }}

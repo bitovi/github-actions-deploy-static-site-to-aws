@@ -54,7 +54,7 @@ inputs:
     required: false
   aws_spa_website_bucket_name:
     description: 'AWS secret access key'
-    required: true
+    required: false
   aws_spa_cdn_enabled:
     description: 'AWS session token'
     required: false

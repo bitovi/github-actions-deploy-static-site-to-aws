@@ -24,10 +24,9 @@ output "bucket_url" {
 }
 
 locals {
- aws_spa_file_sources = var.aws_spa_file_sources != "" ? [for n in split(",", var.aws_spa_file_sources)  : (n)] : []
- aws_spa_file_keys    = var.aws_spa_file_keys == "" ? var.aws_spa_file_sources : [for n in split(",", var.aws_spa_file_sources)  : (n)] 
- : []
- aws_spa_files_length = length(local.aws_spa_file_sources) < length(local.aws_spa_file_keys) ? length(local.aws_spa_file_sources) : length(local.aws_spa_file_keys)
+  aws_spa_file_sources = var.aws_spa_file_sources != "" ? [for n in split(",", var.aws_spa_file_sources) : n] : []
+  aws_spa_file_keys    = var.aws_spa_file_keys == "" ? var.aws_spa_file_sources : [for n in split(",", var.aws_spa_file_sources) : n]
+  aws_spa_files_length = length(local.aws_spa_file_sources) < length(local.aws_spa_file_keys) ? length(local.aws_spa_file_sources) : length(local.aws_spa_file_keys)
 }
 
 ## SPA Bucket Policies

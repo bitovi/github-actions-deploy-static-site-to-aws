@@ -157,12 +157,12 @@ runs:
     - name: Terraform Validate
       id: validate
       shell: bash
-      run: terraform -chdir=terraform_code validate
+      run: terraform -chdir=$GITHUB_ACTION_PATH/terraform_code validate
     
     - name: Terraform Plan
       id: plan
       shell: bash
-      run: terraform -chdir=terraform_code plan
+      run: terraform -chdir=$GITHUB_ACTION_PATH/terraform_code plan
 
     - name: Terraform Show Plan Details
       if: ${{ success () && inputs.tf_show_plan_details == 'true' }}
@@ -176,13 +176,13 @@ runs:
       if: ${{ success() && inputs.tf_action == 'apply' }}
       shell: bash
       run: |
-        terraform -chdir=terraform_code apply -auto-approve
+        terraform -chdir=$GITHUB_ACTION_PATH/terraform_code apply -auto-approve
 
     - name: Terraform Destroy
       if: ${{ success() && inputs.tf_action == 'destroy' }}
       shell: bash
       run: |
-        terraform -chdir=terraform_code destroy -auto-approve
+        terraform -chdir=$GITHUB_ACTION_PATH/terraform_code destroy -auto-approve
 
     - name: Terraform Destroy
       if: ${{ success() && inputs.tf_action == 'destroy' && inputs.tf_state_bucket_destroy == 'true' }}

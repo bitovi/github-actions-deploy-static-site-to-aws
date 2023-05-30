@@ -67,8 +67,57 @@ resource "aws_s3_bucket_policy" "aws_spa_website_bucket_policy" {
 
 ### CDN 
 
+resource "aws_cloudfront_distribution" "cdn_static_site_default_cert" {
+  count               = var.aws_spa_cdn_enabled ? ( local.selected_arn == "" ? 1 : 0 ) : 0
+  enabled             = true
+  is_ipv6_enabled     = true
+  default_root_object = var.aws_spa_cdn_root_object 
+  comment             = "CDN for ${var.aws_spa_website_bucket_name}"
+
+  origin {
+    domain_name              = aws_s3_bucket.aws_spa_website_bucket.bucket_regional_domain_name
+    origin_id                = "aws_spa_bucket_origin"
+    origin_access_control_id = aws_cloudfront_origin_access_control.default[0].id
+  }
+
+  default_cache_behavior {
+    min_ttl                = 0
+    default_ttl            = 0
+    max_ttl                = 0
+    viewer_protocol_policy = "redirect-to-https"
+
+    allowed_methods  = ["GET", "HEAD", "OPTIONS"]
+    cached_methods   = ["GET", "HEAD"]
+    target_origin_id = "aws_spa_bucket_origin"
+
+    forwarded_values {
+      query_string = false
+      cookies {
+        forward = "none"
+      }
+    }
+  }
+
+  restrictions {
+    geo_restriction {
+      locations        = []
+      restriction_type = "none"
+    }
+  }
+
+  aliases = local.cdn_aliases
+
+  viewer_certificate {
+    cloudfront_default_certificate = true 
+
+    acm_certificate_arn      = local.selected_arn
+    ssl_support_method       = "sni-only"
+    minimum_protocol_version = "TLSv1.2_2021"
+  }
+}
+
 resource "aws_cloudfront_distribution" "cdn_static_site" {
-  count               = var.aws_spa_cdn_enabled ? 1 : 0
+  count               = var.aws_spa_cdn_enabled ? ( local.selected_arn != "" ? 1 : 0 ) : 0
   enabled             = true
   is_ipv6_enabled     = true
   default_root_object = var.aws_spa_cdn_root_object 
@@ -113,6 +162,7 @@ resource "aws_cloudfront_distribution" "cdn_static_site" {
     minimum_protocol_version = "TLSv1.2_2021"
   }
 }
+
 
 locals {
   cdn_aliases = var.aws_r53_domain_name != "" ? ["var.aws_r53_domain_name"] : []

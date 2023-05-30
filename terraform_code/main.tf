@@ -32,6 +32,7 @@ locals {
 ## SPA Bucket Policies
 
 data "aws_iam_policy_document" "aws_spa_website_bucket" {
+  count  = var.aws_spa_cdn_enabled ? 1 : 0
   statement {
     actions   = ["s3:GetObject"]
     resources = ["${aws_s3_bucket.aws_spa_website_bucket.arn}/*"]
@@ -48,6 +49,7 @@ data "aws_iam_policy_document" "aws_spa_website_bucket" {
 }
 
 resource "aws_s3_bucket_policy" "aws_spa_website_bucket_policy" {
+  count  = var.aws_spa_cdn_enabled ? 1 : 0
   bucket = aws_s3_bucket.aws_spa_website_bucket.id
   policy = data.aws_iam_policy_document.aws_spa_website_bucket.json
 }
@@ -115,7 +117,7 @@ resource "aws_cloudfront_origin_access_control" "default" {
 }
 
 output "cloudfront_url" {
-  value = aws_cloudfront_distribution.cdn_static_site[0].domain_name
+  value = aws_cloudfront_distribution.cdn_static_site[0].domain_name != "" ? aws_cloudfront_distribution.cdn_static_site[0].domain_name : "No Cloudfront URL"
 }
 
 ## ALL DNS

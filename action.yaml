@@ -135,8 +135,8 @@ runs:
         $GITHUB_ACTION_PATH/scripts/generate_deploy.sh
 
 
-    - name: Terraform fmt
-      id: fmt
+    - name: Env print
+      id: env
       shell: bash
       run: env
 

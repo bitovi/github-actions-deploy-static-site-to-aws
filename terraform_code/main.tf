@@ -166,7 +166,12 @@ resource "aws_cloudfront_distribution" "cdn_static_site" {
 
 locals {
   cdn_aliases = var.aws_r53_domain_name != "" ? ["var.aws_r53_domain_name"] : []
+  cdn_site_url = var.aws_spa_cdn_enabled ? ( local.selected_arn != "" ? aws_cloudfront_distribution.cdn_static_site[0].domain_name : aws_cloudfront_distribution.cdn_static_site_default_cert[0].domain_name ) : ""
 } 
+
+output "cloudfront_url" {
+  value = local.cdn_site_url
+}
 
 resource "aws_cloudfront_origin_access_control" "default" {
   count                             = var.aws_spa_cdn_enabled ? 1 : 0
@@ -175,10 +180,6 @@ resource "aws_cloudfront_origin_access_control" "default" {
   origin_access_control_origin_type = "s3"
   signing_behavior                  = "always"
   signing_protocol                  = "sigv4"
-}
-
-output "cloudfront_url" {
-  value = length(aws_cloudfront_distribution.cdn_static_site) > 0 ? aws_cloudfront_distribution.cdn_static_site[0].domain_name : "No Cloudfront URL"
 }
 
 ## ALL DNS
@@ -238,7 +239,7 @@ locals {
       "${local.protocol}${var.aws_r53_domain_name}" :
       "${local.protocol}${var.aws_r53_sub_domain_name}.${var.aws_r53_domain_name}"
     ) :
-    (var.aws_spa_cdn_enabled ? "${local.protocol}${aws_cloudfront_distribution.cdn_static_site[0].domain_name}" :
+    (var.aws_spa_cdn_enabled ? "${local.protocol}${local.cdn_site_url}" :
      aws_s3_bucket.aws_spa_website_bucket.bucket_regional_domain_name
     )
   )

@@ -51,7 +51,7 @@ data "aws_iam_policy_document" "aws_spa_website_bucket" {
 resource "aws_s3_bucket_policy" "aws_spa_website_bucket_policy" {
   count  = var.aws_spa_cdn_enabled ? 1 : 0
   bucket = aws_s3_bucket.aws_spa_website_bucket.id
-  policy = data.aws_iam_policy_document.aws_spa_website_bucket.json
+  policy = data.aws_iam_policy_document.aws_spa_website_bucket[0].json
 }
 
 ### CDN 

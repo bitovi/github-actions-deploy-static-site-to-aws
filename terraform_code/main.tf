@@ -117,7 +117,7 @@ resource "aws_cloudfront_origin_access_control" "default" {
 }
 
 output "cloudfront_url" {
-  value = aws_cloudfront_distribution.cdn_static_site[0].domain_name != "" ? aws_cloudfront_distribution.cdn_static_site[0].domain_name : "No Cloudfront URL"
+  value = length(aws_cloudfront_distribution.cdn_static_site) > 0 ? aws_cloudfront_distribution.cdn_static_site[0].domain_name : "No Cloudfront URL"
 }
 
 ## ALL DNS

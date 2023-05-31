@@ -18,11 +18,11 @@ Define `aws_spa_root_object` if different than `index.html`
 You'll need [Access Keys](https://docs.aws.amazon.com/powershell/latest/userguide/pstools-appendix-sign-up.html) from an [AWS account](https://aws.amazon.com/premiumsupport/knowledge-center/create-and-activate-aws-account/)
 
 ### 3. CERTIFICATES - Only for AWS Managed domains with Route53
-If `domain_name` is defined, we will look up for a certificate with the name of that domain (eg. `example.com`). We expect that certificate to contain both `example.com` and `*.example.com`. 
+If `aws_r53_domain_name` is defined, we will look up for a certificate with the name of that domain (eg. `example.com`). We expect that certificate to contain both `example.com` and `*.example.com`. 
 
-Setting `create_root_cert` to `true` will create this certificate with both `example.com` and `*.example.com` for you, and validate them. (DNS validation).
+Setting `aws_r53_create_root_cert` to `true` will create this certificate with both `example.com` and `*.example.com` for you, and validate them. (DNS validation).
 
-Setting `create_sub_cert` to `true` will create a certificate **just for the subdomain**, and validate it.
+Setting `aws_r53_create_sub_cert` to `true` will create a certificate **just for the subdomain**, and validate it.
 
 > :warning: Be very careful here! **Created certificates are fully managed by Terraform**. Therefor **they will be destroyed upon stack destruction**.
 
@@ -43,7 +43,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Create deploy-bucket-only
+    - name: Create deploy-bucket
       uses: bitovi/github-actions-deploy-serverless-website@v0.0.1
       with:
         aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID_SANDBOX}}
@@ -55,7 +55,8 @@ jobs:
         
         aws_spa_cdn_enabled: true
         
-        aws_r53_domain_name: examplex.com
+        # You should own and have this domain available
+        aws_r53_domain_name: example.com
         aws_r53_sub_domain_name: spa
 ```
 

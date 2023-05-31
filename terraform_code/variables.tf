@@ -1,8 +1,3 @@
-#  AWS_ACCESS_KEY_ID: ${{ inputs.aws_access_key_id }}
-#  AWS_SECRET_ACCESS_KEY: ${{ inputs.aws_secret_access_key }}
-#  AWS_SESSION_TOKEN: ${{ inputs.aws_session_token }}
-#  AWS_DEFAULT_REGION: ${{ inputs.aws_default_region }}
-
 variable "aws_resource_identifier" {
   type        = string
   description = "Identifier to use for AWS resources (defaults to GITHUB_ORG-GITHUB_REPO-GITHUB_BRANCH)"
@@ -69,7 +64,7 @@ variable "aws_r53_root_domain_deploy" {
 variable "aws_r53_enable_cert" {
   type        = bool
   description = "Enable AWS Certificate management."
-  default     = false
+  default     = true
 }
 
 variable "aws_r53_cert_arn" {

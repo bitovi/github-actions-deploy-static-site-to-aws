@@ -1,31 +1,30 @@
 ### SPA Bucket
 
+# Create bucket to store incoming files - If no name is provided, will set a default one
 resource "aws_s3_bucket" "aws_spa_website_bucket" {
-  bucket = local.spa_bucket_name
+  bucket = var.aws_spa_website_bucket_name != "" ? var.aws_spa_website_bucket_name : "${var.aws_resource_identifier}-sp"
 }
 
-locals {
-  spa_bucket_name = var.aws_spa_website_bucket_name != "" ? var.aws_spa_website_bucket_name : "${var.aws_resource_identifier}-sp"
-}
-
+# Allow public access to bucket
 resource "aws_s3_bucket_public_access_block" "aws_spa_website_bucket" {
   bucket                  = aws_s3_bucket.aws_spa_website_bucket.id
   block_public_policy     = false
   restrict_public_buckets = false
 }
 
+# Tool to identify file types
 module "template_files" {
   source   = "hashicorp/dir/template"
   base_dir = var.aws_spa_source_folder
 }
 
+# Will upload each file to the bucket, defining content-type
 resource "aws_s3_object" "aws_spa_website_bucket" {
   for_each = module.template_files.files
 
   bucket       = aws_s3_bucket.aws_spa_website_bucket.id
   key          = each.key
   content_type = contains([".ts", "tsx"], substr(each.key, -3, 3)) ? "text/javascript" : each.value.content_type
-
 
   source  = each.value.source_path
   content = each.value.content
@@ -37,15 +36,7 @@ output "bucket_url" {
   value = aws_s3_bucket.aws_spa_website_bucket.bucket_regional_domain_name
 }
 
-#locals {
-#  aws_spa_file_sources = var.aws_spa_file_sources != "" ? [for n in split(",", var.aws_spa_file_sources) : n] : []
-#  aws_spa_file_keys    = var.aws_spa_file_keys == "" ? ["${var.aws_spa_file_sources}"] : [for n in split(",", var.aws_spa_file_sources) : n]
-#  aws_spa_files_length = length(local.aws_spa_file_sources) < length(local.aws_spa_file_keys) ? length(local.aws_spa_file_sources) : length(local.aws_spa_file_keys)
-#}
-
 ## SPA Bucket Policies
-
-
 resource "aws_s3_bucket_policy" "aws_spa_bucket_public_access" {
   count  = var.aws_spa_cdn_enabled ? 0 : 1
   bucket = aws_s3_bucket.aws_spa_website_bucket.id
@@ -91,8 +82,53 @@ resource "aws_s3_bucket_policy" "aws_spa_website_bucket_policy" {
 
 ### CDN 
 
+### CDN Without DNS
 resource "aws_cloudfront_distribution" "cdn_static_site_default_cert" {
   count               = var.aws_spa_cdn_enabled ? ( local.selected_arn == "" ? 1 : 0 ) : 0
+  enabled             = true
+  is_ipv6_enabled     = true
+  default_root_object = var.aws_spa_cdn_root_object 
+  comment             = "CDN for ${var.aws_spa_website_bucket_name} static"
+
+  origin {
+    domain_name              = aws_s3_bucket.aws_spa_website_bucket.bucket_regional_domain_name
+    origin_id                = "aws_spa_bucket_origin"
+    origin_access_control_id = aws_cloudfront_origin_access_control.default[0].id
+  }
+
+  default_cache_behavior {
+    min_ttl                = 0
+    default_ttl            = 0
+    max_ttl                = 0
+    viewer_protocol_policy = "redirect-to-https"
+
+    allowed_methods  = ["GET", "HEAD", "OPTIONS"]
+    cached_methods   = ["GET", "HEAD"]
+    target_origin_id = "aws_spa_bucket_origin"
+
+    forwarded_values {
+      query_string = false
+      cookies {
+        forward = "none"
+      }
+    }
+  }
+
+  restrictions {
+    geo_restriction {
+      locations        = []
+      restriction_type = "none"
+    }
+  }
+
+  viewer_certificate {
+    cloudfront_default_certificate = true 
+  }
+}
+
+### CDN with custom DNS
+resource "aws_cloudfront_distribution" "cdn_static_site" {
+  count               = var.aws_spa_cdn_enabled ? ( local.selected_arn != "" ? 1 : 0 ) : 0
   enabled             = true
   is_ipv6_enabled     = true
   default_root_object = var.aws_spa_cdn_root_object 
@@ -129,67 +165,17 @@ resource "aws_cloudfront_distribution" "cdn_static_site_default_cert" {
     }
   }
 
-  aliases = local.cdn_aliases
+  aliases = ["local.cdn_alias_url"]
 
   viewer_certificate {
-    cloudfront_default_certificate = true 
-
     acm_certificate_arn      = local.selected_arn
     ssl_support_method       = "sni-only"
     minimum_protocol_version = "TLSv1.2_2021"
   }
 }
 
-#resource "aws_cloudfront_distribution" "cdn_static_site" {
-#  count               = var.aws_spa_cdn_enabled ? ( local.selected_arn != "" ? 1 : 0 ) : 0
-#  enabled             = true
-#  is_ipv6_enabled     = true
-#  default_root_object = var.aws_spa_cdn_root_object 
-#  comment             = "CDN for ${var.aws_spa_website_bucket_name}"
-#
-#  origin {
-#    domain_name              = aws_s3_bucket.aws_spa_website_bucket.bucket_regional_domain_name
-#    origin_id                = "aws_spa_bucket_origin"
-#    origin_access_control_id = aws_cloudfront_origin_access_control.default[0].id
-#  }
-#
-#  default_cache_behavior {
-#    min_ttl                = 0
-#    default_ttl            = 0
-#    max_ttl                = 0
-#    viewer_protocol_policy = "redirect-to-https"
-#
-#    allowed_methods  = ["GET", "HEAD", "OPTIONS"]
-#    cached_methods   = ["GET", "HEAD"]
-#    target_origin_id = "aws_spa_bucket_origin"
-#
-#    forwarded_values {
-#      query_string = false
-#      cookies {
-#        forward = "none"
-#      }
-#    }
-#  }
-#
-#  restrictions {
-#    geo_restriction {
-#      locations        = []
-#      restriction_type = "none"
-#    }
-#  }
-#
-#  aliases = local.vm_url
-#
-#  viewer_certificate {
-#    acm_certificate_arn      = local.selected_arn
-#    ssl_support_method       = "sni-only"
-#    minimum_protocol_version = "TLSv1.2_2021"
-#  }
-#}
-#
 
 locals {
-  cdn_aliases = var.aws_r53_domain_name != "" ? ["var.aws_r53_domain_name"] : []
   cdn_site_url = var.aws_spa_cdn_enabled ? ( local.selected_arn != "" ? aws_cloudfront_distribution.cdn_static_site[0].domain_name : aws_cloudfront_distribution.cdn_static_site_default_cert[0].domain_name ) : ""
 } 
 
@@ -206,16 +192,18 @@ resource "aws_cloudfront_origin_access_control" "default" {
   signing_protocol                  = "sigv4"
 }
 
-## ALL DNS
+##### ALL DNS
 
+## Set domain to be used
 data "aws_route53_zone" "selected" {
   count        = var.aws_r53_domain_name != "" ? 1 : 0
   name         = "${var.aws_r53_domain_name}."
   private_zone = false
 }
+###
 
 ## RECORDS
-
+# Create sub-domain record
 resource "aws_route53_record" "dev" {
   count   = local.fqdn_provided ? (var.aws_r53_root_domain_deploy ? 0 : 1) : 0
   zone_id = data.aws_route53_zone.selected[0].zone_id
@@ -229,6 +217,7 @@ resource "aws_route53_record" "dev" {
   }
 }
 
+# Create both www and root records when deploying at root level
 resource "aws_route53_record" "root-a" {
   count   = local.fqdn_provided ? (var.aws_r53_root_domain_deploy ? 1 : 0) : 0
   zone_id = data.aws_route53_zone.selected[0].zone_id
@@ -254,37 +243,9 @@ resource "aws_route53_record" "www-a" {
     evaluate_target_health = false
   }
 }
+###
 
-## R53 OUTPUTS
-
-locals {
-  url = (local.fqdn_provided ?
-    (var.aws_r53_root_domain_deploy ?
-      "${local.protocol}${var.aws_r53_domain_name}" :
-      "${local.protocol}${var.aws_r53_sub_domain_name}.${var.aws_r53_domain_name}"
-    ) :
-    (var.aws_spa_cdn_enabled ? "${local.protocol}${local.cdn_site_url}" :
-     aws_s3_bucket.aws_spa_website_bucket.bucket_regional_domain_name
-    )
-  )
-
-
-  fqdn_provided = (
-    (var.aws_r53_domain_name != "") ?
-    (var.aws_r53_sub_domain_name != "" ?
-      true :
-      var.aws_r53_root_domain_deploy ? true : false
-    ) : 
-    false
-  )
-  protocol = local.cert_available ? "https://" : "http://"
-}
-
-output "vm_url" {
-  value = local.url
-}
-
-# Lookup for main domain.
+# CERTIFICATE STUFF
 
 data "aws_acm_certificate" "issued" {
   for_each = var.aws_r53_enable_cert ? {
@@ -318,7 +279,7 @@ resource "aws_acm_certificate_validation" "root_domain" {
   certificate_arn         = aws_acm_certificate.root_domain[0].arn
   validation_record_fqdns = [for record in aws_route53_record.root_domain : record.fqdn]
 }
-
+###
 
 # This block will create and validate the sub domain cert ONLY
 resource "aws_acm_certificate" "sub_domain" {
@@ -342,7 +303,9 @@ resource "aws_acm_certificate_validation" "sub_domain" {
   certificate_arn         = aws_acm_certificate.sub_domain[0].arn
   validation_record_fqdns = [for record in aws_route53_record.sub_domain : record.fqdn]
 }
+###
 
+### Some locals for parsing details
 locals {
   selected_arn = (
     var.aws_r53_enable_cert ? 
@@ -367,59 +330,40 @@ locals {
     ) : false
   )
   acm_arn = try(data.aws_acm_certificate.issued["domain"].arn, try(data.aws_acm_certificate.issued["wildcard"].arn, data.aws_acm_certificate.issued["sub"].arn, ""))
+
+  url = (local.fqdn_provided ?
+    (var.aws_r53_root_domain_deploy ?
+      "${local.protocol}${var.aws_r53_domain_name}" :
+      "${local.protocol}${var.aws_r53_sub_domain_name}.${var.aws_r53_domain_name}"
+    ) :
+    (var.aws_spa_cdn_enabled ? "${local.protocol}${local.cdn_site_url}" :
+     aws_s3_bucket.aws_spa_website_bucket.bucket_regional_domain_name
+    )
+  )
+
+  cdn_alias_url = (local.fqdn_provided ?
+    (var.aws_r53_root_domain_deploy ?
+      "${var.aws_r53_domain_name}" :
+      "${var.aws_r53_sub_domain_name}.${var.aws_r53_domain_name}"
+    ) : ""
+  )
+  
+  # This checks if we have the fqdn, and if it should go to the root domain or not.
+  fqdn_provided = (
+    (var.aws_r53_domain_name != "") ?
+    (var.aws_r53_sub_domain_name != "" ?
+      true :
+      var.aws_r53_root_domain_deploy ? true : false
+    ) : 
+    false
+  )
+  protocol = local.cert_available ? "https://" : "http://"
+}
+
+output "vm_url" {
+  value = local.url
 }
 
 output "selected_arn" {
   value = local.selected_arn
-}
-
-
-
-
-
-resource "aws_cloudfront_distribution" "cdn_static_site" {
-  count               = var.aws_spa_cdn_enabled ? ( local.selected_arn != "" ? 1 : 0 ) : 0
-  enabled             = true
-  is_ipv6_enabled     = true
-  default_root_object = "index.html"
-  comment             = "my cloudfront in front of the s3 bucket"
-
-  origin {
-    domain_name              = aws_s3_bucket.aws_spa_website_bucket.bucket_regional_domain_name
-    origin_id                = "aws_spa_bucket_origin"
-    origin_access_control_id = aws_cloudfront_origin_access_control.default[0].id
-  }
-
-  default_cache_behavior {
-    min_ttl                = 0
-    default_ttl            = 0
-    max_ttl                = 0
-    viewer_protocol_policy = "redirect-to-https"
-
-    allowed_methods  = ["GET", "HEAD", "OPTIONS"]
-    cached_methods   = ["GET", "HEAD"]
-    target_origin_id = "aws_spa_bucket_origin"
-
-    forwarded_values {
-      query_string = false
-      cookies {
-        forward = "none"
-      }
-    }
-  }
-
-  restrictions {
-    geo_restriction {
-      locations        = []
-      restriction_type = "none"
-    }
-  }
-
-  aliases = ["${var.aws_r53_sub_domain_name}.${var.aws_r53_domain_name}"]
-
-  viewer_certificate {
-    acm_certificate_arn      = local.selected_arn
-    ssl_support_method       = "sni-only"
-    minimum_protocol_version = "TLSv1.2_2021"
-  }
 }

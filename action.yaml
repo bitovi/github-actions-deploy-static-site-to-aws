@@ -159,7 +159,6 @@ runs:
       shell: bash
       run: |
         terraform -chdir=$GITHUB_ACTION_PATH/terraform_code apply -auto-approve
-        echo "public_url=$(terraform output | grep public_url)" >> $GITHUB_OUTPUT
 
     - name: Terraform Destroy
       if: ${{ success() && inputs.tf_action == 'destroy' }}

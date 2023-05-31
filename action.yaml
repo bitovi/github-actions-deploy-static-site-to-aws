@@ -88,6 +88,7 @@ runs:
   using: 'composite'
   steps:
     - name: Checkout
+      if: ${{ inputs.checkout == 'true' }}
       uses: actions/checkout@v3
 
     - name: Configure AWS Credentials

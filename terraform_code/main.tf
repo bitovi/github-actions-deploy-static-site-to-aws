@@ -26,8 +26,8 @@ resource "aws_s3_object" "aws_spa_website_bucket" {
   key            = each.key
   source         = "${var.aws_spa_source_folder}/${each.key}"
   source_hash    = filemd5("${var.aws_spa_source_folder}/${each.key}")
-  acl            = var.aws_spa_cdn_enabled ? "" : "public-read"
   ##content_type = "text/html"####
+  content_type   = each.key == "*.html" ? "text/html" : null
 }
 
 output "bucket_url" {
@@ -41,6 +41,27 @@ output "bucket_url" {
 #}
 
 ## SPA Bucket Policies
+
+
+resource "aws_s3_bucket_policy" "aws_spa_bucket_public_access" {
+  count  = var.aws_spa_cdn_enabled ? 0 : 1
+  bucket = aws_s3_bucket.aws_spa_website_bucket.id
+
+  policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "PublicReadGetObject",
+      "Effect": "Allow",
+      "Principal": "*",
+      "Action": ["s3:GetObject"],
+      "Resource": ["${aws_s3_bucket.aws_spa_website_bucket.arn}/*"]
+    }
+  ]
+}
+EOF
+}
 
 data "aws_iam_policy_document" "aws_spa_website_bucket" {
   count  = var.aws_spa_cdn_enabled ? 1 : 0

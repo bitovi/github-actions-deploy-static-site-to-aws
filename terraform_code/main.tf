@@ -248,7 +248,7 @@ resource "aws_route53_record" "www-a" {
 # CERTIFICATE STUFF
 
 data "aws_acm_certificate" "issued" {
-  for_each = var.aws_r53_enable_cert ? {
+  for_each = var.cert_available ? {
     "domain" : var.aws_r53_domain_name,
     "wildcard" : "*.${var.aws_r53_domain_name}"
     "sub": "${var.aws_r53_sub_domain_name}.${var.aws_r53_domain_name}"

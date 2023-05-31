@@ -47,42 +47,42 @@ inputs:
 
   # SPA Settings
   aws_spa_source_folder:
-    description: 'Sources to be stored in the bucket. Coma sepparated list of files possible.'
+    description: 'Source folder for files to be published. Will ignore any hidden file. Defaults to root folder of the calling repo if nothing defined.'
     required: true
+  aws_spa_root_object:
+    description: 'Root object to be served as entry-point. Defaults to `index.html`'
+    required: false
   aws_spa_website_bucket_name:
-    description: 'AWS secret access key'
+    description: ' AWS S3 bucket name to use for the public files. Defaults to `${org}-${repo}-{branch}-sp`'
     required: false
   aws_spa_cdn_enabled:
-    description: 'AWS session token'
-    required: false
-  aws_spa_root_object:
-    description: 'AWS default region'
+    description: 'Enable or disables the use of CDN. Defaults to `false`.'
     required: false
 
   # AWS Route53 Domains abd Certificates
   aws_r53_domain_name:
-    description: 'Define the root domain name for the application. e.g. app.com'
+    description: 'Define the root domain name for the application. e.g. bitovi.com'.'
     required: false
   aws_r53_sub_domain_name:
-    description: 'Define the sub-domain part of the URL. Defaults to `${org}-${repo}-{branch}`'
+    description: 'Define the sub-domain part of the URL. Defaults to `${GITHUB_ORG_NAME}-${GITHUB_REPO_NAME}-${GITHUB_BRANCH_NAME}`.'
   aws_r53_root_domain_deploy:
-    description: 'Deploy to root domain. Will generate two DNS recrods, one for root, another for www'
+    description: 'Deploy application to root domain. Will create root and www records. Default is `false`.'
     required: false
   aws_r53_cert_arn:
-    description: 'Define the certificate ARN to use for the application'
+    description:  Define the certificate ARN to use for the application.'
     required: false
   aws_r53_create_root_cert:
-    description: 'Generates and manage the root cert for the application'
+    description: 'Generates and manage the root cert for the application. Default is `false`.'
     required: false
   aws_r53_create_sub_cert: 
-    description: 'Generates and manage the sub-domain certificate for the application'
+    description: 'Generates and manage the sub-domain certificate for the application. Default is `false`.'
     required: false
     
 
 outputs:
-  vm_url:
+  public_url:
     description: "The URL of the generated app"
-    value: ${{ steps.deploy.outputs.vm_url }}
+    value: ${{ steps.apply.outputs.public_url }}
 
 runs:
   using: 'composite'
@@ -126,12 +126,6 @@ runs:
         echo "running scripts/generate_deploy.sh"
         $GITHUB_ACTION_PATH/scripts/generate_deploy.sh
 
-
-    - name: Env print
-      id: env
-      shell: bash
-      run: env
-
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v2
 
@@ -160,6 +154,7 @@ runs:
         echo ${{ steps.plan.outputs.exitcode }}
 
     - name: Terraform Apply
+      id: apply
       if: ${{ success() && inputs.tf_action == 'apply' }}
       shell: bash
       run: |

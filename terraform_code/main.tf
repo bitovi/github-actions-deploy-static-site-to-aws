@@ -165,7 +165,7 @@ resource "aws_cloudfront_distribution" "cdn_static_site" {
     }
   }
 
-  aliases = ["local.cdn_alias_url"]
+  aliases = [ var.aws_r53_root_domain_deploy ? "${var.aws_r53_domain_name}" : "${var.aws_r53_sub_domain_name}.${var.aws_r53_domain_name}" ]
 
   viewer_certificate {
     acm_certificate_arn      = local.selected_arn

@@ -52,6 +52,11 @@ resource "aws_s3_object" "aws_spa_website_bucket" {
   content = each.value.content
 
   etag = each.value.digests.md5
+
+  # Ignore files starting with a dot in any subdirectory
+  if !rstartswith(each.key, ".") {
+    count = 1
+  }
 }
 
 output "bucket_url" {

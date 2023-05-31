@@ -377,6 +377,7 @@ output "selected_arn" {
 
 
 resource "aws_cloudfront_distribution" "cdn_static_site" {
+  count               = var.aws_spa_cdn_enabled ? ( local.selected_arn != "" ? 1 : 0 ) : 0
   enabled             = true
   is_ipv6_enabled     = true
   default_root_object = "index.html"

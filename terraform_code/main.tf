@@ -28,7 +28,8 @@ resource "aws_s3_object" "aws_spa_website_bucket" {
   source         = "${var.aws_spa_source_folder}/${each.key}"
   source_hash    = filemd5("${var.aws_spa_source_folder}/${each.key}")
   ##content_type = "text/html"####
-  content_type   = each.key == "*.html" ? "text/html" : null
+  content_type   = filebase64("${var.aws_spa_source_folder}/${each.key}")
+  #content_type   = each.key == "index.html" ? "text/html" : filebase64("${var.aws_spa_source_folder}/${each.key}")
 }
 
 output "bucket_url" {

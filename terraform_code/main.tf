@@ -10,26 +10,46 @@ locals {
 
 resource "aws_s3_bucket_public_access_block" "aws_spa_website_bucket" {
   bucket                  = aws_s3_bucket.aws_spa_website_bucket.id
-  block_public_acls       = var.aws_spa_cdn_enabled ? true : false
-  block_public_policy     = var.aws_spa_cdn_enabled ? true : false
-  ignore_public_acls      = var.aws_spa_cdn_enabled ? true : false
-  restrict_public_buckets = var.aws_spa_cdn_enabled ? true : false
+  block_public_policy     = false
+  restrict_public_buckets = false
 }
 
-resource "aws_s3_object" "aws_spa_website_bucket" {  
+#resource "aws_s3_object" "aws_spa_website_bucket" {  
+#  for_each = {
+#    for file in fileset(var.aws_spa_source_folder, "**") :
+#    file => file
+#    if !startswith(file, ".")  # Ignore files starting with a dot
+#  }
+#  
+#  bucket         = aws_s3_bucket.aws_spa_website_bucket.id
+#  key            = each.key
+#  source         = "${var.aws_spa_source_folder}/${each.key}"
+#  source_hash    = filemd5("${var.aws_spa_source_folder}/${each.key}")
+#  ##content_type = "text/html"####
+#  #content_type   = filebase64("${var.aws_spa_source_folder}/${each.key}")
+#  content_type   = each.key == "index.html" ? "text/html" : filebase64("${var.aws_spa_source_folder}/${each.key}")
+#}
+
+module "template_files" {
+  source   = "hashicorp/dir/template"
+  base_dir = var.aws_spa_source_folder
+}
+
+resource "aws_s3_object" "aws_spa_website_bucket" {
   for_each = {
-    for file in fileset(var.aws_spa_source_folder, "**") :
+    for file in module.template_files.files :
     file => file
-    if !startswith(file, ".")  # Ignore files starting with a dot
+    if !startswith(file.key, ".")  # Ignore files starting with a dot
   }
-  
-  bucket         = aws_s3_bucket.aws_spa_website_bucket.id
-  key            = each.key
-  source         = "${var.aws_spa_source_folder}/${each.key}"
-  source_hash    = filemd5("${var.aws_spa_source_folder}/${each.key}")
-  ##content_type = "text/html"####
-  content_type   = filebase64("${var.aws_spa_source_folder}/${each.key}")
-  #content_type   = each.key == "index.html" ? "text/html" : filebase64("${var.aws_spa_source_folder}/${each.key}")
+
+  bucket       = aws_s3_bucket.aws_spa_website_bucket.id
+  key          = each.key
+  content_type = each.value.content_type
+
+  source  = each.value.source_path
+  content = each.value.content
+
+  etag = each.value.digests.md5
 }
 
 output "bucket_url" {

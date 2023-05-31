@@ -29,6 +29,35 @@ resource "aws_s3_bucket_public_access_block" "aws_spa_website_bucket" {
 #  #content_type   = filebase64("${var.aws_spa_source_folder}/${each.key}")
 #  content_type   = each.key == "index.html" ? "text/html" : filebase64("${var.aws_spa_source_folder}/${each.key}")
 #}
+#
+#module "template_files" {
+#  source   = "hashicorp/dir/template"
+#  base_dir = var.aws_spa_source_folder
+#}
+#
+#resource "aws_s3_object" "aws_spa_website_bucket" {
+#  for_each = module.template_files.files
+#
+#  #for_each = {
+#  #  for file in module.template_files.files :
+#  #  file => file
+#  #  if !startswith(file, ".")  # Ignore files starting with a dot
+#  #}
+#
+#  bucket       = aws_s3_bucket.aws_spa_website_bucket.id
+#  key          = each.key
+#  content_type = each.value.content_type
+#
+#  source  = each.value.source_path
+#  content = each.value.content
+#
+#  etag = each.value.digests.md5
+#
+#  # Ignore files starting with a dot in any subdirectory
+#  if !rstartswith(each.key, ".") {
+#    count = 1
+#  }
+#}
 
 module "template_files" {
   source   = "hashicorp/dir/template"
@@ -37,12 +66,6 @@ module "template_files" {
 
 resource "aws_s3_object" "aws_spa_website_bucket" {
   for_each = module.template_files.files
-
-  #for_each = {
-  #  for file in module.template_files.files :
-  #  file => file
-  #  if !startswith(file, ".")  # Ignore files starting with a dot
-  #}
 
   bucket       = aws_s3_bucket.aws_spa_website_bucket.id
   key          = each.key
@@ -54,9 +77,10 @@ resource "aws_s3_object" "aws_spa_website_bucket" {
   etag = each.value.digests.md5
 
   # Ignore files starting with a dot in any subdirectory
-  if !rstartswith(each.key, ".") {
-    count = 1
-  }
+  include = [
+    for file in module.template_files.files :
+      if !rstartswith(file, ".")
+    ]
 }
 
 output "bucket_url" {

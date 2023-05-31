@@ -8,7 +8,8 @@ locals {
   spa_bucket_name = var.aws_spa_website_bucket_name != "" ? var.aws_spa_website_bucket_name : "${var.aws_resource_identifier}-sp"
 }
 
-resource "aws_s3_account_public_access_block" "aws_spa_website_bucket" {
+resource "aws_s3_bucket_public_access_block" "aws_spa_website_bucket" {
+  bucket                  = aws_s3_bucket.aws_spa_website_bucket.id
   block_public_acls       = var.aws_spa_cdn_enabled ? true : false
   block_public_policy     = var.aws_spa_cdn_enabled ? true : false
   ignore_public_acls      = var.aws_spa_cdn_enabled ? true : false

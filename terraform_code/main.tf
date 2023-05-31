@@ -26,7 +26,7 @@ resource "aws_s3_object" "aws_spa_website_bucket" {
   key            = each.key
   source         = "${var.aws_spa_source_folder}/${each.key}"
   source_hash    = filemd5("${var.aws_spa_source_folder}/${each.key}")
-  #acl            = "public-read"
+  acl            = var.aws_spa_cdn_enabled ? "" : "public-read"
   ##content_type = "text/html"####
 }
 

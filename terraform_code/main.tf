@@ -14,33 +14,9 @@ resource "aws_s3_bucket_public_access_block" "aws_spa_website_bucket" {
   restrict_public_buckets = false
 }
 
-#resource "aws_s3_object" "aws_spa_website_bucket" {  
-#  for_each = {
-#    for file in fileset(var.aws_spa_source_folder, "**") :
-#    file => file
-#    if !startswith(file, ".")  # Ignore files starting with a dot
-#  }
-#  
-#  bucket         = aws_s3_bucket.aws_spa_website_bucket.id
-#  key            = each.key
-#  source         = "${var.aws_spa_source_folder}/${each.key}"
-#  source_hash    = filemd5("${var.aws_spa_source_folder}/${each.key}")
-#  ##content_type = "text/html"####
-#  #content_type   = filebase64("${var.aws_spa_source_folder}/${each.key}")
-#  content_type   = each.key == "index.html" ? "text/html" : filebase64("${var.aws_spa_source_folder}/${each.key}")
-#}
-#
 module "template_files" {
   source   = "hashicorp/dir/template"
   base_dir = var.aws_spa_source_folder
-
-  // Exclude hidden files
-  file_filter {
-    excludes = [
-      "**/.*",  // Exclude hidden files in subdirectories
-      ".*",     // Exclude hidden files in the current directory
-    ]
-  }
 }
 
 resource "aws_s3_object" "aws_spa_website_bucket" {

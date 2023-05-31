@@ -334,10 +334,10 @@ locals {
 
   url = (local.fqdn_provided ?
     (var.aws_r53_root_domain_deploy ?
-      "${local.protocol}${var.aws_r53_domain_name}" :
-      "${local.protocol}${var.aws_r53_sub_domain_name}.${var.aws_r53_domain_name}"
+      "${var.aws_r53_domain_name}" :
+      "${var.aws_r53_sub_domain_name}.${var.aws_r53_domain_name}"
     ) :
-    (var.aws_spa_cdn_enabled ? "${local.protocol}${local.cdn_site_url}" :
+    (var.aws_spa_cdn_enabled ? "${local.cdn_site_url}" :
      "${aws_s3_bucket.aws_spa_website_bucket.bucket_regional_domain_name}/${var.aws_spa_cdn_root_object}"
     )
   )
@@ -362,7 +362,7 @@ locals {
 }
 
 output "public_url" {
-  value = "${local.protocol}.${local.url}"
+  value = "https://${local.url}"
 }
 
 output "selected_arn" {

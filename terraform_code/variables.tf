@@ -37,7 +37,7 @@ variable "aws_spa_cdn_enabled" {
   default     = false
 }
 
-variable "aws_spa_cdn_root_object" {
+variable "aws_spa_root_object" {
   description = "Root object for CDN. Defaults to index.html"
   type        = string
   default     = "index.html"

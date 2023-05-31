@@ -88,7 +88,7 @@ resource "aws_cloudfront_distribution" "cdn_static_site_default_cert" {
   count               = var.aws_spa_cdn_enabled ? ( local.selected_arn == "" ? 1 : 0 ) : 0
   enabled             = true
   is_ipv6_enabled     = true
-  default_root_object = var.aws_spa_cdn_root_object 
+  default_root_object = var.aws_spa_root_object 
   comment             = "CDN for ${var.aws_spa_website_bucket_name} static"
 
   origin {
@@ -132,7 +132,7 @@ resource "aws_cloudfront_distribution" "cdn_static_site" {
   count               = var.aws_spa_cdn_enabled ? ( local.selected_arn != "" ? 1 : 0 ) : 0
   enabled             = true
   is_ipv6_enabled     = true
-  default_root_object = var.aws_spa_cdn_root_object 
+  default_root_object = var.aws_spa_root_object 
   comment             = "CDN for ${var.aws_spa_website_bucket_name}"
 
   origin {
@@ -338,7 +338,7 @@ locals {
       "${var.aws_r53_sub_domain_name}.${var.aws_r53_domain_name}"
     ) :
     (var.aws_spa_cdn_enabled ? "${local.cdn_site_url}" :
-     "${aws_s3_bucket.aws_spa_website_bucket.bucket_regional_domain_name}/${var.aws_spa_cdn_root_object}"
+     "${aws_s3_bucket.aws_spa_website_bucket.bucket_regional_domain_name}/${var.aws_spa_root_object}"
     )
   )
 

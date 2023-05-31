@@ -55,7 +55,7 @@ inputs:
   aws_spa_cdn_enabled:
     description: 'AWS session token'
     required: false
-  aws_spa_cdn_root_object:
+  aws_spa_root_object:
     description: 'AWS default region'
     required: false
 
@@ -67,9 +67,6 @@ inputs:
     description: 'Define the sub-domain part of the URL. Defaults to `${org}-${repo}-{branch}`'
   aws_r53_root_domain_deploy:
     description: 'Deploy to root domain. Will generate two DNS recrods, one for root, another for www'
-    required: false
-  aws_r53_enable_cert:
-    description: 'Makes the application use a certificate by enabling a certificate lookup.'
     required: false
   aws_r53_cert_arn:
     description: 'Define the certificate ARN to use for the application'
@@ -117,12 +114,11 @@ runs:
         AWS_SPA_SOURCE_FOLDER: ${{ inputs.aws_spa_source_folder }}
         AWS_SPA_WEBSITE_BUCKET_NAME: ${{ inputs.aws_spa_website_bucket_name }}
         AWS_SPA_CDN_ENABLED: ${{ inputs.aws_spa_cdn_enabled }}
-        AWS_SPA_CDN_ROOT_OBJECT: ${{ inputs.aws_spa_cdn_root_object }}
+        aws_spa_root_object: ${{ inputs.aws_spa_root_object }}
         # AWS Route53 Domains abd Certificates
         AWS_R53_DOMAIN_NAME: ${{ inputs.aws_r53_domain_name }}
         AWS_R53_SUB_DOMAIN_NAME: ${{ inputs.aws_r53_sub_domain_name }}
         AWS_R53_ROOT_DOMAIN_DEPLOY: ${{ inputs.aws_r53_root_domain_deploy }}
-        AWS_R53_ENABLE_CERT: ${{ inputs.aws_r53_enable_cert }}
         AWS_R53_CERT_ARN: ${{ inputs.aws_r53_cert_arn }}
         AWS_R53_CREATE_ROOT_CERT: ${{ inputs.aws_r53_create_root_cert }}
         AWS_R53_CREATE_SUB_CERT: ${{ inputs.aws_r53_create_sub_cert }}

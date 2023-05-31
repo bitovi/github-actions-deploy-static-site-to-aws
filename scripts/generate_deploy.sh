@@ -76,7 +76,7 @@ aws_default_region=$(generate_var aws_default_region $AWS_DEFAULT_REGION)
 aws_spa_source_folder="aws_spa_source_folder = \"${SOURCE_FILES}\""
 aws_spa_website_bucket_name=$(generate_var aws_spa_website_bucket_name $AWS_SPA_WEBSITE_BUCKET_NAME)
 aws_spa_cdn_enabled=$(generate_var aws_spa_cdn_enabled $AWS_SPA_CDN_ENABLED)
-aws_spa_cdn_root_object=$(generate_var aws_spa_cdn_root_object $AWS_SPA_CDN_ROOT_OBJECT)
+aws_spa_root_object=$(generate_var aws_spa_root_object $aws_spa_root_object)
 aws_r53_domain_name=$(generate_var aws_r53_domain_name $AWS_R53_DOMAIN_NAME)
 aws_r53_root_domain_deploy=$(generate_var aws_r53_root_domain_deploy $AWS_R53_ROOT_DOMAIN_DEPLOY)
 aws_r53_enable_cert=$(generate_var aws_r53_enable_cert $AWS_R53_ENABLE_CERT)
@@ -94,7 +94,7 @@ $aws_tf_state_bucket
 $aws_spa_source_folder
 $aws_spa_website_bucket_name
 $aws_spa_cdn_enabled
-$aws_spa_cdn_root_object
+$aws_spa_root_object
 $aws_r53_domain_name
 $aws_r53_sub_domain_name
 $aws_r53_root_domain_deploy

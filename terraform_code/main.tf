@@ -24,7 +24,7 @@ resource "aws_s3_object" "aws_spa_website_bucket" {
 
   bucket       = aws_s3_bucket.aws_spa_website_bucket.id
   key          = each.key
-  content_type = contains([".ts", "tsx"], substr(each.key, -3, 3)) ? "application/javascript" : each.value.content_type
+  content_type = contains([".ts", "tsx"], substr(each.key, -3, 3)) ? "text/javascript" : each.value.content_type
 
 
   source  = each.value.source_path

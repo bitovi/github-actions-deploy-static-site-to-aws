@@ -25,6 +25,12 @@ variable "aws_spa_source_folder" {
   default     = ""
 }
 
+variable "aws_spa_root_object" {
+  description = "Root object. Defaults to index.html"
+  type        = string
+  default     = "index.html"
+}
+
 variable "aws_spa_website_bucket_name" {
   description = "Bucket name where all the files will be stored."
   type        = string
@@ -35,12 +41,6 @@ variable "aws_spa_cdn_enabled" {
   description = "Enable or not CDN for site"
   type        = bool
   default     = false
-}
-
-variable "aws_spa_root_object" {
-  description = "Root object for CDN. Defaults to index.html"
-  type        = string
-  default     = "index.html"
 }
 
 variable "aws_r53_domain_name" {

@@ -112,9 +112,9 @@ runs:
         TF_STATE_BUCKET_DESTROY: ${{ inputs.tf_state_bucket_destroy }}
         # SPA
         AWS_SPA_SOURCE_FOLDER: ${{ inputs.aws_spa_source_folder }}
+        AWS_SPA_ROOT_OBJECT: ${{ inputs.aws_spa_root_object }}
         AWS_SPA_WEBSITE_BUCKET_NAME: ${{ inputs.aws_spa_website_bucket_name }}
         AWS_SPA_CDN_ENABLED: ${{ inputs.aws_spa_cdn_enabled }}
-        aws_spa_root_object: ${{ inputs.aws_spa_root_object }}
         # AWS Route53 Domains abd Certificates
         AWS_R53_DOMAIN_NAME: ${{ inputs.aws_r53_domain_name }}
         AWS_R53_SUB_DOMAIN_NAME: ${{ inputs.aws_r53_sub_domain_name }}

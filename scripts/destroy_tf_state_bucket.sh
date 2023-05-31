@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -ex
+set -e
 
 GITHUB_IDENTIFIER="$($GITHUB_ACTION_PATH/scripts/generate_identifier.sh)"
 GITHUB_IDENTIFIER_SS="$($GITHUB_ACTION_PATH/scripts/generate_identifier.sh 30)"

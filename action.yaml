@@ -100,7 +100,7 @@ runs:
         aws-region: ${{ inputs.aws_default_region }}
         role-to-assume: ${{ inputs.aws_role_to_assume }}
 
-    - name: Deploy with BitOps
+    - name: Deploy
       id: deploy
       shell: bash
       env:

@@ -44,7 +44,7 @@ jobs:
 
     steps:
     - name: Create deploy-bucket
-      uses: bitovi/github-actions-deploy-serverless-website@v0.0.1
+      uses: bitovi/github-actions-deploy-static-site-to-aws@v0.0.1
       with:
         aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID_SANDBOX}}
         aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY_SANDBOX}}
@@ -135,8 +135,8 @@ We use the kubernetes style for this. For example, kubernetes -> k(# of characte
 For some specific resources, we have a 32 characters limit. If the identifier length exceeds this number after compression, we remove the middle part and replace it for a hash made up from the string itself. 
 
 ## Contributing
-We would love for you to contribute to [bitovi/github-actions-deploy-serverless-website](https://github.com/bitovigithub-actions-deploy-serverless-website).
-Would you like to see additional features?  [Create an issue](https://github.com/bitovi/github-actions-deploy-serverless-website/issues/new) or a [Pull Requests](https://github.com/bitovi/github-actions-deploy-serverless-website/pulls). We love discussing solutions!
+We would love for you to contribute to [bitovi/bitovi/github-actions-deploy-static-site-to-aws](https://github.com/bitovi/bitovi/github-actions-deploy-static-site-to-aws).
+Would you like to see additional features?  [Create an issue](https://github.com/bitovi/bitovi/github-actions-deploy-static-site-to-aws/issues/new) or a [Pull Requests](https://github.com/bitovi/bitovi/github-actions-deploy-static-site-to-aws/pulls). We love discussing solutions!
 
 ## License
-The scripts and documentation in this project are released under the [MIT License](https://github.com/bitovi/github-actions-deploy-serverless-website/blob/main/LICENSE).
+The scripts and documentation in this project are released under the [MIT License](https://github.com/bitovi/bitovi/github-actions-deploy-static-site-to-aws/blob/main/LICENSE).

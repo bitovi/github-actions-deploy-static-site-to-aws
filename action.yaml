@@ -1,5 +1,5 @@
-name: 'Deploy Docker to AWS (EC2)'
-description: 'Deploy a Docker app to an AWS Virtual Machine (EC2) with Docker Compose'
+name: 'Deploy static site to AWS (S3+CDN+R53)'
+description: 'Deploy a website to an S3 bucket. Option to add Cloudfront, and deploy to a Route53 managed domain with certs.'
 branding:
   icon: upload-cloud
   color: red
@@ -59,7 +59,7 @@ inputs:
     description: 'Enable or disables the use of CDN. Defaults to `false`.'
     required: false
 
-  # AWS Route53 Domains abd Certificates
+  # AWS Route53 Domains and Certificates
   aws_r53_domain_name:
     description: 'Define the root domain name for the application. e.g. `bitovi.com`'
     required: false

@@ -1,4 +1,4 @@
-# Deploy serverless website
+# Deploy static site to AWS (S3+CDN+R53)
 
 GitHub action to deploy anything into a bucket, adding the options to add a CDN and use a Domain (if hosted in Route53) with certificates.
 

@@ -10,6 +10,7 @@ resource "aws_s3_bucket_public_access_block" "aws_spa_website_bucket" {
   bucket                  = aws_s3_bucket.aws_spa_website_bucket.id
   block_public_policy     = false
   restrict_public_buckets = false
+  depends_on = [ aws_s3_bucket.aws_spa_website_bucket ]
 }
 
 # Tool to identify file types
@@ -40,7 +41,7 @@ output "bucket_url" {
 resource "aws_s3_bucket_policy" "aws_spa_bucket_public_access" {
   count  = var.aws_spa_cdn_enabled ? 0 : 1
   bucket = aws_s3_bucket.aws_spa_website_bucket.id
-
+  depends_on = [ aws_s3_bucket_public_access_block.aws_spa_website_bucket ]
   policy = <<EOF
 {
   "Version": "2012-10-17",

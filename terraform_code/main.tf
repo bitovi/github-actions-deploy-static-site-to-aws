@@ -39,7 +39,7 @@ resource "aws_s3_object" "aws_spa_website_bucket" {
   for_each = {
     for file in module.template_files.files :
     file => file
-    if !startswith(file.key, ".")  # Ignore files starting with a dot
+    if !startswith(file, ".")  # Ignore files starting with a dot
   }
 
   bucket       = aws_s3_bucket.aws_spa_website_bucket.id

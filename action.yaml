@@ -61,7 +61,7 @@ inputs:
 
   # AWS Route53 Domains abd Certificates
   aws_r53_domain_name:
-    description: 'Define the root domain name for the application. e.g. bitovi.com'.'
+    description: 'Define the root domain name for the application. e.g. `bitovi.com`'
     required: false
   aws_r53_sub_domain_name:
     description: 'Define the sub-domain part of the URL. Defaults to `${GITHUB_ORG_NAME}-${GITHUB_REPO_NAME}-${GITHUB_BRANCH_NAME}`.'

@@ -11,6 +11,7 @@ resource "aws_s3_bucket_website_configuration" "aws_spa_website_bucket" {
   index_document {
     suffix = "index.html"
   }
+}
 
 # Allow public access to bucket
 resource "aws_s3_bucket_public_access_block" "aws_spa_website_bucket" {

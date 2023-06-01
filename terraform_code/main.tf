@@ -361,8 +361,8 @@ locals {
   protocol = local.cert_available ? "https://" : "http://"
 }
 
-output "public_url" {
-  value = "https://${local.url}"
+output "vm_url" {
+  value = https://${local.url}
 }
 
 output "selected_arn" {

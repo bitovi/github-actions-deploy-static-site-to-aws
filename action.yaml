@@ -188,3 +188,10 @@ runs:
         echo "::group::Purge and delete tf-state bucket"
         $GITHUB_ACTION_PATH/scripts/destroy_tf_state_bucket.sh
         echo "::endgroup::"
+
+    name: Print result
+    - if: ${{ success() && teps.output.outputs.public_url != "" }}}}
+      shell: bash
+      run: |
+        echo "## It's published! :rocket:" >> $GITHUB_STEP_SUMMARY
+        echo " ${{ teps.output.outputs.public_url }}" >> $GITHUB_STEP_SUMMARY

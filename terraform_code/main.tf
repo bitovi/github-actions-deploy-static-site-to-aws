@@ -362,7 +362,7 @@ locals {
   protocol = local.cert_available ? "https://" : "http://"
 }
 
-output "vm_url" {
+output "public_url" {
   value = local.public_url
 }
 

@@ -1,13 +1,12 @@
 ### SPA Bucket
 
 # Create bucket to store incoming files - If no name is provided, will set a default one
-#resource "aws_s3_bucket" "aws_spa_website_bucket" {
-#  bucket = var.aws_spa_website_bucket_name != "" ? var.aws_spa_website_bucket_name : "${var.aws_resource_identifier}-sp"
-#}
+resource "aws_s3_bucket" "aws_spa_website_bucket" {
+  bucket = var.aws_spa_website_bucket_name != "" ? var.aws_spa_website_bucket_name : "${var.aws_resource_identifier}-sp"
+}
 
 resource "aws_s3_bucket_website_configuration" "aws_spa_website_bucket" {
   bucket = var.aws_spa_website_bucket_name != "" ? var.aws_spa_website_bucket_name : "${var.aws_resource_identifier}-sp"
-
   index_document {
     suffix = "index.html"
   }
@@ -15,10 +14,10 @@ resource "aws_s3_bucket_website_configuration" "aws_spa_website_bucket" {
 
 # Allow public access to bucket
 resource "aws_s3_bucket_public_access_block" "aws_spa_website_bucket" {
-  bucket                  = aws_s3_bucket_website_configuration.aws_spa_website_bucket.id
+  bucket                  = aws_s3_bucket.aws_spa_website_bucket.id
   block_public_policy     = false
   restrict_public_buckets = false
-  depends_on = [ aws_s3_bucket_website_configuration.aws_spa_website_bucket ]
+  depends_on = [ aws_s3_bucket.aws_spa_website_bucket ]
 }
 
 # Tool to identify file types
@@ -31,7 +30,7 @@ module "template_files" {
 resource "aws_s3_object" "aws_spa_website_bucket" {
   for_each = module.template_files.files
 
-  bucket       = aws_s3_bucket_website_configuration.aws_spa_website_bucket.id
+  bucket       = aws_s3_bucket.aws_spa_website_bucket.id
   key          = each.key
   content_type = contains([".ts", "tsx"], substr(each.key, -3, 3)) ? "text/javascript" : each.value.content_type
 
@@ -42,13 +41,13 @@ resource "aws_s3_object" "aws_spa_website_bucket" {
 }
 
 output "bucket_url" {
-  value = aws_s3_bucket_website_configuration.aws_spa_website_bucket.bucket_regional_domain_name
+  value = aws_s3_bucket.aws_spa_website_bucket.bucket_regional_domain_name
 }
 
 ## SPA Bucket Policies
 resource "aws_s3_bucket_policy" "aws_spa_bucket_public_access" {
   count  = var.aws_spa_cdn_enabled ? 0 : 1
-  bucket = aws_s3_bucket_website_configuration.aws_spa_website_bucket.id
+  bucket = aws_s3_bucket.aws_spa_website_bucket.id
   depends_on = [ aws_s3_bucket_public_access_block.aws_spa_website_bucket ]
   policy = <<EOF
 {
@@ -59,7 +58,7 @@ resource "aws_s3_bucket_policy" "aws_spa_bucket_public_access" {
       "Effect": "Allow",
       "Principal": "*",
       "Action": ["s3:GetObject"],
-      "Resource": ["${aws_s3_bucket_website_configuration.aws_spa_website_bucket.arn}/*"]
+      "Resource": ["${aws_s3_bucket.aws_spa_website_bucket.arn}/*"]
     }
   ]
 }
@@ -70,7 +69,7 @@ data "aws_iam_policy_document" "aws_spa_website_bucket" {
   count  = var.aws_spa_cdn_enabled ? 1 : 0
   statement {
     actions   = ["s3:GetObject"]
-    resources = ["${aws_s3_bucket_website_configuration.aws_spa_website_bucket.arn}/*"]
+    resources = ["${aws_s3_bucket.aws_spa_website_bucket.arn}/*"]
     principals {
       type        = "Service"
       identifiers = ["cloudfront.amazonaws.com"]
@@ -85,7 +84,7 @@ data "aws_iam_policy_document" "aws_spa_website_bucket" {
 
 resource "aws_s3_bucket_policy" "aws_spa_website_bucket_policy" {
   count  = var.aws_spa_cdn_enabled ? 1 : 0
-  bucket = aws_s3_bucket_website_configuration.aws_spa_website_bucket.id
+  bucket = aws_s3_bucket.aws_spa_website_bucket.id
   policy = data.aws_iam_policy_document.aws_spa_website_bucket[0].json
 }
 
@@ -100,7 +99,7 @@ resource "aws_cloudfront_distribution" "cdn_static_site_default_cert" {
   comment             = "CDN for ${var.aws_spa_website_bucket_name} static"
 
   origin {
-    domain_name              = aws_s3_bucket_website_configuration.aws_spa_website_bucket.bucket_regional_domain_name
+    domain_name              = aws_s3_bucket.aws_spa_website_bucket.bucket_regional_domain_name
     origin_id                = "aws_spa_bucket_origin"
     origin_access_control_id = aws_cloudfront_origin_access_control.default[0].id
   }
@@ -144,7 +143,7 @@ resource "aws_cloudfront_distribution" "cdn_static_site" {
   comment             = "CDN for ${var.aws_spa_website_bucket_name}"
 
   origin {
-    domain_name              = aws_s3_bucket_website_configuration.aws_spa_website_bucket.bucket_regional_domain_name
+    domain_name              = aws_s3_bucket.aws_spa_website_bucket.bucket_regional_domain_name
     origin_id                = "aws_spa_bucket_origin"
     origin_access_control_id = aws_cloudfront_origin_access_control.default[0].id
   }
@@ -255,8 +254,8 @@ resource "aws_route53_record" "www-a" {
 ###
 
 locals {
-  r53_alias_name = var.aws_spa_cdn_enabled ? aws_cloudfront_distribution.cdn_static_site[0].domain_name : aws_s3_bucket_website_configuration.aws_spa_website_bucket.bucket_domain_name
-  r53_alias_id   = var.aws_spa_cdn_enabled ? aws_cloudfront_distribution.cdn_static_site[0].hosted_zone_id : aws_s3_bucket_website_configuration.aws_spa_website_bucket.hosted_zone_id
+  r53_alias_name = var.aws_spa_cdn_enabled ? aws_cloudfront_distribution.cdn_static_site[0].domain_name : aws_s3_bucket.aws_spa_website_bucket.website_domain
+  r53_alias_id   = var.aws_spa_cdn_enabled ? aws_cloudfront_distribution.cdn_static_site[0].hosted_zone_id : aws_s3_bucket.aws_spa_website_bucket.hosted_zone_id
 }
 
 # CERTIFICATE STUFF
@@ -351,7 +350,7 @@ locals {
       "${var.aws_r53_sub_domain_name}.${var.aws_r53_domain_name}"
     ) :
     (var.aws_spa_cdn_enabled ? "${local.cdn_site_url}" :
-     "${aws_s3_bucket_website_configuration.aws_spa_website_bucket.bucket_regional_domain_name}/${var.aws_spa_root_object}"
+     "${aws_s3_bucket.aws_spa_website_bucket.bucket_regional_domain_name}/${var.aws_spa_root_object}"
     )
   )
   public_url = "https://${local.url}"

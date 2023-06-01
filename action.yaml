@@ -78,7 +78,7 @@ inputs:
 outputs:
   vm_url:
     description: "The URL of the generated app"
-    value: ${{ steps.apply.outputs.public_url }}
+    value: ${{ steps.output.outputs.public_url }}
 
 runs:
   using: 'composite'
@@ -163,6 +163,13 @@ runs:
         terraform -chdir=$GITHUB_ACTION_PATH/terraform_code output | grep public_url | sed -e 's/ *= */=/g' 
         echo $(terraform -chdir=$GITHUB_ACTION_PATH/terraform_code output | grep public_url | sed -e 's/ *= */=/g') >> "$GITHUB_OUTPUT"
         echo "::endgroup::"
+
+    - name: Terraform Output url
+      id: output
+      if: ${{ success() && inputs.tf_action == 'apply' }}
+      shell: bash
+      run: |
+        terraform -chdir=$GITHUB_ACTION_PATH/terraform_code output | grep public_url | sed -e 's/ *= */=/g' >> "$GITHUB_OUTPUT"
 
     - name: Terraform Destroy
       if: ${{ success() && inputs.tf_action == 'destroy' }}

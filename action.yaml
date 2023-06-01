@@ -161,7 +161,7 @@ runs:
       run: |
         echo "::group::Terraform Apply"
         terraform -chdir=$GITHUB_ACTION_PATH/terraform_code apply -auto-approve
-        terraform -chdir=$GITHUB_ACTION_PATH/terraform_code output | grep public_url
+        terraform -chdir=$GITHUB_ACTION_PATH/terraform_code output | grep public_url | sed -e 's/ *= */=/g' >> $GITHUB_OUTPUT
         echo "::endgroup::"
 
     - name: Terraform Destroy

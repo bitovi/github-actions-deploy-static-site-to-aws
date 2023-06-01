@@ -212,8 +212,8 @@ resource "aws_route53_record" "dev" {
   type    = "A"
 
   alias {
-    name                   = aws_cloudfront_distribution.cdn_static_site[0].domain_name
-    zone_id                = aws_cloudfront_distribution.cdn_static_site[0].hosted_zone_id
+    name                   = local.r53_alias_name
+    zone_id                = local.r53_alias_id
     evaluate_target_health = false
   }
 }
@@ -226,8 +226,8 @@ resource "aws_route53_record" "root-a" {
   type    = "A"
 
   alias {
-    name                   = aws_cloudfront_distribution.cdn_static_site[0].domain_name
-    zone_id                = aws_cloudfront_distribution.cdn_static_site[0].hosted_zone_id
+    name                   = local.r53_alias_name
+    zone_id                = local.r53_alias_id
     evaluate_target_health = false
   }
 }
@@ -239,12 +239,17 @@ resource "aws_route53_record" "www-a" {
   type    = "A"
 
   alias {
-    name                   = aws_cloudfront_distribution.cdn_static_site[0].domain_name
-    zone_id                = aws_cloudfront_distribution.cdn_static_site[0].hosted_zone_id
+    name                   = local.r53_alias_name
+    zone_id                = local.r53_alias_id
     evaluate_target_health = false
   }
 }
 ###
+
+locals {
+  r53_alias_name = var.aws_spa_cdn_enabled ? aws_cloudfront_distribution.cdn_static_site[0].domain_name : aws_s3_bucket.aws_spa_website_bucket.bucket_regional_domain_name
+  r53_alias_id   = var.aws_spa_cdn_enabled ? aws_cloudfront_distribution.cdn_static_site[0].hosted_zone_id : aws_s3_bucket.aws_spa_website_bucket.bucket_regional_domain_name
+}
 
 # CERTIFICATE STUFF
 

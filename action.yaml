@@ -144,7 +144,7 @@ runs:
       if: ${{ success () && inputs.tf_plan_show_details == 'true' && inputs.tf_action != 'destroy' }}
       id: plan
       shell: bash
-      run: terraform -chdir=$GITHUB_ACTION_PATH/terraform_code plan
+      run: terraform -chdir=$GITHUB_ACTION_PATH/terraform_code plan -input=false
 
     - name: Terraform Show Plan Details
       if: ${{ success () && inputs.tf_plan_show_details == 'true' && inputs.tf_action != 'destroy' }}

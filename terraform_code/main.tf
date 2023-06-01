@@ -247,7 +247,7 @@ resource "aws_route53_record" "www-a" {
 ###
 
 locals {
-  r53_alias_name = var.aws_spa_cdn_enabled ? aws_cloudfront_distribution.cdn_static_site[0].domain_name : aws_s3_bucket.aws_spa_website_bucket.bucket_regional_domain_name
+  r53_alias_name = var.aws_spa_cdn_enabled ? aws_cloudfront_distribution.cdn_static_site[0].domain_name : aws_s3_bucket.aws_spa_website_bucket.bucket_domain_name
   r53_alias_id   = var.aws_spa_cdn_enabled ? aws_cloudfront_distribution.cdn_static_site[0].hosted_zone_id : aws_s3_bucket.aws_spa_website_bucket.hosted_zone_id
 }
 

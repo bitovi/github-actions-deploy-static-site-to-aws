@@ -69,7 +69,7 @@ data "aws_iam_policy_document" "aws_spa_bucket_public_access_dns" {
   count = local.fqdn_provided ? 1 : 0
   statement {
     actions = ["s3:GetObject"]
-    resources = [ "arn:aws:s3:::${var.aws_r53_sub_domain_name}.${var.aws_r53_domain_name}/*" ]
+    resources = ["${aws_s3_bucket.aws_spa_website_bucket.arn}/*"]
     principals {
       identifiers = ["*"]
       type = "AWS"

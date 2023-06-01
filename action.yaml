@@ -150,9 +150,9 @@ runs:
       if: ${{ success () && inputs.tf_plan_show_details == 'true' && inputs.tf_action != 'destroy' }}
       shell: bash
       run: |
-        echo ${{ steps.plan.outputs.stdout }}
-        echo ${{ steps.plan.outputs.stderr }}
-        echo ${{ steps.plan.outputs.exitcode }}
+        echo ${{ steps.plan.outputs.stdout }} | grep '\$'
+        echo ${{ steps.plan.outputs.stderr }} | grep '\$'
+        echo ${{ steps.plan.outputs.exitcode }} | grep '\$'
 
     - name: Terraform Apply
       id: apply

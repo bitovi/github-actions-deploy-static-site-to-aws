@@ -68,14 +68,12 @@ EOF
 data "aws_iam_policy_document" "aws_spa_bucket_public_access_dns" {
   count = local.fqdn_provided ? 1 : 0
   statement {
-    actions = [
-      "s3:GetObject"
-    ]
+    actions = ["s3:GetObject"]
+    resources = [ "arn:aws:s3:::${var.aws_r53_sub_domain_name}.${var.aws_r53_domain_name}/*" ]
     principals {
       identifiers = ["*"]
       type = "AWS"
     }
-    resources = [ var.aws_r53_root_domain_deploy ? "arn:aws:s3:::${var.aws_r53_domain_name}/*" : "arn:aws:s3:::${var.aws_r53_sub_domain_name}.${var.aws_r53_domain_name}/*" ]
   }
 }
 

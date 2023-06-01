@@ -75,7 +75,6 @@ inputs:
     description: 'Generates and manage the sub-domain certificate for the application. Default is `false`.'
     required: false
     
-
 outputs:
   vm_url:
     description: "The URL of the generated app"
@@ -162,7 +161,7 @@ runs:
         echo "::group::Terraform Apply"
         terraform -chdir=$GITHUB_ACTION_PATH/terraform_code apply -auto-approve
         terraform -chdir=$GITHUB_ACTION_PATH/terraform_code output | grep public_url | sed -e 's/ *= */=/g' 
-        terraform -chdir=$GITHUB_ACTION_PATH/terraform_code output | grep public_url | sed -e 's/ *= */=/g' >> $GITHUB_OUTPUT
+        echo $(terraform -chdir=$GITHUB_ACTION_PATH/terraform_code output | grep public_url | sed -e 's/ *= */=/g') >> "$GITHUB_OUTPUT"
         echo "::endgroup::"
 
     - name: Terraform Destroy

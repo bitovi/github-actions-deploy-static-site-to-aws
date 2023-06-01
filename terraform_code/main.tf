@@ -341,6 +341,7 @@ locals {
      "${aws_s3_bucket.aws_spa_website_bucket.bucket_regional_domain_name}/${var.aws_spa_root_object}"
     )
   )
+  public_url = "https://${local.url}"
 
   cdn_alias_url = (local.fqdn_provided ?
     (var.aws_r53_root_domain_deploy ?
@@ -362,7 +363,7 @@ locals {
 }
 
 output "vm_url" {
-  value = https://${local.url}
+  value = local.public_url
 }
 
 output "selected_arn" {

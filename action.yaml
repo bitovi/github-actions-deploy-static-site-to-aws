@@ -35,9 +35,6 @@ inputs:
   tf_action: 
     desctiption: 'Option to run Terraform apply / destroy option. Will run plan if nothing defined.'
     required: false
-  tf_plan_show_details:
-    description: 'Set to true to show a detailed output from Terraform plan.'
-    required: false
   tf_state_bucket:
     description: 'AWS S3 bucket to use for Terraform state. Defaults to `${org}-${repo}-{branch}-tf-state`'
     required: false
@@ -133,7 +130,11 @@ runs:
     - name: Terraform Init
       id: init
       shell: bash
-      run: terraform -chdir=$GITHUB_ACTION_PATH/terraform_code init
+      run: |
+        echo "::group::Terraform Init"
+        terraform -chdir=$GITHUB_ACTION_PATH/terraform_code init
+        echo "::endgroup::"
+        echo "### Terraform Init done! :rocket:" >> $GITHUB_STEP_SUMMARY
     
     - name: Terraform Validate
       id: validate
@@ -141,18 +142,10 @@ runs:
       run: terraform -chdir=$GITHUB_ACTION_PATH/terraform_code validate
     
     - name: Terraform Plan
-      if: ${{ success () && inputs.tf_plan_show_details == 'true' && inputs.tf_action != 'destroy' }}
+      if: ${{ success () && inputs.tf_action != 'destroy' }}
       id: plan
       shell: bash
       run: terraform -chdir=$GITHUB_ACTION_PATH/terraform_code plan -input=false
-
-    - name: Terraform Show Plan Details
-      if: ${{ success () && inputs.tf_plan_show_details == 'true' && inputs.tf_action != 'destroy' }}
-      shell: bash
-      run: |
-        printf "%s\n" ${{ steps.plan.outputs.stdout }}
-        printf "%s\n" ${{ steps.plan.outputs.stderr }}
-        printf "%s\n" ${{ steps.plan.outputs.exitcode }}
 
     - name: Terraform Apply
       id: apply
@@ -167,7 +160,7 @@ runs:
       run: |
         terraform -chdir=$GITHUB_ACTION_PATH/terraform_code destroy -auto-approve
 
-    - name: Terraform Destroy
+    - name: Purge and delete tf-state bucket
       if: ${{ success() && inputs.tf_action == 'destroy' && inputs.tf_state_bucket_destroy == 'true' }}
       shell: bash
       env: 

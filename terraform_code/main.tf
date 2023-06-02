@@ -404,7 +404,7 @@ locals {
     ) : 
     false
   )
-  protocol = local.cert_available ? ( var.aws_spa_cdn_enabled ?  "https://" : "http://" ) : "https://" 
+  protocol = local.cert_available ? ( var.aws_spa_cdn_enabled ?  "https://" : "http://" ) : "http://" 
 }
 
 output "public_url" {

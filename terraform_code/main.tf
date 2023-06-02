@@ -385,11 +385,23 @@ locals {
   )
   acm_arn = try(data.aws_acm_certificate.issued["domain"].arn, try(data.aws_acm_certificate.issued["wildcard"].arn, data.aws_acm_certificate.issued["sub"].arn, ""))
 
-  s3_default_name = var.aws_spa_website_bucket_name != "" ? var.aws_spa_website_bucket_name : "${var.aws_resource_identifier}-sp"
+  # IF bucket length exceeds 63 chars, will use default identifier
+  s3_default_name = var.aws_spa_website_bucket_name != "" ? ( length(var.aws_spa_website_bucket_name) < 63 ? var.aws_spa_website_bucket_name : "${var.aws_resource_identifier}-sp") : "${var.aws_resource_identifier}-sp"
 
   s3_bucket_name = local.fqdn_provided ? local.r53_fqdn : local.s3_default_name
   
-  r53_fqdn = var.aws_r53_root_domain_deploy ? var.aws_r53_domain_name : "${var.aws_r53_sub_domain_name}.${var.aws_r53_domain_name}"
+  r53_fqdn = var.aws_r53_root_domain_deploy ? var.aws_r53_domain_name : local.fqdn_bucket_name
+
+  aws_r53_fqdn_full_length = length("${var.aws_r53_sub_domain_name}.${var.aws_r53_domain_name}")
+  aws_r53_fqdn_full  = "${var.aws_r53_sub_domain_name}.${var.aws_r53_domain_name}"
+  aws_r53_fqdn_short_length = length("${var.aws_resource_identifier_supershort}.${var.aws_r53_domain_name}")
+  aws_r53_fqdn_short = "${var.aws_resource_identifier_supershort}.${var.aws_r53_domain_name}"
+  aws_r53_fqdn_ss_remove = local.aws_r53_fqdn_short_length63 - 63
+  aws_r53_fqdn_ss = try(slice(local.aws_r53_fqdn_short, 0, local.aws_r53_fqdn_ss_remove))
+
+  fqdn_bucket_name = local.aws_r53_fqdn_full_length > 63 ? local.aws_r53_fqdn_short_length > 63 ? local.aws_r53_fqdn_ss : local.aws_r53_fqdn_short : local.aws_r53_fqdn_full
+  
+  aws_r53_sub_domain_name = local.aws_r53_fqdn_full_length > 63 ? "${var.aws_resource_identifier_supershort}.${var.aws_r53_domain_name}" : "${var.aws_r53_sub_domain_name}.${var.aws_r53_domain_name}"
 
   url = local.fqdn_provided ? local.r53_fqdn : (var.aws_spa_cdn_enabled ? "${local.cdn_site_url}" : "${aws_s3_bucket_website_configuration.aws_spa_website_bucket.website_endpoint}" )
 

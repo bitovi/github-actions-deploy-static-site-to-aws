@@ -1,16 +1,37 @@
 ### SPA Bucket
 
-# Create bucket to store incoming files - If no name is provided, will set a default one
 resource "aws_s3_bucket" "aws_spa_website_bucket" {
-  bucket = var.aws_spa_website_bucket_name != "" ? var.aws_spa_website_bucket_name : "${var.aws_resource_identifier}-sp"
+  bucket = local.s3_bucket_name
 }
 
 resource "aws_s3_bucket_website_configuration" "aws_spa_website_bucket" {
-  bucket = var.aws_spa_website_bucket_name != "" ? var.aws_spa_website_bucket_name : "${var.aws_resource_identifier}-sp"
+  bucket = aws_s3_bucket.aws_spa_website_bucket.bucket
   index_document {
-    suffix = "index.html"
+    suffix = var.aws_spa_root_object
   }
 }
+
+# Only create this two IF -> R53 FQDN provided and CDN is off
+  
+resource "aws_s3_bucket" "aws_spa_website_bucket_www" {
+  count  = var.aws_spa_cdn_enabled ? 0 : local.fqdn_provided ? 1 : 0 
+  bucket = "www.${local.s3_bucket_name}"
+}
+
+resource "aws_s3_bucket_website_configuration" "aws_spa_website_bucket_www" {
+  count  = var.aws_spa_cdn_enabled ? 0 : local.fqdn_provided ? 1 : 0 
+  bucket = aws_s3_bucket.aws_spa_website_bucket_www.bucket
+  redirect_all_requests_to {
+    host_name = local.s3_bucket_name
+  }
+}
+
+#resource "aws_s3_bucket_public_access_block" "aws_spa_website_bucket_www" {
+#  bucket                  = aws_s3_bucket.aws_spa_website_bucket_www.id
+#  block_public_policy     = false
+#  restrict_public_buckets = false
+#  depends_on = [ aws_s3_bucket.aws_spa_website_bucket_www ]
+#}
 
 # Allow public access to bucket
 resource "aws_s3_bucket_public_access_block" "aws_spa_website_bucket" {
@@ -364,23 +385,20 @@ locals {
   )
   acm_arn = try(data.aws_acm_certificate.issued["domain"].arn, try(data.aws_acm_certificate.issued["wildcard"].arn, data.aws_acm_certificate.issued["sub"].arn, ""))
 
+  s3_default_name = var.aws_spa_website_bucket_name != "" ? var.aws_spa_website_bucket_name : "${var.aws_resource_identifier}-sp"
+
+  s3_bucket_name = local.fqdn_provided ? local.url : local.s3_default_name
+
   url = (local.fqdn_provided ?
     (var.aws_r53_root_domain_deploy ?
       "${var.aws_r53_domain_name}" :
       "${var.aws_r53_sub_domain_name}.${var.aws_r53_domain_name}"
     ) :
     (var.aws_spa_cdn_enabled ? "${local.cdn_site_url}" :
-     "${aws_s3_bucket.aws_spa_website_bucket.bucket_regional_domain_name}/${var.aws_spa_root_object}"
+     "${aws_s3_bucket.aws_spa_website_bucket.bucket_regional_domain_name}"
     )
   )
   public_url = "https://${local.url}"
-
-  cdn_alias_url = (local.fqdn_provided ?
-    (var.aws_r53_root_domain_deploy ?
-      "${var.aws_r53_domain_name}" :
-      "${var.aws_r53_sub_domain_name}.${var.aws_r53_domain_name}"
-    ) : ""
-  )
   
   # This checks if we have the fqdn, and if it should go to the root domain or not.
   fqdn_provided = (

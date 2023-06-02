@@ -393,7 +393,7 @@ locals {
 
   url = local.fqdn_provided ? local.r53_fqdn : (var.aws_spa_cdn_enabled ? "${local.cdn_site_url}" : "${aws_s3_bucket.aws_spa_website_bucket.bucket_regional_domain_name}" )
 
-  public_url = "https://${local.url}"
+  public_url = "${local.protocol}${local.url}"
   
   # This checks if we have the fqdn, and if it should go to the root domain or not.
   fqdn_provided = (
@@ -404,7 +404,7 @@ locals {
     ) : 
     false
   )
-  protocol = local.cert_available ? "https://" : "http://"
+  protocol = local.cert_available ? ( var.aws_spa_cdn_enabled ?  "https://" : "http://" ) : "https://" 
 }
 
 output "public_url" {

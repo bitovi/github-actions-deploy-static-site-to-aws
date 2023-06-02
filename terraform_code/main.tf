@@ -391,7 +391,7 @@ locals {
   
   r53_fqdn = var.aws_r53_root_domain_deploy ? var.aws_r53_domain_name : "${var.aws_r53_sub_domain_name}.${var.aws_r53_domain_name}"
 
-  url = local.fqdn_provided ? local.r53_fqdn : (var.aws_spa_cdn_enabled ? "${local.cdn_site_url}" : "${aws_s3_bucket.aws_spa_website_bucket.bucket_regional_domain_name}" )
+  url = local.fqdn_provided ? local.r53_fqdn : (var.aws_spa_cdn_enabled ? "${local.cdn_site_url}" : "${aws_s3_bucket_website_configuration.aws_spa_website_bucket.website_endpoint}" )
 
   public_url = "${local.protocol}${local.url}"
   

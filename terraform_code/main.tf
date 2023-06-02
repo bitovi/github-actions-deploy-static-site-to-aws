@@ -26,19 +26,19 @@ resource "aws_s3_bucket_website_configuration" "aws_spa_website_bucket_www" {
   }
 }
 
-#resource "aws_s3_bucket_public_access_block" "aws_spa_website_bucket_www" {
-#  bucket                  = aws_s3_bucket.aws_spa_website_bucket_www.id
-#  block_public_policy     = false
-#  restrict_public_buckets = false
-#  depends_on = [ aws_s3_bucket.aws_spa_website_bucket_www ]
-#}
-
 # Allow public access to bucket
 resource "aws_s3_bucket_public_access_block" "aws_spa_website_bucket" {
   bucket                  = aws_s3_bucket.aws_spa_website_bucket.id
   block_public_policy     = false
   restrict_public_buckets = false
   depends_on = [ aws_s3_bucket.aws_spa_website_bucket ]
+}
+
+resource "aws_s3_bucket_public_access_block" "aws_spa_website_bucket_www" {
+  bucket                  = aws_s3_bucket.aws_spa_website_bucket_www[0].id
+  block_public_policy     = false
+  restrict_public_buckets = false
+  depends_on = [ aws_s3_bucket.aws_spa_website_bucket_www ]
 }
 
 # Tool to identify file types
@@ -386,22 +386,22 @@ locals {
   acm_arn = try(data.aws_acm_certificate.issued["domain"].arn, try(data.aws_acm_certificate.issued["wildcard"].arn, data.aws_acm_certificate.issued["sub"].arn, ""))
 
   # IF bucket length exceeds 63 chars, will use default identifier
-  s3_default_name = var.aws_spa_website_bucket_name != "" ? ( length(var.aws_spa_website_bucket_name) < 63 ? var.aws_spa_website_bucket_name : "${var.aws_resource_identifier}-sp") : "${var.aws_resource_identifier}-sp"
-
   s3_bucket_name = local.fqdn_provided ? local.r53_fqdn : local.s3_default_name
   
+  s3_default_name = var.aws_spa_website_bucket_name != "" ? ( length(var.aws_spa_website_bucket_name) < 63 ? var.aws_spa_website_bucket_name : "${var.aws_resource_identifier}-sp") : "${var.aws_resource_identifier}-sp"
+
   r53_fqdn = var.aws_r53_root_domain_deploy ? var.aws_r53_domain_name : local.fqdn_bucket_name
 
-  aws_r53_fqdn_full_length = length("${var.aws_r53_sub_domain_name}.${var.aws_r53_domain_name}")
+  fqdn_bucket_name = local.aws_r53_fqdn_full_length > 63 ? local.aws_r53_fqdn_short_length > 63 ? local.aws_r53_fqdn_ss : local.aws_r53_fqdn_short : local.aws_r53_fqdn_full
+  # Generate fqdn names
   aws_r53_fqdn_full  = "${var.aws_r53_sub_domain_name}.${var.aws_r53_domain_name}"
-  aws_r53_fqdn_short_length = length("${var.aws_resource_identifier_supershort}.${var.aws_r53_domain_name}")
   aws_r53_fqdn_short = "${var.aws_resource_identifier_supershort}.${var.aws_r53_domain_name}"
+  # Get lengths of the different bucket names strings
+  aws_r53_fqdn_full_length = length(local.aws_r53_fqdn_full)
+  aws_r53_fqdn_short_length = length("${var.aws_resource_identifier_supershort}.${var.aws_r53_domain_name}")
+  # IF the shortest string is still too long, get how much char's we should remove.
   aws_r53_fqdn_ss_remove = tonumber( local.aws_r53_fqdn_short_length - 63 > 0 ? local.aws_r53_fqdn_short_length - 63 : 0 )
   aws_r53_fqdn_ss = substr(local.aws_r53_fqdn_short, 0, local.aws_r53_fqdn_ss_remove)
-
-  fqdn_bucket_name = local.aws_r53_fqdn_full_length > 63 ? local.aws_r53_fqdn_short_length > 63 ? local.aws_r53_fqdn_ss : local.aws_r53_fqdn_short : local.aws_r53_fqdn_full
-  
-  aws_r53_sub_domain_name = local.aws_r53_fqdn_full_length > 63 ? "${var.aws_resource_identifier_supershort}.${var.aws_r53_domain_name}" : "${var.aws_r53_sub_domain_name}.${var.aws_r53_domain_name}"
 
   url = local.fqdn_provided ? local.r53_fqdn : (var.aws_spa_cdn_enabled ? "${local.cdn_site_url}" : "${aws_s3_bucket_website_configuration.aws_spa_website_bucket.website_endpoint}" )
 

@@ -20,7 +20,7 @@ resource "aws_s3_bucket" "aws_spa_website_bucket_www" {
 
 resource "aws_s3_bucket_website_configuration" "aws_spa_website_bucket_www" {
   count  = var.aws_spa_cdn_enabled ? 0 : local.fqdn_provided ? 1 : 0 
-  bucket = aws_s3_bucket.aws_spa_website_bucket_www.id
+  bucket = aws_s3_bucket.aws_spa_website_bucket_www[0].id
   redirect_all_requests_to {
     host_name = local.s3_bucket_name
   }

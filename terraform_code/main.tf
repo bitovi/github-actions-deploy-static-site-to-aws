@@ -35,6 +35,7 @@ resource "aws_s3_bucket_public_access_block" "aws_spa_website_bucket" {
 }
 
 resource "aws_s3_bucket_public_access_block" "aws_spa_website_bucket_www" {
+  count  = var.aws_spa_cdn_enabled ? 0 : var.aws_r53_root_domain_deploy ? 1 : 0 
   bucket                  = aws_s3_bucket.aws_spa_website_bucket_www[0].id
   block_public_policy     = false
   restrict_public_buckets = false

@@ -5,7 +5,7 @@ resource "aws_s3_bucket" "aws_spa_website_bucket" {
 }
 
 resource "aws_s3_bucket_website_configuration" "aws_spa_website_bucket" {
-  bucket = aws_s3_bucket.aws_spa_website_bucket.bucket
+  bucket = aws_s3_bucket.aws_spa_website_bucket.id
   index_document {
     suffix = var.aws_spa_root_object
   }
@@ -20,7 +20,7 @@ resource "aws_s3_bucket" "aws_spa_website_bucket_www" {
 
 resource "aws_s3_bucket_website_configuration" "aws_spa_website_bucket_www" {
   count  = var.aws_spa_cdn_enabled ? 0 : local.fqdn_provided ? 1 : 0 
-  bucket = aws_s3_bucket.aws_spa_website_bucket_www.bucket
+  bucket = aws_s3_bucket.aws_spa_website_bucket_www.id
   redirect_all_requests_to {
     host_name = local.s3_bucket_name
   }

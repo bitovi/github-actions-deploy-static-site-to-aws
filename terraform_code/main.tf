@@ -387,7 +387,7 @@ locals {
 
   s3_default_name = var.aws_spa_website_bucket_name != "" ? var.aws_spa_website_bucket_name : "${var.aws_resource_identifier}-sp"
 
-  s3_bucket_name = local.fqdn_provided ? local.url : local.s3_default_name
+  s3_bucket_name = local.fqdn_provided ? local.r53_fqdn : local.s3_default_name
   
   r53_fqdn = var.aws_r53_root_domain_deploy ? var.aws_r53_domain_name : "${var.aws_r53_sub_domain_name}.${var.aws_r53_domain_name}"
 
@@ -414,3 +414,6 @@ output "public_url" {
 output "selected_arn" {
   value = local.selected_arn
 }
+
+
+#Cycle: aws_cloudfront_distribution.cdn_static_site_default_cert, local.cdn_site_url (expand), local.url (expand), local.s3_bucket_name (expand), aws_s3_bucket.aws_spa_website_bucket, aws_cloudfront_distribution.cdn_static_site

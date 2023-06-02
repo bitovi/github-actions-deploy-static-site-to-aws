@@ -396,7 +396,7 @@ locals {
   aws_r53_fqdn_full  = "${var.aws_r53_sub_domain_name}.${var.aws_r53_domain_name}"
   aws_r53_fqdn_short_length = length("${var.aws_resource_identifier_supershort}.${var.aws_r53_domain_name}")
   aws_r53_fqdn_short = "${var.aws_resource_identifier_supershort}.${var.aws_r53_domain_name}"
-  aws_r53_fqdn_ss_remove = local.aws_r53_fqdn_short_length63 - 63
+  aws_r53_fqdn_ss_remove = local.aws_r53_fqdn_short_length - 63
   aws_r53_fqdn_ss = try(slice(local.aws_r53_fqdn_short, 0, local.aws_r53_fqdn_ss_remove))
 
   fqdn_bucket_name = local.aws_r53_fqdn_full_length > 63 ? local.aws_r53_fqdn_short_length > 63 ? local.aws_r53_fqdn_ss : local.aws_r53_fqdn_short : local.aws_r53_fqdn_full

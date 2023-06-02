@@ -14,12 +14,12 @@ resource "aws_s3_bucket_website_configuration" "aws_spa_website_bucket" {
 # Only create this two IF -> R53 FQDN provided and CDN is off
   
 resource "aws_s3_bucket" "aws_spa_website_bucket_www" {
-  count  = var.aws_spa_cdn_enabled ? 0 : local.fqdn_provided ? 1 : 0 
+  count  = var.aws_spa_cdn_enabled ? 0 : var.aws_r53_root_domain_deploy ? 1 : 0 
   bucket = "www.${local.s3_bucket_name}"
 }
 
 resource "aws_s3_bucket_website_configuration" "aws_spa_website_bucket_www" {
-  count  = var.aws_spa_cdn_enabled ? 0 : local.fqdn_provided ? 1 : 0 
+  count  = var.aws_spa_cdn_enabled ? 0 : var.var.aws_r53_root_domain_deploy ? 1 : 0 
   bucket = aws_s3_bucket.aws_spa_website_bucket_www[0].id
   redirect_all_requests_to {
     host_name = local.s3_bucket_name
@@ -295,7 +295,7 @@ resource "aws_route53_record" "www-a" {
 ###
 
 locals {
-  r53_alias_name = var.aws_spa_cdn_enabled ? aws_cloudfront_distribution.cdn_static_site[0].domain_name : aws_s3_bucket_website_configuration.aws_spa_website_bucket.website_endpoint
+  r53_alias_name = var.aws_spa_cdn_enabled ? aws_cloudfront_distribution.cdn_static_site[0].domain_name : aws_s3_bucket_website_configuration.aws_spa_website_bucket.website_domain
   r53_alias_id   = var.aws_spa_cdn_enabled ? aws_cloudfront_distribution.cdn_static_site[0].hosted_zone_id : aws_s3_bucket.aws_spa_website_bucket.hosted_zone_id
 }
 

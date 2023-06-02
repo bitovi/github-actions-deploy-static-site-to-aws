@@ -182,7 +182,7 @@ runs:
         echo "::endgroup::"
 
     - name: Print result
-      if: ${{ success() && steps.apply.outputs.public_url != '' }}}}
+      if: ${{ success() && steps.apply.outputs.public_url != '' }}
       shell: bash
       run: |
         echo "## It's published! :rocket:" >> $GITHUB_STEP_SUMMARY

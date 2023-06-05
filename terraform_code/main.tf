@@ -1,9 +1,9 @@
 ### SPA Bucket
-
+## Main bucket
 resource "aws_s3_bucket" "aws_spa_website_bucket" {
   bucket = local.s3_bucket_name
 }
-
+## Bucket website config
 resource "aws_s3_bucket_website_configuration" "aws_spa_website_bucket" {
   bucket = aws_s3_bucket.aws_spa_website_bucket.id
   index_document {
@@ -11,8 +11,7 @@ resource "aws_s3_bucket_website_configuration" "aws_spa_website_bucket" {
   }
 }
 
-# Only create this two IF -> R53 FQDN provided and CDN is off
-  
+## Only create this two IF -> R53 FQDN provided and CDN is off - for www.* support
 resource "aws_s3_bucket" "aws_spa_website_bucket_www" {
   count  = var.aws_spa_cdn_enabled ? 0 : var.aws_r53_root_domain_deploy ? 1 : 0 
   bucket = "www.${local.s3_bucket_name}"
@@ -33,7 +32,7 @@ resource "aws_s3_bucket_public_access_block" "aws_spa_website_bucket" {
   restrict_public_buckets = false
   depends_on = [ aws_s3_bucket.aws_spa_website_bucket ]
 }
-
+## Same, but if www bucket is created
 resource "aws_s3_bucket_public_access_block" "aws_spa_website_bucket_www" {
   count  = var.aws_spa_cdn_enabled ? 0 : var.aws_r53_root_domain_deploy ? 1 : 0 
   bucket                  = aws_s3_bucket.aws_spa_website_bucket_www[0].id
@@ -54,7 +53,7 @@ resource "aws_s3_object" "aws_spa_website_bucket" {
 
   bucket       = aws_s3_bucket.aws_spa_website_bucket.id
   key          = each.key
-  content_type = contains([".ts", "tsx"], substr(each.key, -3, 3)) ? "text/javascript" : each.value.content_type
+  content_type = contains([".ts", "tsx"], substr(each.key, -3, 3)) ? "text/javascript" : each.value.content_type # Ensuring .ts and .tsx files are set to text/javascript
 
   source  = each.value.source_path
   content = each.value.content
@@ -62,10 +61,7 @@ resource "aws_s3_object" "aws_spa_website_bucket" {
   etag = each.value.digests.md5
 }
 
-output "bucket_url" {
-  value = aws_s3_bucket.aws_spa_website_bucket.bucket_regional_domain_name
-}
-
+### IAM Policies definitions
 data "aws_iam_policy_document" "aws_spa_bucket_public_access_dns" {
   count = var.aws_spa_cdn_enabled ? 0 : 1
   statement {
@@ -85,6 +81,7 @@ resource "aws_s3_bucket_policy" "aws_spa_website_bucket_policy_dns" {
 }
 
 
+### Special policies if CDN is the exposed URL
 data "aws_iam_policy_document" "aws_spa_website_bucket" {
   count = var.aws_spa_cdn_enabled ? 1 : 0
   statement {
@@ -203,14 +200,7 @@ resource "aws_cloudfront_distribution" "cdn_static_site" {
   }
 }
 
-locals {
-  cdn_site_url = var.aws_spa_cdn_enabled ? ( local.selected_arn != "" ? aws_cloudfront_distribution.cdn_static_site[0].domain_name : aws_cloudfront_distribution.cdn_static_site_default_cert[0].domain_name ) : ""
-} 
-
-output "cloudfront_url" {
-  value = local.cdn_site_url
-}
-
+### CDN Access control
 resource "aws_cloudfront_origin_access_control" "default" {
   count                             = var.aws_spa_cdn_enabled ? 1 : 0
   name                              = "${var.aws_resource_identifier_supershort} - Cloudfront OAC"
@@ -362,9 +352,23 @@ locals {
       )
     ) : false
   )
+  fqdn_provided = (
+    (var.aws_r53_domain_name != "") ?
+    (var.aws_r53_sub_domain_name != "" ?
+      true :
+      var.aws_r53_root_domain_deploy ? true : false
+    ) : 
+    false
+  )
+
+  ### Try looking up for the cert with different names
   acm_arn = try(data.aws_acm_certificate.issued["domain"].arn, try(data.aws_acm_certificate.issued["wildcard"].arn, data.aws_acm_certificate.issued["sub"].arn, ""))
 
-  # IF bucket length exceeds 63 chars, will use default identifier
+  ### Amazon buckets have a limit of 63 chars. 
+  ### IF we are hosting a site with a DNS name and without CDN, bucket name *MUST* match DNS name. Hence the 63 chars limit.
+  ### IF the provided length exceeds the limit, we will shorten it until it fits.
+
+  # IF FQDN bucket length exceeds 63 chars, will use default identifier
   s3_bucket_name = local.fqdn_provided ? local.r53_fqdn : local.s3_default_name
   
   s3_default_name = var.aws_spa_website_bucket_name != "" ? ( length(var.aws_spa_website_bucket_name) < 63 ? var.aws_spa_website_bucket_name : "${var.aws_resource_identifier}-sp") : "${var.aws_resource_identifier}-sp"
@@ -378,33 +382,32 @@ locals {
   # Get lengths of the different bucket names strings
   aws_r53_fqdn_full_length = length(local.aws_r53_fqdn_full)
   aws_r53_fqdn_short_length = length("${var.aws_resource_identifier_supershort}.${var.aws_r53_domain_name}")
-  # IF the shortest string is still too long, get how much char's we should remove.
+  # IF the shortest string is still too long, get how much char's we should remove and do so.
   aws_r53_fqdn_ss_remove = tonumber( local.aws_r53_fqdn_short_length - 63 > 0 ? local.aws_r53_fqdn_short_length - 63 : 0 )
   aws_r53_fqdn_ss = substr(local.aws_r53_fqdn_short, 0, local.aws_r53_fqdn_ss_remove)
+  ####
+
+  # Final URL Generator
+  cdn_site_url = var.aws_spa_cdn_enabled ? ( local.selected_arn != "" ? aws_cloudfront_distribution.cdn_static_site[0].domain_name : aws_cloudfront_distribution.cdn_static_site_default_cert[0].domain_name ) : ""
 
   url = local.fqdn_provided ? local.r53_fqdn : (var.aws_spa_cdn_enabled ? "${local.cdn_site_url}" : "${aws_s3_bucket_website_configuration.aws_spa_website_bucket.website_endpoint}" )
+  protocol = local.cert_available ? ( var.aws_spa_cdn_enabled ?  "https://" : "http://" ) : "http://" 
 
   public_url = "${local.protocol}${local.url}"
-  
-  # This checks if we have the fqdn, and if it should go to the root domain or not.
-  fqdn_provided = (
-    (var.aws_r53_domain_name != "") ?
-    (var.aws_r53_sub_domain_name != "" ?
-      true :
-      var.aws_r53_root_domain_deploy ? true : false
-    ) : 
-    false
-  )
-  protocol = local.cert_available ? ( var.aws_spa_cdn_enabled ?  "https://" : "http://" ) : "http://" 
-}
-
-output "public_url" {
-  value = local.public_url
 }
 
 output "selected_arn" {
   value = local.selected_arn
 }
 
+output "bucket_url" {
+  value = aws_s3_bucket.aws_spa_website_bucket.bucket_regional_domain_name
+}
 
-#Cycle: aws_cloudfront_distribution.cdn_static_site_default_cert, local.cdn_site_url (expand), local.url (expand), local.s3_bucket_name (expand), aws_s3_bucket.aws_spa_website_bucket, aws_cloudfront_distribution.cdn_static_site
+output "cloudfront_url" {
+  value = local.cdn_site_url
+}
+
+output "public_url" {
+  value = local.public_url
+}

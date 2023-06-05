@@ -78,6 +78,7 @@ resource "aws_s3_bucket_policy" "aws_spa_website_bucket_policy_dns" {
   count = var.aws_spa_cdn_enabled ? 0 : 1
   bucket = aws_s3_bucket.aws_spa_website_bucket.id
   policy = data.aws_iam_policy_document.aws_spa_bucket_public_access_dns[0].json
+  depends_on = [ aws_s3_bucket.aws_spa_website_bucket ]
 }
 
 
@@ -103,6 +104,7 @@ resource "aws_s3_bucket_policy" "aws_spa_website_bucket_policy" {
   count  = var.aws_spa_cdn_enabled ? 1 : 0
   bucket = aws_s3_bucket.aws_spa_website_bucket.id
   policy = data.aws_iam_policy_document.aws_spa_website_bucket[0].json
+  depends_on = [ aws_s3_bucket.aws_spa_website_bucket ]
 }
 
 

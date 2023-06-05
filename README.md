@@ -4,6 +4,16 @@ GitHub action to deploy anything into a bucket, adding the options to add a CDN 
 
 This action will copy the files from the defined folder into an S3 bucket, defining the content type and serving ALL OF THEM PUBLICLY. 
 
+## Action main options graph
+
+```mermaid
+graph TD;
+    A[S3 Bucket] --> B[S3 Endpoint]
+    A -->|DNS| C[Direct S3 DNS] --> G[- No SSL\n- 63 chars FQDN limit]
+    A -->|CDN| D[CDN Public URL] --> H[- SSL\n- CND URL]
+    A -->|CDN + DNS| E[Public FQDN] --> I[- Owned SSL cert\n- Unlimited FQDN length]
+```
+
 ## Requirements 
 
 1. Files to publish
@@ -137,7 +147,10 @@ For some specific resources, we have a 32 characters limit. If the identifier le
 
 As a default, the bucket name will be `${GITHUB_ORG_NAME}-${GITHUB_REPO_NAME}-${GITHUB_BRANCH_NAME}-sp`. 
 
-But, in the case you add a Route53 domain, the bucket name must match the FQDN defined, like `spa.example.com`. If setting `aws_r53_root_domain_deploy`, two buckets will be created. `www.{aws_r53_domain_name}`and `{aws_r53_domain_name}`. Traffic from www bucket will be forwarded to the main bucket.
+But, in the case you add a Route53 domain and no CDN, the bucket name must match the FQDN defined, like `spa.example.com`. If setting `aws_r53_root_domain_deploy`, two buckets will be created. `www.{aws_r53_domain_name}`and `{aws_r53_domain_name}`. Traffic from www bucket will be forwarded to the main bucket.
+Because of this reason, the length of the FQDN *MUST* be below 64 characters. Will try using the provided FQDN, if not, fallback to `resource-identifier.{aws_r53_domain_name}` of the compressed one. IF it still exceeds the limit, will remove as many as needed.
+
+> :warning: HTTPS (TLS / SSL) will only be available if using CDN.
 
 In the case you are using domains and not using a CDN, no cert will be available, and length of the FQDN *MUST* be below 64 characters. Will be adjusted if it exceeds that limit. 
 

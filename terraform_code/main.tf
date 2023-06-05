@@ -257,7 +257,7 @@ data "aws_route53_zone" "selected" {
 resource "aws_route53_record" "dev" {
   count   = local.fqdn_provided ? (var.aws_r53_root_domain_deploy ? 0 : 1) : 0
   zone_id = data.aws_route53_zone.selected[0].zone_id
-  name    = "${var.aws_r53_sub_domain_name}.${var.aws_r53_domain_name}"
+  name    = var.aws_spa_cdn_enabled ? "${var.aws_r53_sub_domain_name}.${var.aws_r53_domain_name}" : local.r53_fqdn
   type    = "A"
 
   alias {

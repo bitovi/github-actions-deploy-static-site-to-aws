@@ -284,7 +284,7 @@ resource "aws_route53_record" "root-a" {
 resource "aws_route53_record" "www-a" {
   count   = local.fqdn_provided ? (var.aws_r53_root_domain_deploy ? 1 : 0) : 0
   zone_id = data.aws_route53_zone.selected[0].zone_id
-  name    = "www.{var.aws_r53_domain_name}"
+  name    = "www.${var.aws_r53_domain_name}"
   type    = "A"
 
   alias {

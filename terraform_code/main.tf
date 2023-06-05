@@ -72,6 +72,7 @@ data "aws_iam_policy_document" "aws_spa_bucket_public_access_dns" {
       type = "AWS"
     }
   }
+  depends_on = [ aws_s3_bucket_public_access_block.aws_spa_website_bucket ]
 }
 
 resource "aws_s3_bucket_policy" "aws_spa_website_bucket_policy_dns" {
@@ -98,6 +99,7 @@ data "aws_iam_policy_document" "aws_spa_website_bucket" {
       values   = length(aws_cloudfront_distribution.cdn_static_site) > 0 ? [aws_cloudfront_distribution.cdn_static_site[0].arn] : [aws_cloudfront_distribution.cdn_static_site_default_cert[0].arn]
     }
   }
+  depends_on = [ aws_s3_bucket_public_access_block.aws_spa_website_bucket ]
 }
 
 resource "aws_s3_bucket_policy" "aws_spa_website_bucket_policy" {
@@ -398,12 +400,6 @@ locals {
   #url = local.fqdn_provided ? local.r53_fqdn : (var.aws_spa_cdn_enabled ? local.cdn_site_url : local.s3_endpoint )
 
   url = var.aws_spa_cdn_enabled ? local.cdn_site_url : ( local.fqdn_provided ? local.r53_fqdn : local.s3_endpoint )
-
-  # URL Options
-  # - Bucket name plain
-  # - Bucket with DNS
-  # - CDN          ------> cdn_site_url
-  # - CDN + DNS    --/
 
   protocol = local.cert_available ? ( var.aws_spa_cdn_enabled ?  "https://" : "http://" ) : "http://" 
 

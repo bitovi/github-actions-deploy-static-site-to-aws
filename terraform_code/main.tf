@@ -367,6 +367,7 @@ locals {
   ### Amazon buckets have a limit of 63 chars. 
   ### IF we are hosting a site with a DNS name and without CDN, bucket name *MUST* match DNS name. Hence the 63 chars limit.
   ### IF the provided length exceeds the limit, we will shorten it until it fits.
+  ### BUT if CDN is enabled, we don't have that 63 limit, so any sub-domain can be used, or the default aws_resource_identifier will be. 
 
   # IF FQDN bucket length exceeds 63 chars, will use default identifier
   s3_bucket_name = local.fqdn_provided ? local.r53_fqdn : local.s3_default_name
@@ -388,7 +389,7 @@ locals {
   ####
 
   # Final URL Generator
-  cdn_site_url = var.aws_spa_cdn_enabled ? ( local.selected_arn != "" ? aws_cloudfront_distribution.cdn_static_site[0].domain_name : aws_cloudfront_distribution.cdn_static_site_default_cert[0].domain_name ) : ""
+  cdn_site_url = var.aws_spa_cdn_enabled ? ( local.selected_arn != "" ? aws_cloudfront_distribution.cdn_static_site[0].aliases[0] : aws_cloudfront_distribution.cdn_static_site_default_cert[0].domain_name ) : ""
 
   url = local.fqdn_provided ? local.r53_fqdn : (var.aws_spa_cdn_enabled ? "${local.cdn_site_url}" : "${aws_s3_bucket_website_configuration.aws_spa_website_bucket.website_endpoint}" )
   protocol = local.cert_available ? ( var.aws_spa_cdn_enabled ?  "https://" : "http://" ) : "http://" 

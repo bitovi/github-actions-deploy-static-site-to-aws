@@ -390,8 +390,19 @@ locals {
 
   # Final URL Generator
   cdn_site_url = var.aws_spa_cdn_enabled ? ( local.selected_arn != "" ? coalesce(aws_cloudfront_distribution.cdn_static_site[0].aliases...) : aws_cloudfront_distribution.cdn_static_site_default_cert[0].domain_name ) : ""
+  # Set to shorten url variable
+  s3_endpoint = aws_s3_bucket_website_configuration.aws_spa_website_bucket.website_endpoint
 
-  url = local.fqdn_provided ? local.r53_fqdn : (var.aws_spa_cdn_enabled ? "${local.cdn_site_url}" : "${aws_s3_bucket_website_configuration.aws_spa_website_bucket.website_endpoint}" )
+  #url = local.fqdn_provided ? local.r53_fqdn : (var.aws_spa_cdn_enabled ? local.cdn_site_url : local.s3_endpoint )
+
+  url = var.aws_spa_cdn_enabled ? local.cdn_site_url : ( local.fqdn_provided ? local.r53_fqdn : local.s3_endpoint )
+  
+  # URL Options
+  # - Bucket name plain
+  # - Bucket with DNS
+  # - CDN          ------> cdn_site_url
+  # - CDN + DNS    --/
+
   protocol = local.cert_available ? ( var.aws_spa_cdn_enabled ?  "https://" : "http://" ) : "http://" 
 
   public_url = "${local.protocol}${local.url}"

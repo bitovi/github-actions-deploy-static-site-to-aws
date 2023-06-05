@@ -35,9 +35,6 @@ inputs:
   tf_action: 
     desctiption: 'Option to run Terraform apply / destroy option. Will run plan if nothing defined.'
     required: false
-  tf_plan_show_details:
-    description: 'Set to true to show a detailed output from Terraform plan.'
-    required: false
   tf_state_bucket:
     description: 'AWS S3 bucket to use for Terraform state. Defaults to `${org}-${repo}-{branch}-tf-state`'
     required: false
@@ -78,7 +75,6 @@ inputs:
     description: 'Generates and manage the sub-domain certificate for the application. Default is `false`.'
     required: false
     
-
 outputs:
   public_url:
     description: "The URL of the generated app"
@@ -124,8 +120,10 @@ runs:
         AWS_R53_CREATE_ROOT_CERT: ${{ inputs.aws_r53_create_root_cert }}
         AWS_R53_CREATE_SUB_CERT: ${{ inputs.aws_r53_create_sub_cert }}
       run: |
+        echo "::group::Generating Terraform pre-requisites" > /dev/null
         echo "running scripts/generate_deploy.sh"
         $GITHUB_ACTION_PATH/scripts/generate_deploy.sh
+        echo "::endgroup::"
 
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v2
@@ -133,45 +131,81 @@ runs:
     - name: Terraform Init
       id: init
       shell: bash
-      run: terraform -chdir=$GITHUB_ACTION_PATH/terraform_code init
+      run: |
+        echo "::group::Terraform Init"
+        terraform -chdir=$GITHUB_ACTION_PATH/terraform_code init
+        echo "::endgroup::"
     
     - name: Terraform Validate
       id: validate
       shell: bash
-      run: terraform -chdir=$GITHUB_ACTION_PATH/terraform_code validate
+      run:  |
+        echo "::group::Terraform Validate"
+        terraform -chdir=$GITHUB_ACTION_PATH/terraform_code validate
+        echo "::endgroup::"
     
     - name: Terraform Plan
-      if: ${{ success () && inputs.tf_show_plan_details == 'true' && inputs.tf_action != 'destroy' }}
+      if: ${{ success () && inputs.tf_action != 'destroy' }}
       id: plan
       shell: bash
-      run: terraform -chdir=$GITHUB_ACTION_PATH/terraform_code plan
-
-    - name: Terraform Show Plan Details
-      if: ${{ success () && inputs.tf_show_plan_details == 'true' && inputs.tf_action != 'destroy' }}
-      shell: bash
-      run: |
-        echo ${{ steps.plan.outputs.stdout }}
-        echo ${{ steps.plan.outputs.stderr }}
-        echo ${{ steps.plan.outputs.exitcode }}
+      run:  |
+        echo "::group::Terraform Plan"
+        terraform -chdir=$GITHUB_ACTION_PATH/terraform_code plan -input=false
+        echo "::endgroup::"
 
     - name: Terraform Apply
       id: apply
       if: ${{ success() && inputs.tf_action == 'apply' }}
       shell: bash
       run: |
+        echo "::group::Terraform Apply"
         terraform -chdir=$GITHUB_ACTION_PATH/terraform_code apply -auto-approve
+        echo "::endgroup::"
+        terraform -chdir=$GITHUB_ACTION_PATH/terraform_code output | grep public_url | sed -e 's/ *= */=/g' -e 's/"//g' >> $GITHUB_OUTPUT
 
     - name: Terraform Destroy
       if: ${{ success() && inputs.tf_action == 'destroy' }}
       shell: bash
-      run: |
+      run:  |
+        echo "::group::Terraform Destroy"
         terraform -chdir=$GITHUB_ACTION_PATH/terraform_code destroy -auto-approve
+        echo "::endgroup::"
 
-    - name: Terraform Destroy
+    - name: Purge and delete tf-state bucket
       if: ${{ success() && inputs.tf_action == 'destroy' && inputs.tf_state_bucket_destroy == 'true' }}
       shell: bash
       env: 
         TF_STATE_BUCKET: ${{ inputs.tf_state_bucket }}
-      run: |
-        echo "running scripts/destroy_tf_state_bucket.sh"
+      run:  |
+        echo "::group::Purge and delete tf-state bucket"
         $GITHUB_ACTION_PATH/scripts/destroy_tf_state_bucket.sh
+        echo "::endgroup::"
+
+    - name: Print result
+      if: ${{ success() && steps.apply.outputs.public_url != '' }}
+      shell: bash
+      run: |
+        echo "## It's published! :rocket:" >> $GITHUB_STEP_SUMMARY
+        echo ${{ steps.apply.outputs.public_url }} >> $GITHUB_STEP_SUMMARY
+
+    - name: Print result
+      if: ${{ success() inputs.tf_action == 'destroy' && inputs.tf_state_bucket_destroy == 'true' }}
+      shell: bash
+      run: |
+        echo "## Deploy Destroyed! :boom:" >> $GITHUB_STEP_SUMMARY
+        echo "Infrastructure should be gone now!" >> $GITHUB_STEP_SUMMARY
+
+     - name: Print result
+      if: ${{ success() inputs.tf_action == 'destroy' && inputs.tf_state_bucket_destroy != 'true' }}
+      shell: bash
+      run: |
+        echo "## Deploy Destroyed! :boom:" >> $GITHUB_STEP_SUMMARY
+        echo "Buckets and infrastructure should be gone now!" >> $GITHUB_STEP_SUMMARY
+ 
+    - name: Print error result
+      if: ${{ failure() }} 
+      shell: bash
+      run: |
+        echo "## Workflow failed to run :fire:" >> $GITHUB_STEP_SUMMARY
+        echo "Please check the logs for possible errors." >> $GITHUB_STEP_SUMMARY
+        echo "If you consider this is a bug in the Github Action, please submit an issue to our repo." >> $GITHUB_STEP_SUMMARY

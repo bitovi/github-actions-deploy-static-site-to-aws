@@ -27,7 +27,6 @@ Setting `aws_r53_create_sub_cert` to `true` will create a certificate **just for
 
 > :warning: Be very careful here! **Created certificates are fully managed by Terraform**. Therefor **they will be destroyed upon stack destruction**.
 
-
 ## Example usage
 
 Create `.github/workflow/deploy.yaml` with the following to build on push.
@@ -107,7 +106,7 @@ The following inputs can be used as `step.with` keys
 |------------------|---------|------------------------------------|
 | `aws_spa_source_folder` | String | Source folder for files to be published. Will ignore any hidden file. Defaults to root folder of the calling repo if nothing defined. |
 | `aws_spa_root_object` | Boolean | Root object to be served as entry-point. Defaults to `index.html`. |
-| `aws_spa_website_bucket_name` | String | AWS S3 bucket name to use for the public files. Defaults to `${org}-${repo}-{branch}-sp` |
+| `aws_spa_website_bucket_name` | String | AWS S3 bucket name to use for the public files. Defaults to `${org}-${repo}-{branch}-sp`. If using a R53 domain and not a CDN, bucket name will be the FQDN one. See note. |
 | `aws_spa_cdn_enabled` | Boolean | Enable or disables the use of CDN. Defaults to `false`. |
 <hr/>
 <br/>
@@ -133,6 +132,14 @@ We limit this to a 60 characters string because some AWS resources have a length
 We use the kubernetes style for this. For example, kubernetes -> k(# of characters)s -> k8s. And so you might see some compressions are made.
 
 For some specific resources, we have a 32 characters limit. If the identifier length exceeds this number after compression, we remove the middle part and replace it for a hash made up from the string itself. 
+
+## Note about bucket names
+
+As a default, the bucket name will be `${GITHUB_ORG_NAME}-${GITHUB_REPO_NAME}-${GITHUB_BRANCH_NAME}-sp`. 
+
+But, in the case you add a Route53 domain, the bucket name must match the FQDN defined, like `spa.example.com`. If setting `aws_r53_root_domain_deploy`, two buckets will be created. `www.{aws_r53_domain_name}`and `{aws_r53_domain_name}`. Traffic from www bucket will be forwarded to the main bucket.
+
+In the case you are using domains and not using a CDN, no cert will be available, and length of the FQDN *MUST* be below 64 characters. Will be adjusted if it exceeds that limit. 
 
 ## Contributing
 We would love for you to contribute to [bitovi/github-actions-deploy-static-site-to-aws](https://github.com/bitovi/github-actions-deploy-static-site-to-aws).

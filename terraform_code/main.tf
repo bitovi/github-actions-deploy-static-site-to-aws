@@ -67,28 +67,29 @@ output "bucket_url" {
 }
 
 ## SPA Bucket Policies
-resource "aws_s3_bucket_policy" "aws_spa_bucket_public_access" {
-  count  = var.aws_spa_cdn_enabled ? 0 : 1
-  bucket = aws_s3_bucket.aws_spa_website_bucket.id
-  depends_on = [ aws_s3_bucket_public_access_block.aws_spa_website_bucket ]
-  policy = <<EOF
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Sid": "PublicReadGetObject",
-      "Effect": "Allow",
-      "Principal": "*",
-      "Action": ["s3:GetObject"],
-      "Resource": ["${aws_s3_bucket.aws_spa_website_bucket.arn}/*"]
-    }
-  ]
-}
-EOF
-}
-
+#resource "aws_s3_bucket_policy" "aws_spa_bucket_public_access" {
+#  count  = var.aws_spa_cdn_enabled ? 0 : 1
+#  bucket = aws_s3_bucket.aws_spa_website_bucket.id
+#  depends_on = [ aws_s3_bucket_public_access_block.aws_spa_website_bucket ]
+#  policy = <<EOF
+#{
+#  "Version": "2012-10-17",
+#  "Statement": [
+#    {
+#      "Sid": "PublicReadGetObject",
+#      "Effect": "Allow",
+#      "Principal": "*",
+#      "Action": ["s3:GetObject"],
+#      "Resource": ["${aws_s3_bucket.aws_spa_website_bucket.arn}/*"]
+#    }
+#  ]
+#}
+#EOF
+#}
+#
 data "aws_iam_policy_document" "aws_spa_bucket_public_access_dns" {
-  count = local.fqdn_provided ? 1 : 0
+  #count = local.fqdn_provided ? 1 : 0
+  count = var.aws_spa_cdn_enabled ? 0 : 1
   statement {
     actions = ["s3:GetObject"]
     resources = ["${aws_s3_bucket.aws_spa_website_bucket.arn}/*"]
@@ -100,7 +101,8 @@ data "aws_iam_policy_document" "aws_spa_bucket_public_access_dns" {
 }
 
 resource "aws_s3_bucket_policy" "aws_spa_website_bucket_policy_dns" {
-  count  = local.fqdn_provided ? 1 : 0
+  #count  = local.fqdn_provided ? 1 : 0
+  count = var.aws_spa_cdn_enabled ? 0 : 1
   bucket = aws_s3_bucket.aws_spa_website_bucket.id
   policy = data.aws_iam_policy_document.aws_spa_bucket_public_access_dns[0].json
 }

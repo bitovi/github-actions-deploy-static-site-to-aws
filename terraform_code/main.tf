@@ -266,6 +266,7 @@ resource "aws_route53_record" "www-a" {
 locals {
   r53_alias_name = var.aws_spa_cdn_enabled ? aws_cloudfront_distribution.cdn_static_site[0].domain_name : aws_s3_bucket_website_configuration.aws_spa_website_bucket.website_domain
   r53_alias_id   = var.aws_spa_cdn_enabled ? aws_cloudfront_distribution.cdn_static_site[0].hosted_zone_id : aws_s3_bucket.aws_spa_website_bucket.hosted_zone_id
+  depends_on = [ aws_cloudfront_distribution.cdn_static_site ]
 }
 
 # CERTIFICATE STUFF
@@ -396,7 +397,7 @@ locals {
   #url = local.fqdn_provided ? local.r53_fqdn : (var.aws_spa_cdn_enabled ? local.cdn_site_url : local.s3_endpoint )
 
   url = var.aws_spa_cdn_enabled ? local.cdn_site_url : ( local.fqdn_provided ? local.r53_fqdn : local.s3_endpoint )
-  
+
   # URL Options
   # - Bucket name plain
   # - Bucket with DNS

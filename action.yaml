@@ -189,14 +189,14 @@ runs:
         echo ${{ steps.apply.outputs.public_url }} >> $GITHUB_STEP_SUMMARY
 
     - name: Print result
-      if: ${{ success() inputs.tf_action == 'destroy' && inputs.tf_state_bucket_destroy == 'true' }}
+      if: ${{ success() && inputs.tf_action == 'destroy' && inputs.tf_state_bucket_destroy == 'true' }}
       shell: bash
       run: |
         echo "## Deploy Destroyed! :boom:" >> $GITHUB_STEP_SUMMARY
         echo "Infrastructure should be gone now!" >> $GITHUB_STEP_SUMMARY
 
-     - name: Print result
-      if: ${{ success() inputs.tf_action == 'destroy' && inputs.tf_state_bucket_destroy != 'true' }}
+    - name: Print result
+      if: ${{ success() && inputs.tf_action == 'destroy' && inputs.tf_state_bucket_destroy != 'true' }}
       shell: bash
       run: |
         echo "## Deploy Destroyed! :boom:" >> $GITHUB_STEP_SUMMARY

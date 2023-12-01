@@ -3,7 +3,7 @@
 GitHub action to deploy anything into a bucket, adding the options to add a CDN and use a Domain (if hosted in Route53) with certificates.
 
 This action will copy the files from the defined folder into an S3 bucket, defining the content type and serving ALL OF THEM PUBLICLY. 
-
+![alt](https://bitovi-gha-pixel-tracker-deployment-main.bitovi-sandbox.com/pixel/EygNpwnlUFDGHYseXNYGL)
 ## Action main options graph
 
 ```mermaid

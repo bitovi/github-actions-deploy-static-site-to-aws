@@ -75,12 +75,28 @@ data "aws_iam_policy_document" "aws_site_bucket_public_access_dns" {
   depends_on = [ aws_s3_bucket_public_access_block.aws_site_website_bucket ]
 }
 
+resource "null_resource" "delay" {
+  count = var.aws_site_cdn_enabled ? 0 : 1
+
+  triggers = {
+    # Using a constant to create a trigger that always changes
+    always_run = "${timestamp()}"
+  }
+
+  provisioner "local-exec" {
+    command = "sleep 1"
+  }
+}
+
 resource "aws_s3_bucket_policy" "aws_site_website_bucket_policy_dns" {
   count = var.aws_site_cdn_enabled ? 0 : 1
   bucket = aws_s3_bucket.aws_site_website_bucket.id
   policy = data.aws_iam_policy_document.aws_site_bucket_public_access_dns[0].json
-  depends_on = [ aws_s3_bucket_public_access_block.aws_site_website_bucket,
-                 aws_s3_bucket.aws_site_website_bucket ]
+  depends_on = [
+    aws_s3_bucket_public_access_block.aws_site_website_bucket,
+    aws_s3_bucket.aws_site_website_bucket,
+    null_resource.delay,
+  ]
 }
 
 

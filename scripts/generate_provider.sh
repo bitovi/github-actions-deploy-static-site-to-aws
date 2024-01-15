@@ -26,7 +26,7 @@ terraform {
   backend \"s3\" {
     region  = \"${AWS_DEFAULT_REGION}\"
     bucket  = \"${TF_STATE_BUCKET}\"
-    key     = \"tf-state-spa\"
+    key     = \"tf-state-site\"
     encrypt = true #AES-256encryption
   }
 }

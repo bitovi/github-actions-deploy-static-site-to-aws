@@ -1,57 +1,57 @@
-### SPA Bucket
+### Site Bucket
 ## Main bucket
-resource "aws_s3_bucket" "aws_spa_website_bucket" {
+resource "aws_s3_bucket" "aws_site_website_bucket" {
   bucket = local.s3_bucket_name
 }
 ## Bucket website config
-resource "aws_s3_bucket_website_configuration" "aws_spa_website_bucket" {
-  bucket = aws_s3_bucket.aws_spa_website_bucket.id
+resource "aws_s3_bucket_website_configuration" "aws_site_website_bucket" {
+  bucket = aws_s3_bucket.aws_site_website_bucket.id
   index_document {
-    suffix = var.aws_spa_root_object
+    suffix = var.aws_site_root_object
   }
 }
 
 ## Only create this two IF -> R53 FQDN provided and CDN is off - for www.* support
-resource "aws_s3_bucket" "aws_spa_website_bucket_www" {
-  count  = var.aws_spa_cdn_enabled ? 0 : var.aws_r53_root_domain_deploy ? 1 : 0 
+resource "aws_s3_bucket" "aws_site_website_bucket_www" {
+  count  = var.aws_site_cdn_enabled ? 0 : var.aws_r53_root_domain_deploy ? 1 : 0 
   bucket = "www.${local.s3_bucket_name}"
 }
 
-resource "aws_s3_bucket_website_configuration" "aws_spa_website_bucket_www" {
-  count  = var.aws_spa_cdn_enabled ? 0 : var.aws_r53_root_domain_deploy ? 1 : 0 
-  bucket = aws_s3_bucket.aws_spa_website_bucket_www[0].id
+resource "aws_s3_bucket_website_configuration" "aws_site_website_bucket_www" {
+  count  = var.aws_site_cdn_enabled ? 0 : var.aws_r53_root_domain_deploy ? 1 : 0 
+  bucket = aws_s3_bucket.aws_site_website_bucket_www[0].id
   redirect_all_requests_to {
     host_name = local.s3_bucket_name
   }
 }
 
 # Allow public access to bucket
-resource "aws_s3_bucket_public_access_block" "aws_spa_website_bucket" {
-  bucket                  = aws_s3_bucket.aws_spa_website_bucket.id
+resource "aws_s3_bucket_public_access_block" "aws_site_website_bucket" {
+  bucket                  = aws_s3_bucket.aws_site_website_bucket.id
   block_public_policy     = false
   restrict_public_buckets = false
-  depends_on = [ aws_s3_bucket.aws_spa_website_bucket ]
+  depends_on = [ aws_s3_bucket.aws_site_website_bucket ]
 }
 ## Same, but if www bucket is created
-resource "aws_s3_bucket_public_access_block" "aws_spa_website_bucket_www" {
-  count  = var.aws_spa_cdn_enabled ? 0 : var.aws_r53_root_domain_deploy ? 1 : 0 
-  bucket                  = aws_s3_bucket.aws_spa_website_bucket_www[0].id
+resource "aws_s3_bucket_public_access_block" "aws_site_website_bucket_www" {
+  count  = var.aws_site_cdn_enabled ? 0 : var.aws_r53_root_domain_deploy ? 1 : 0 
+  bucket                  = aws_s3_bucket.aws_site_website_bucket_www[0].id
   block_public_policy     = false
   restrict_public_buckets = false
-  depends_on = [ aws_s3_bucket.aws_spa_website_bucket_www ]
+  depends_on = [ aws_s3_bucket.aws_site_website_bucket_www ]
 }
 
 # Tool to identify file types
 module "template_files" {
   source   = "hashicorp/dir/template"
-  base_dir = var.aws_spa_source_folder
+  base_dir = var.aws_site_source_folder
 }
 
 # Will upload each file to the bucket, defining content-type
-resource "aws_s3_object" "aws_spa_website_bucket" {
+resource "aws_s3_object" "aws_site_website_bucket" {
   for_each = module.template_files.files
 
-  bucket       = aws_s3_bucket.aws_spa_website_bucket.id
+  bucket       = aws_s3_bucket.aws_site_website_bucket.id
   key          = each.key
   content_type = contains([".ts", "tsx"], substr(each.key, -3, 3)) ? "text/javascript" : each.value.content_type # Ensuring .ts and .tsx files are set to text/javascript
 
@@ -62,33 +62,33 @@ resource "aws_s3_object" "aws_spa_website_bucket" {
 }
 
 ### IAM Policies definitions
-data "aws_iam_policy_document" "aws_spa_bucket_public_access_dns" {
-  count = var.aws_spa_cdn_enabled ? 0 : 1
+data "aws_iam_policy_document" "aws_site_bucket_public_access_dns" {
+  count = var.aws_site_cdn_enabled ? 0 : 1
   statement {
     actions = ["s3:GetObject"]
-    resources = ["${aws_s3_bucket.aws_spa_website_bucket.arn}/*"]
+    resources = ["${aws_s3_bucket.aws_site_website_bucket.arn}/*"]
     principals {
       identifiers = ["*"]
       type = "AWS"
     }
   }
-  depends_on = [ aws_s3_bucket_public_access_block.aws_spa_website_bucket ]
+  depends_on = [ aws_s3_bucket_public_access_block.aws_site_website_bucket ]
 }
 
-resource "aws_s3_bucket_policy" "aws_spa_website_bucket_policy_dns" {
-  count = var.aws_spa_cdn_enabled ? 0 : 1
-  bucket = aws_s3_bucket.aws_spa_website_bucket.id
-  policy = data.aws_iam_policy_document.aws_spa_bucket_public_access_dns[0].json
-  depends_on = [ aws_s3_bucket_public_access_block.aws_spa_website_bucket ]
+resource "aws_s3_bucket_policy" "aws_site_website_bucket_policy_dns" {
+  count = var.aws_site_cdn_enabled ? 0 : 1
+  bucket = aws_s3_bucket.aws_site_website_bucket.id
+  policy = data.aws_iam_policy_document.aws_site_bucket_public_access_dns[0].json
+  depends_on = [ aws_s3_bucket_public_access_block.aws_site_website_bucket ]
 }
 
 
 ### Special policies if CDN is the exposed URL
-data "aws_iam_policy_document" "aws_spa_website_bucket" {
-  count = var.aws_spa_cdn_enabled ? 1 : 0
+data "aws_iam_policy_document" "aws_site_website_bucket" {
+  count = var.aws_site_cdn_enabled ? 1 : 0
   statement {
     actions   = ["s3:GetObject"]
-    resources = ["${aws_s3_bucket.aws_spa_website_bucket.arn}/*"]
+    resources = ["${aws_s3_bucket.aws_site_website_bucket.arn}/*"]
     principals {
       type        = "Service"
       identifiers = ["cloudfront.amazonaws.com"]
@@ -99,14 +99,14 @@ data "aws_iam_policy_document" "aws_spa_website_bucket" {
       values   = length(aws_cloudfront_distribution.cdn_static_site) > 0 ? [aws_cloudfront_distribution.cdn_static_site[0].arn] : [aws_cloudfront_distribution.cdn_static_site_default_cert[0].arn]
     }
   }
-  depends_on = [ aws_s3_bucket_public_access_block.aws_spa_website_bucket ]
+  depends_on = [ aws_s3_bucket_public_access_block.aws_site_website_bucket ]
 }
 
-resource "aws_s3_bucket_policy" "aws_spa_website_bucket_policy" {
-  count  = var.aws_spa_cdn_enabled ? 1 : 0
-  bucket = aws_s3_bucket.aws_spa_website_bucket.id
-  policy = data.aws_iam_policy_document.aws_spa_website_bucket[0].json
-  depends_on = [ aws_s3_bucket_public_access_block.aws_spa_website_bucket ]
+resource "aws_s3_bucket_policy" "aws_site_website_bucket_policy" {
+  count  = var.aws_site_cdn_enabled ? 1 : 0
+  bucket = aws_s3_bucket.aws_site_website_bucket.id
+  policy = data.aws_iam_policy_document.aws_site_website_bucket[0].json
+  depends_on = [ aws_s3_bucket_public_access_block.aws_site_website_bucket ]
 }
 
 
@@ -114,15 +114,15 @@ resource "aws_s3_bucket_policy" "aws_spa_website_bucket_policy" {
 
 ### CDN Without DNS
 resource "aws_cloudfront_distribution" "cdn_static_site_default_cert" {
-  count               = var.aws_spa_cdn_enabled ? ( local.cert_available ? 0 : 1 ) : 0
+  count               = var.aws_site_cdn_enabled ? ( local.cert_available ? 0 : 1 ) : 0
   enabled             = true
   is_ipv6_enabled     = true
-  default_root_object = var.aws_spa_root_object 
-  comment             = "CDN for ${var.aws_spa_website_bucket_name} static"
+  default_root_object = var.aws_site_root_object 
+  comment             = "CDN for ${var.aws_site_bucket_name} static"
 
   origin {
-    domain_name              = aws_s3_bucket.aws_spa_website_bucket.bucket_regional_domain_name
-    origin_id                = "aws_spa_bucket_origin"
+    domain_name              = aws_s3_bucket.aws_site_website_bucket.bucket_regional_domain_name
+    origin_id                = "aws_site_bucket_origin"
     origin_access_control_id = aws_cloudfront_origin_access_control.default[0].id
   }
 
@@ -134,7 +134,7 @@ resource "aws_cloudfront_distribution" "cdn_static_site_default_cert" {
 
     allowed_methods  = ["GET", "HEAD", "OPTIONS"]
     cached_methods   = ["GET", "HEAD"]
-    target_origin_id = "aws_spa_bucket_origin"
+    target_origin_id = "aws_site_bucket_origin"
 
     forwarded_values {
       query_string = false
@@ -158,15 +158,15 @@ resource "aws_cloudfront_distribution" "cdn_static_site_default_cert" {
 
 ### CDN with custom DNS
 resource "aws_cloudfront_distribution" "cdn_static_site" {
-  count               = var.aws_spa_cdn_enabled ? ( local.cert_available ? 1 : 0 ) : 0
+  count               = var.aws_site_cdn_enabled ? ( local.cert_available ? 1 : 0 ) : 0
   enabled             = true
   is_ipv6_enabled     = true
-  default_root_object = var.aws_spa_root_object 
-  comment             = "CDN for ${var.aws_spa_website_bucket_name}"
+  default_root_object = var.aws_site_root_object 
+  comment             = "CDN for ${var.aws_site_bucket_name}"
 
   origin {
-    domain_name              = aws_s3_bucket.aws_spa_website_bucket.bucket_regional_domain_name
-    origin_id                = "aws_spa_bucket_origin"
+    domain_name              = aws_s3_bucket.aws_site_website_bucket.bucket_regional_domain_name
+    origin_id                = "aws_site_bucket_origin"
     origin_access_control_id = aws_cloudfront_origin_access_control.default[0].id
   }
 
@@ -178,7 +178,7 @@ resource "aws_cloudfront_distribution" "cdn_static_site" {
 
     allowed_methods  = ["GET", "HEAD", "OPTIONS"]
     cached_methods   = ["GET", "HEAD"]
-    target_origin_id = "aws_spa_bucket_origin"
+    target_origin_id = "aws_site_bucket_origin"
 
     forwarded_values {
       query_string = false
@@ -214,7 +214,7 @@ resource "aws_cloudfront_distribution" "cdn_static_site" {
 
 ### CDN Access control
 resource "aws_cloudfront_origin_access_control" "default" {
-  count                             = var.aws_spa_cdn_enabled ? 1 : 0
+  count                             = var.aws_site_cdn_enabled ? 1 : 0
   name                              = "${var.aws_resource_identifier_supershort} - Cloudfront OAC"
   description                       = "Cloudfront OAC for ${var.aws_resource_identifier}"
   origin_access_control_origin_type = "s3"
@@ -237,7 +237,7 @@ data "aws_route53_zone" "selected" {
 resource "aws_route53_record" "dev" {
   count   = local.fqdn_provided ? (var.aws_r53_root_domain_deploy ? 0 : 1) : 0
   zone_id = data.aws_route53_zone.selected[0].zone_id
-  name    = var.aws_spa_cdn_enabled ? "${var.aws_r53_sub_domain_name}.${var.aws_r53_domain_name}" : local.r53_fqdn
+  name    = var.aws_site_cdn_enabled ? "${var.aws_r53_sub_domain_name}.${var.aws_r53_domain_name}" : local.r53_fqdn
   type    = "A"
 
   alias {
@@ -276,8 +276,8 @@ resource "aws_route53_record" "www-a" {
 ###
 
 locals {
-  r53_alias_name = var.aws_spa_cdn_enabled ? try(aws_cloudfront_distribution.cdn_static_site[0].domain_name,"") : aws_s3_bucket_website_configuration.aws_spa_website_bucket.website_domain
-  r53_alias_id   = var.aws_spa_cdn_enabled ? try(aws_cloudfront_distribution.cdn_static_site[0].hosted_zone_id,"") : aws_s3_bucket.aws_spa_website_bucket.hosted_zone_id
+  r53_alias_name = var.aws_site_cdn_enabled ? try(aws_cloudfront_distribution.cdn_static_site[0].domain_name,"") : aws_s3_bucket_website_configuration.aws_site_website_bucket.website_domain
+  r53_alias_id   = var.aws_site_cdn_enabled ? try(aws_cloudfront_distribution.cdn_static_site[0].hosted_zone_id,"") : aws_s3_bucket.aws_site_website_bucket.hosted_zone_id
 }
 
 # CERTIFICATE STUFF
@@ -384,7 +384,7 @@ locals {
   # IF FQDN bucket length exceeds 63 chars, will use default identifier
   s3_bucket_name = local.fqdn_provided ? local.r53_fqdn : local.s3_default_name
   
-  s3_default_name = var.aws_spa_website_bucket_name != "" ? ( length(var.aws_spa_website_bucket_name) < 63 ? var.aws_spa_website_bucket_name : "${var.aws_resource_identifier}-sp") : "${var.aws_resource_identifier}-sp"
+  s3_default_name = var.aws_site_bucket_name != "" ? ( length(var.aws_site_bucket_name) < 63 ? var.aws_site_bucket_name : "${var.aws_resource_identifier}-sp") : "${var.aws_resource_identifier}-sp"
 
   r53_fqdn = var.aws_r53_root_domain_deploy ? var.aws_r53_domain_name : local.fqdn_bucket_name
 
@@ -401,15 +401,15 @@ locals {
   ####
 
   # Final URL Generator
-  cdn_site_url = var.aws_spa_cdn_enabled ? ( local.selected_arn != "" ? coalesce(aws_cloudfront_distribution.cdn_static_site[0].aliases...) : aws_cloudfront_distribution.cdn_static_site_default_cert[0].domain_name ) : ""
+  cdn_site_url = var.aws_site_cdn_enabled ? ( local.selected_arn != "" ? coalesce(aws_cloudfront_distribution.cdn_static_site[0].aliases...) : aws_cloudfront_distribution.cdn_static_site_default_cert[0].domain_name ) : ""
   # Set to shorten url variable
-  s3_endpoint = aws_s3_bucket_website_configuration.aws_spa_website_bucket.website_endpoint
+  s3_endpoint = aws_s3_bucket_website_configuration.aws_site_website_bucket.website_endpoint
 
-  #url = local.fqdn_provided ? local.r53_fqdn : (var.aws_spa_cdn_enabled ? local.cdn_site_url : local.s3_endpoint )
+  #url = local.fqdn_provided ? local.r53_fqdn : (var.aws_site_cdn_enabled ? local.cdn_site_url : local.s3_endpoint )
 
-  url = var.aws_spa_cdn_enabled ? local.cdn_site_url : ( local.fqdn_provided ? local.r53_fqdn : local.s3_endpoint )
+  url = var.aws_site_cdn_enabled ? local.cdn_site_url : ( local.fqdn_provided ? local.r53_fqdn : local.s3_endpoint )
 
-  protocol = local.cert_available ? ( var.aws_spa_cdn_enabled ?  "https://" : "http://" ) : "http://" 
+  protocol = local.cert_available ? ( var.aws_site_cdn_enabled ?  "https://" : "http://" ) : "http://" 
 
   public_url = "${local.protocol}${local.url}"
 }
@@ -419,7 +419,7 @@ output "selected_arn" {
 }
 
 output "bucket_url" {
-  value = aws_s3_bucket.aws_spa_website_bucket.bucket_regional_domain_name
+  value = aws_s3_bucket.aws_site_website_bucket.bucket_regional_domain_name
 }
 
 output "cloudfront_url" {

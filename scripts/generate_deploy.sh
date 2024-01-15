@@ -34,7 +34,7 @@ GITHUB_IDENTIFIER_SS="$($GITHUB_ACTION_PATH/scripts/generate_identifier.sh 30)"
 echo "GITHUB_IDENTIFIER SS: [$GITHUB_IDENTIFIER_SS]"
 
 # Moving files, excluding hidden ones.
-SOURCE_FILES="$GITHUB_WORKSPACE/$AWS_SPA_SOURCE_FOLDER"
+SOURCE_FILES="$GITHUB_WORKSPACE/$AWS_SITE_SOURCE_FOLDER"
 rsync -av --exclude=".*" $SOURCE_FILES/ "${GITHUB_ACTION_PATH}/upload"
 SOURCE_FILES="${GITHUB_ACTION_PATH}/upload"
 
@@ -73,11 +73,11 @@ aws_tf_state_bucket=$(generate_var aws_tf_state_bucket $TF_STATE_BUCKET)
 #-- AWS Specific --#
 aws_additional_tags=$(generate_var aws_additional_tags $AWS_ADDITIONAL_TAGS)
 aws_default_region=$(generate_var aws_default_region $AWS_DEFAULT_REGION)
-#aws_spa_source_folder=$(generate_var aws_spa_source_folder $AWS_SPA_SOURCE_FOLDER)
-aws_spa_source_folder="aws_spa_source_folder = \"${SOURCE_FILES}\""
-aws_spa_website_bucket_name=$(generate_var aws_spa_website_bucket_name $AWS_SPA_WEBSITE_BUCKET_NAME)
-aws_spa_cdn_enabled=$(generate_var aws_spa_cdn_enabled $AWS_SPA_CDN_ENABLED)
-aws_spa_root_object=$(generate_var aws_spa_root_object $AWS_SPA_ROOT_OBJECT)
+#aws_site_source_folder=$(generate_var aws_site_source_folder $AWS_SITE_SOURCE_FOLDER)
+aws_site_source_folder="aws_site_source_folder = \"${SOURCE_FILES}\""
+aws_site_bucket_name=$(generate_var aws_site_bucket_name $AWS_SITE_BUCKET_NAME)
+aws_site_cdn_enabled=$(generate_var aws_site_cdn_enabled $AWS_SITE_CDN_ENABLED)
+aws_site_root_object=$(generate_var aws_site_root_object $AWS_SITE_ROOT_OBJECT)
 aws_r53_domain_name=$(generate_var aws_r53_domain_name $AWS_R53_DOMAIN_NAME)
 aws_r53_root_domain_deploy=$(generate_var aws_r53_root_domain_deploy $AWS_R53_ROOT_DOMAIN_DEPLOY)
 aws_r53_enable_cert=$(generate_var aws_r53_enable_cert $AWS_R53_ENABLE_CERT)
@@ -92,10 +92,10 @@ $aws_resource_identifier
 $aws_resource_identifier_supershort
 $aws_additional_tags
 $aws_tf_state_bucket
-$aws_spa_source_folder
-$aws_spa_website_bucket_name
-$aws_spa_cdn_enabled
-$aws_spa_root_object
+$aws_site_source_folder
+$aws_site_bucket_name
+$aws_site_cdn_enabled
+$aws_site_root_object
 $aws_r53_domain_name
 $aws_r53_sub_domain_name
 $aws_r53_root_domain_deploy

@@ -208,15 +208,14 @@ resource "aws_cloudfront_distribution" "cdn_static_site" {
     ssl_support_method       = "sni-only"
     minimum_protocol_version = "TLSv1.2_2021"
   }
-
   lifecycle {
-    replace_triggered_by = [ viewer_certificate ]
+    create_before_destroy = true
   }
-  #depends_on = [
-  #  aws_acm_certificate.sub_domain,
-  #  aws_acm_certificate.root_domain,
-  #  data.aws_acm_certificate.issued
-  #]
+  depends_on = [
+    aws_acm_certificate.sub_domain,
+    aws_acm_certificate.root_domain,
+    data.aws_acm_certificate.issued
+  ]
 }
 
 ### CDN Access control

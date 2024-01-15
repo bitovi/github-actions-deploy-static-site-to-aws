@@ -115,7 +115,7 @@ resource "aws_s3_bucket_policy" "aws_spa_website_bucket_policy" {
 ### CDN Without DNS
 resource "aws_cloudfront_distribution" "cdn_static_site_default_cert" {
   #count               = var.aws_spa_cdn_enabled ? ( local.selected_arn == "" ? 1 : 0 ) : 0
-  count               = var.aws_spa_cdn_enabled ? ( local.cert_available != "" ? 1 : 0 ) : 0
+  count               = var.aws_spa_cdn_enabled ? ( local.cert_available ? 0 : 1 ) : 0
   enabled             = true
   is_ipv6_enabled     = true
   default_root_object = var.aws_spa_root_object 
@@ -166,7 +166,7 @@ resource "aws_cloudfront_distribution" "cdn_static_site_default_cert" {
 ### CDN with custom DNS
 resource "aws_cloudfront_distribution" "cdn_static_site" {
   #count               = var.aws_spa_cdn_enabled ? ( local.selected_arn != "" ? 1 : 0 ) : 0
-  count               = var.aws_spa_cdn_enabled ? ( local.cert_available != "" ? 1 : 0 ) : 0
+  count               = var.aws_spa_cdn_enabled ? ( local.cert_available ? 1 : 0 ) : 0
   enabled             = true
   is_ipv6_enabled     = true
   default_root_object = var.aws_spa_root_object 

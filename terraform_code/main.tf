@@ -154,12 +154,6 @@ resource "aws_cloudfront_distribution" "cdn_static_site_default_cert" {
   viewer_certificate {
     cloudfront_default_certificate = true 
   }
-
-  #depends_on = [
-  #  aws_acm_certificate.sub_domain,
-  #  aws_acm_certificate.root_domain,
-  #  data.aws_acm_certificate.issued
-  #]
 }
 
 ### CDN with custom DNS

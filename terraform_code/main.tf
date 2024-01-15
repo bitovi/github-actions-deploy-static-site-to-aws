@@ -75,14 +75,13 @@ data "aws_iam_policy_document" "aws_site_bucket_public_access_dns" {
   depends_on = [ aws_s3_bucket_public_access_block.aws_site_website_bucket ]
 }
 
+# Policy failed due to bucket not fully created. Added this delay for it. 
 resource "null_resource" "delay" {
   count = var.aws_site_cdn_enabled ? 0 : 1
-
   triggers = {
     # Using a constant to create a trigger that always changes
     always_run = "${timestamp()}"
   }
-
   provisioner "local-exec" {
     command = "sleep 1"
   }

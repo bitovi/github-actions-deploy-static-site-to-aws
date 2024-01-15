@@ -54,7 +54,7 @@ jobs:
 
     steps:
     - name: Create deploy-bucket
-      uses: bitovi/github-actions-deploy-static-site-to-aws@v0.1.3
+      uses: bitovi/github-actions-deploy-static-site-to-aws@v0.1.4
       with:
         aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID_SANDBOX}}
         aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY_SANDBOX}}

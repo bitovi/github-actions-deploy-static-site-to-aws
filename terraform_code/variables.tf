@@ -106,7 +106,7 @@ locals {
     GitHubOrgName             = "${var.app_org_name}"
     GitHubRepoName            = "${var.app_repo_name}"
     GitHubBranchName          = "${var.app_branch_name}"
-    GitHubAction              = "bitovi/github-actions-deploy-serverless-website"
+    GitHubAction              = "bitovi/github-actions-deploy-static-site-to-aws"
     created_with              = "terraform"
   }
 }

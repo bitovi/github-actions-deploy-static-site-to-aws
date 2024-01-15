@@ -114,7 +114,7 @@ resource "aws_s3_bucket_policy" "aws_spa_website_bucket_policy" {
 
 ### CDN Without DNS
 resource "aws_cloudfront_distribution" "cdn_static_site_default_cert" {
-  count               = var.aws_spa_cdn_enabled ? ( local.selected_arn == "" ? 1 : 0 ) : 0
+  count               = var.aws_spa_cdn_enabled ? ( local.cert_available ? 0 : 1 ) : 0
   enabled             = true
   is_ipv6_enabled     = true
   default_root_object = var.aws_spa_root_object 
@@ -158,7 +158,7 @@ resource "aws_cloudfront_distribution" "cdn_static_site_default_cert" {
 
 ### CDN with custom DNS
 resource "aws_cloudfront_distribution" "cdn_static_site" {
-  count               = var.aws_spa_cdn_enabled ? ( local.selected_arn != "" ? 1 : 0 ) : 0
+  count               = var.aws_spa_cdn_enabled ? ( local.cert_available ? 1 : 0 ) : 0
   enabled             = true
   is_ipv6_enabled     = true
   default_root_object = var.aws_spa_root_object 
@@ -202,6 +202,14 @@ resource "aws_cloudfront_distribution" "cdn_static_site" {
     ssl_support_method       = "sni-only"
     minimum_protocol_version = "TLSv1.2_2021"
   }
+  lifecycle {
+    create_before_destroy = true
+  }
+  depends_on = [
+    aws_acm_certificate.sub_domain,
+    aws_acm_certificate.root_domain,
+    data.aws_acm_certificate.issued
+  ]
 }
 
 ### CDN Access control
@@ -275,7 +283,7 @@ locals {
 # CERTIFICATE STUFF
 
 data "aws_acm_certificate" "issued" {
-  for_each = local.cert_available ? {
+  for_each = local.cert_available && local.fqdn_provided ? {
     "domain" : var.aws_r53_domain_name,
     "wildcard" : "*.${var.aws_r53_domain_name}"
     "sub": "${var.aws_r53_sub_domain_name}.${var.aws_r53_domain_name}"
@@ -335,7 +343,7 @@ resource "aws_acm_certificate_validation" "sub_domain" {
 ### Some locals for parsing details
 locals {
   selected_arn = (
-    var.aws_r53_enable_cert ? 
+    var.aws_r53_enable_cert && local.fqdn_provided ? 
     (var.aws_r53_cert_arn != "" ? var.aws_r53_cert_arn :
       (!var.aws_r53_create_root_cert ?
         (!var.aws_r53_create_sub_cert ?
@@ -346,7 +354,7 @@ locals {
     ) : ""
   )
   cert_available = (
-    var.aws_r53_enable_cert ?
+    var.aws_r53_enable_cert && local.fqdn_provided ?
     (var.aws_r53_cert_arn != "" ? true :
       (!var.aws_r53_create_root_cert ?
         (!var.aws_r53_create_sub_cert ?

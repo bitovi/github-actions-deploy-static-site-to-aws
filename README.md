@@ -125,7 +125,7 @@ The following inputs can be used as `step.with` keys
 | Name             | Type    | Description                        |
 |------------------|---------|------------------------------------|
 | `aws_r53_domain_name` | String | Define the root domain name for the application. e.g. `bitovi.com`. |
-| `aws_r53_sub_domain_name` | String | Define the sub-domain part of the URL. Defaults to `${GITHUB_ORG_NAME}-${GITHUB_REPO_NAME}-${GITHUB_BRANCH_NAME}`. |
+| `aws_r53_sub_domain_name` | String | Define the sub-domain part of the URL. Defaults to `${GITHUB_ORG_NAME}-${GITHUB_REPO_NAME}-${GITHUB_BRANCH_NAME}`. If longer than 63, will use a shorter version. |
 | `aws_r53_root_domain_deploy` | Boolean | Deploy application to root domain. Will create root and www records. Default is `false`. |
 | `aws_r53_cert_arn` | String | Define the certificate ARN to use for the application. |
 | `aws_r53_create_root_cert` | Boolean | Generates and manage the root cert for the application. Default is `false`. |

@@ -66,7 +66,12 @@ aws_r53_sub_domain_name=
 if [ -n "${AWS_R53_SUB_DOMAIN_NAME}" ]; then
   aws_r53_sub_domain_name="aws_r53_sub_domain_name = \"${AWS_R53_SUB_DOMAIN_NAME}\""
 else
-  aws_r53_sub_domain_name="aws_r53_sub_domain_name = \"${GITHUB_IDENTIFIER}\""
+  concatenated_string="${GITHUB_IDENTIFIER}.${AWS_R53_DOMAIN_NAME}"
+  if [ ${#concatenated_string} -gt 64 ]; then
+      aws_r53_sub_domain_name="aws_r53_sub_domain_name = \"${GITHUB_IDENTIFIER_SS}\""
+  else
+      aws_r53_sub_domain_name="aws_r53_sub_domain_name = \"${GITHUB_IDENTIFIER}\""
+  fi
 fi
 
 aws_tf_state_bucket=$(generate_var aws_tf_state_bucket $TF_STATE_BUCKET)

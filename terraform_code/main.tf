@@ -209,6 +209,9 @@ resource "aws_cloudfront_distribution" "cdn_static_site" {
     minimum_protocol_version = "TLSv1.2_2021"
   }
 
+  lifecycle {
+    replace_triggered_by = [ viewer_certificate ]
+  }
   #depends_on = [
   #  aws_acm_certificate.sub_domain,
   #  aws_acm_certificate.root_domain,

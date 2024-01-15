@@ -210,7 +210,7 @@ resource "aws_cloudfront_distribution" "cdn_static_site" {
   }
 
   lifecycle {
-    replace_triggered_by = [ aws_cloudfront_distribution.cdn_static_site[0].viewer_certificate ]
+    replace_triggered_by = [ viewer_certificate ]
   }
   #depends_on = [
   #  aws_acm_certificate.sub_domain,

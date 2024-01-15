@@ -283,7 +283,7 @@ locals {
 # CERTIFICATE STUFF
 
 data "aws_acm_certificate" "issued" {
-  for_each = local.cert_available ? {
+  for_each = local.cert_available && local.fqdn_provided ? {
     "domain" : var.aws_r53_domain_name,
     "wildcard" : "*.${var.aws_r53_domain_name}"
     "sub": "${var.aws_r53_sub_domain_name}.${var.aws_r53_domain_name}"

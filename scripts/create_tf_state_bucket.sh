@@ -11,9 +11,14 @@ else
   else
     aws s3api create-bucket --bucket $TF_STATE_BUCKET --region $AWS_DEFAULT_REGION --create-bucket-configuration LocationConstraint=$AWS_DEFAULT_REGION || true
   fi
-
-  if ! [[ -z $(aws s3api head-bucket --bucket $TF_STATE_BUCKET 2>&1) ]]; then
-    echo "Bucket does not exist or permission is not there to use it."
+  touch bitovi-test-file.txt
+  if ! [[ -z $(aws s3api put-object --bucket $TF_STATE_BUCKET --key bitovi-test-file.txt --body ./bitovi-test-file.txt 2>&1 >/dev/null ) ]]; then
+    echo "Permission issue: Unable to write to the bucket."
     exit 63
+  else
+      if ! [[ $(aws s3 rm "s3://$TF_STATE_BUCKET/bitovi-test-file.txt" 2>&1 >/dev/null ) ]]; then
+            echo "Access to bucket confirmed. Can create and delete a tf-state file"
+      fi
   fi
+  rm bitovi-test-file.txt
 fi

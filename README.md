@@ -56,18 +56,18 @@ jobs:
     - name: Create deploy-bucket
       uses: bitovi/github-actions-deploy-static-site-to-aws@v0.1.4
       with:
-        aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID_SANDBOX}}
-        aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY_SANDBOX}}
+        aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws_default_region: us-east-1
 
         tf_action: 'apply'
-        tf_state_bucket_destroy: true
+        tf_state_bucket_destroy: true # If destroying, will remove the bucket
         
         aws_spa_cdn_enabled: true
         
-        # You should own and have this domain available
-        aws_r53_domain_name: example.com
+        aws_r53_domain_name: example.com # You should own and have this domain available in R53
         aws_r53_sub_domain_name: spa
+        aws_r53_create_sub_cert: true # Will create and validate a cert for this sub-domain
 ```
 
 ## Customizing

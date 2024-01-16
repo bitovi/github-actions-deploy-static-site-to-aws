@@ -88,6 +88,7 @@ if [ -z "$AWS_RESOURCE_IDENTIFIER" ]; then
   GITHUB_IDENTIFIER="$(shorten_identifier ${GITHUB_IDENTIFIER} $1)"
 else
   GITHUB_IDENTIFIER="$AWS_RESOURCE_IDENTIFIER"
+  GITHUB_IDENTIFIER="$(shorten_identifier ${GITHUB_IDENTIFIER} $1)"
 fi
 
 GITHUB_IDENTIFIER=$(echo $GITHUB_IDENTIFIER | tr '[:upper:]' '[:lower:]' | tr '_' '-' | tr '/' '-')

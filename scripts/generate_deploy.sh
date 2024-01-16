@@ -65,9 +65,15 @@ aws_resource_identifier_supershort="aws_resource_identifier_supershort = \"${GIT
 aws_r53_sub_domain_name=
 if [ -n "${AWS_R53_SUB_DOMAIN_NAME}" ]; then
   aws_r53_sub_domain_name="aws_r53_sub_domain_name = \"${AWS_R53_SUB_DOMAIN_NAME}\""
+  concatenated_string="${AWS_R53_SUB_DOMAIN_NAME}.${AWS_R53_DOMAIN_NAME}"
+  if [ ${#concatenated_string} -gt 64 ] && [[ $(alpha_only "$AWS_R53_CREATE_SUB_CERT") == "true" ]] ; then
+    echo "Length of FQDN exceeds 64 characters. Reduce length of it."
+    echo "You can use a root domain cert with a wildcard or define one through the inputs."
+    exit 64
+  fi
 else
   concatenated_string="${GITHUB_IDENTIFIER}.${AWS_R53_DOMAIN_NAME}"
-  if [ ${#concatenated_string} -gt 64 ] && [[ $(alpha_only "$AWS_SITE_CDN_ENABLED") == "false" ]] ; then
+  if [ ${#concatenated_string} -gt 64 ] && [[ $(alpha_only "$AWS_R53_CREATE_SUB_CERT") == "true" ]] ; then
       aws_r53_sub_domain_name="aws_r53_sub_domain_name = \"${GITHUB_IDENTIFIER_SS}\""
   else
       aws_r53_sub_domain_name="aws_r53_sub_domain_name = \"${GITHUB_IDENTIFIER}\""

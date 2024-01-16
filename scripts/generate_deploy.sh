@@ -67,7 +67,7 @@ if [ -n "${AWS_R53_SUB_DOMAIN_NAME}" ]; then
   aws_r53_sub_domain_name="aws_r53_sub_domain_name = \"${AWS_R53_SUB_DOMAIN_NAME}\""
 else
   concatenated_string="${GITHUB_IDENTIFIER}.${AWS_R53_DOMAIN_NAME}"
-  if [ ${#concatenated_string} -gt 64 ]; then
+  if [ ${#concatenated_string} -gt 64 ] && [[ $(alpha_only "$AWS_SITE_CDN_ENABLED") == "false" ]] ; then
       aws_r53_sub_domain_name="aws_r53_sub_domain_name = \"${GITHUB_IDENTIFIER_SS}\""
   else
       aws_r53_sub_domain_name="aws_r53_sub_domain_name = \"${GITHUB_IDENTIFIER}\""

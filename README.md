@@ -35,6 +35,8 @@ Setting `aws_r53_create_root_cert` to `true` will create this certificate with b
 
 Setting `aws_r53_create_sub_cert` to `true` will create a certificate **just for the subdomain**, and validate it.
 
+> :white_check_mark: If using `aws_r53_create_sub_cert` the total length of the FQDN cannot exceed 64 characters. Use `aws_r53_create_root_cert` or specify one by setting `aws_r53_cert_arn`.
+
 > :warning: Be very careful here! **Created certificates are fully managed by Terraform**. Therefor **they will be destroyed upon stack destruction**.
 
 ## Example usage
@@ -148,7 +150,7 @@ For some specific resources, we have a 32 characters limit. If the identifier le
 As a default, the bucket name will be `${GITHUB_ORG_NAME}-${GITHUB_REPO_NAME}-${GITHUB_BRANCH_NAME}-sp`. 
 
 But, in the case you add a Route53 domain and no CDN, the bucket name must match the FQDN defined, like `site.example.com`. If setting `aws_r53_root_domain_deploy`, two buckets will be created. `www.{aws_r53_domain_name}`and `{aws_r53_domain_name}`. Traffic from www bucket will be forwarded to the main bucket.
-Because of this reason, the length of the FQDN *MUST* be below 64 characters. Will try using the provided FQDN, if not, fallback to `resource-identifier.{aws_r53_domain_name}` of the compressed one. IF it still exceeds the limit, will remove as many as needed.
+Because of this reason, the length of the FQDN *MUST* be below 64 characters. Will try using the provided FQDN, if none provided, fallback to `resource-identifier.{aws_r53_domain_name}` of the compressed one. IF it still exceeds the limit, will remove as many as needed.
 
 > :warning: HTTPS (TLS / SSL) will only be available if using CDN.
 

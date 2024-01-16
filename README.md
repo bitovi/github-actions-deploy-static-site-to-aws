@@ -21,9 +21,9 @@ graph TD;
 3. If domain and cert wanted, registered domain in AWS.
 
 ### 1. Files to publish
-Will grab everything defined in `aws_spa_source_folder` and push it to a bucket.
+Will grab everything defined in `aws_site_source_folder` and push it to a bucket.
 
-Define `aws_spa_root_object` if different than `index.html`.
+Define `aws_site_root_object` if different than `index.html`.
 
 ### 2. An AWS account
 You'll need [Access Keys](https://docs.aws.amazon.com/powershell/latest/userguide/pstools-appendix-sign-up.html) from an [AWS account](https://aws.amazon.com/premiumsupport/knowledge-center/create-and-activate-aws-account/)
@@ -49,12 +49,12 @@ on:
     branches: [ main ]
 
 jobs:
-  Deploy-SPA:
+  Deploy-static-site:
     runs-on: ubuntu-latest
 
     steps:
     - name: Create deploy-bucket
-      uses: bitovi/github-actions-deploy-static-site-to-aws@v0.1.5
+      uses: bitovi/github-actions-deploy-static-site-to-aws@v0.2.0
       with:
         aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -63,10 +63,10 @@ jobs:
         tf_action: 'apply'
         tf_state_bucket_destroy: true # If destroying, will remove the bucket
         
-        aws_spa_cdn_enabled: true
+        aws_site_cdn_enabled: true
         
         aws_r53_domain_name: example.com # You should own and have this domain available in R53
-        aws_r53_sub_domain_name: spa
+        aws_r53_sub_domain_name: site
         aws_r53_create_sub_cert: true # Will create and validate a cert for this sub-domain
 ```
 
@@ -76,7 +76,7 @@ jobs:
 1. [Action defaults](#action-defaults-inputs)
 1. [AWS](#aws-inputs)
 1. [Terraform options](#terraform-options-inputs)
-1. [SPA Settings](#spa-settings-inputs)
+1. [SITE Settings](#site-settings-inputs)
 1. [Certificate](#certificate-inputs)
 
 The following inputs can be used as `step.with` keys
@@ -111,13 +111,13 @@ The following inputs can be used as `step.with` keys
 <hr/>
 <br/>
 
-#### **SPA Settings inputs**
+#### **Site Settings inputs**
 | Name             | Type    | Description                        |
 |------------------|---------|------------------------------------|
-| `aws_spa_source_folder` | String | Source folder for files to be published. Will ignore any hidden file. Defaults to root folder of the calling repo if nothing defined. |
-| `aws_spa_root_object` | Boolean | Root object to be served as entry-point. Defaults to `index.html`. |
-| `aws_spa_website_bucket_name` | String | AWS S3 bucket name to use for the public files. Defaults to `${org}-${repo}-{branch}-sp`. If using a R53 domain and not a CDN, bucket name will be the FQDN one. See note. |
-| `aws_spa_cdn_enabled` | Boolean | Enable or disables the use of CDN. Defaults to `false`. |
+| `aws_site_source_folder` | String | Source folder for files to be published. Will ignore any hidden file. Defaults to root folder of the calling repo if nothing defined. |
+| `aws_site_root_object` | Boolean | Root object to be served as entry-point. Defaults to `index.html`. |
+| `aws_site_bucket_name` | String | AWS S3 bucket name to use for the public files. Defaults to `${org}-${repo}-{branch}-sp`. If using a R53 domain and not a CDN, bucket name will be the FQDN one. See note. |
+| `aws_site_cdn_enabled` | Boolean | Enable or disables the use of CDN. Defaults to `false`. |
 <hr/>
 <br/>
 
@@ -125,7 +125,7 @@ The following inputs can be used as `step.with` keys
 | Name             | Type    | Description                        |
 |------------------|---------|------------------------------------|
 | `aws_r53_domain_name` | String | Define the root domain name for the application. e.g. `bitovi.com`. |
-| `aws_r53_sub_domain_name` | String | Define the sub-domain part of the URL. Defaults to `${GITHUB_ORG_NAME}-${GITHUB_REPO_NAME}-${GITHUB_BRANCH_NAME}`. |
+| `aws_r53_sub_domain_name` | String | Define the sub-domain part of the URL. Defaults to `${GITHUB_ORG_NAME}-${GITHUB_REPO_NAME}-${GITHUB_BRANCH_NAME}`. If longer than 63, will use a shorter version. |
 | `aws_r53_root_domain_deploy` | Boolean | Deploy application to root domain. Will create root and www records. Default is `false`. |
 | `aws_r53_cert_arn` | String | Define the certificate ARN to use for the application. |
 | `aws_r53_create_root_cert` | Boolean | Generates and manage the root cert for the application. Default is `false`. |
@@ -147,7 +147,7 @@ For some specific resources, we have a 32 characters limit. If the identifier le
 
 As a default, the bucket name will be `${GITHUB_ORG_NAME}-${GITHUB_REPO_NAME}-${GITHUB_BRANCH_NAME}-sp`. 
 
-But, in the case you add a Route53 domain and no CDN, the bucket name must match the FQDN defined, like `spa.example.com`. If setting `aws_r53_root_domain_deploy`, two buckets will be created. `www.{aws_r53_domain_name}`and `{aws_r53_domain_name}`. Traffic from www bucket will be forwarded to the main bucket.
+But, in the case you add a Route53 domain and no CDN, the bucket name must match the FQDN defined, like `site.example.com`. If setting `aws_r53_root_domain_deploy`, two buckets will be created. `www.{aws_r53_domain_name}`and `{aws_r53_domain_name}`. Traffic from www bucket will be forwarded to the main bucket.
 Because of this reason, the length of the FQDN *MUST* be below 64 characters. Will try using the provided FQDN, if not, fallback to `resource-identifier.{aws_r53_domain_name}` of the compressed one. IF it still exceeds the limit, will remove as many as needed.
 
 > :warning: HTTPS (TLS / SSL) will only be available if using CDN.

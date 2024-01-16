@@ -42,17 +42,17 @@ inputs:
     description: 'Force purge and deletion of S3 bucket defined if terraform destroy action succeded.'
     required: false
 
-  # SPA Settings
-  aws_spa_source_folder:
+  # Site Settings
+  aws_site_source_folder:
     description: 'Source folder for files to be published. Will ignore any hidden file. Defaults to root folder of the calling repo if nothing defined.'
     required: true
-  aws_spa_root_object:
+  aws_site_root_object:
     description: 'Root object to be served as entry-point. Defaults to `index.html`'
     required: false
-  aws_spa_website_bucket_name:
+  aws_site_bucket_name:
     description: ' AWS S3 bucket name to use for the public files. Defaults to `${org}-${repo}-{branch}-sp`'
     required: false
-  aws_spa_cdn_enabled:
+  aws_site_cdn_enabled:
     description: 'Enable or disables the use of CDN. Defaults to `false`.'
     required: false
 
@@ -89,7 +89,7 @@ runs:
 
     - name: Configure AWS Credentials
       if: ${{ inputs.aws_access_key_id != '' }}
-      uses: aws-actions/configure-aws-credentials@v2
+      uses: aws-actions/configure-aws-credentials@v3
       with:
         aws-access-key-id: ${{ inputs.aws_access_key_id }}
         aws-secret-access-key: ${{ inputs.aws_secret_access_key }}
@@ -107,11 +107,11 @@ runs:
         # TF
         TF_STATE_BUCKET: ${{ inputs.tf_state_bucket }}
         TF_STATE_BUCKET_DESTROY: ${{ inputs.tf_state_bucket_destroy }}
-        # SPA
-        AWS_SPA_SOURCE_FOLDER: ${{ inputs.aws_spa_source_folder }}
-        AWS_SPA_ROOT_OBJECT: ${{ inputs.aws_spa_root_object }}
-        AWS_SPA_WEBSITE_BUCKET_NAME: ${{ inputs.aws_spa_website_bucket_name }}
-        AWS_SPA_CDN_ENABLED: ${{ inputs.aws_spa_cdn_enabled }}
+        # Site
+        AWS_SITE_SOURCE_FOLDER: ${{ inputs.aws_site_source_folder }}
+        AWS_SITE_ROOT_OBJECT: ${{ inputs.aws_site_root_object }}
+        AWS_SITE_BUCKET_NAME: ${{ inputs.aws_site_bucket_name }}
+        AWS_SITE_CDN_ENABLED: ${{ inputs.aws_site_cdn_enabled }}
         # AWS Route53 Domains abd Certificates
         AWS_R53_DOMAIN_NAME: ${{ inputs.aws_r53_domain_name }}
         AWS_R53_SUB_DOMAIN_NAME: ${{ inputs.aws_r53_sub_domain_name }}

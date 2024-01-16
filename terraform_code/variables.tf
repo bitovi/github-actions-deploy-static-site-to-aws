@@ -19,25 +19,25 @@ variable "aws_tf_state_bucket" {
   description = "Bucket to store tf-state file for the deployment"
 }
 
-variable "aws_spa_source_folder" {
+variable "aws_site_source_folder" {
   description = "Sources to be stored in the bucket. Coma sepparated list of files possible."
   type        = string
   default     = ""
 }
 
-variable "aws_spa_root_object" {
+variable "aws_site_root_object" {
   description = "Root object. Defaults to index.html"
   type        = string
   default     = "index.html"
 }
 
-variable "aws_spa_website_bucket_name" {
+variable "aws_site_bucket_name" {
   description = "Bucket name where all the files will be stored."
   type        = string
   default     = ""
 }
 
-variable "aws_spa_cdn_enabled" {
+variable "aws_site_cdn_enabled" {
   description = "Enable or not CDN for site"
   type        = bool
   default     = false

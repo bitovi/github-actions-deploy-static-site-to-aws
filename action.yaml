@@ -189,8 +189,11 @@ runs:
         echo ${{ steps.apply.outputs.public_url }} >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
         echo "---" >> $GITHUB_STEP_SUMMARY
-        echo "[![Bitovi](https://www.bitovi.com/hubfs/limbo-generated/imgs/logos/bitovi-logo-23.svg)](https://bitovi.com) made this GitHub Action. Check out [the rest!](https://github.com/marketplace?category=&type=actions&verification=&query=bitovi)" >> $GITHUB_STEP_SUMMARY
-        echo "Need more help? [Reach us!](https://www.bitovi.com/services/devops-consulting/platform-engineering) we are here to help." >> $GITHUB_STEP_SUMMARY
+        echo "This GitHub action is made by [![Bitovi](https://www.bitovi.com/hubfs/limbo-generated/imgs/logos/bitovi-logo-23.svg)](https://bitovi.com)" >> $GITHUB_STEP_SUMMARY
+        echo ""  >> $GITHUB_STEP_SUMMARY
+        echo "Check the rest of our actions [here](https://github.com/marketplace?category=&type=actions&verification=&query=bitovi)!"  >> $GITHUB_STEP_SUMMARY
+        echo ""  >> $GITHUB_STEP_SUMMARY
+        echo "You can get help or ask questions on our [Discord Channel](https://discord.gg/J7ejFsZnJ4Z), or set up a free consultation [here](https://www.bitovi.com/services/devops-consulting/platform-engineering)." >> $GITHUB_STEP_SUMMARY
 
     - name: Print result
       if: ${{ success() && inputs.tf_action == 'destroy' && inputs.tf_state_bucket_destroy == 'true' }}

@@ -185,7 +185,7 @@ runs:
       if: ${{ success() && steps.apply.outputs.public_url != '' }}
       shell: bash
       run: |
-        echo "## It's published! :rocket:" >> $GITHUB_STEP_SUMMARY
+        echo "# It's published! :rocket:" >> $GITHUB_STEP_SUMMARY
         echo ${{ steps.apply.outputs.public_url }} >> $GITHUB_STEP_SUMMARY
 
     - name: Print result
@@ -216,7 +216,7 @@ runs:
       run: |
         echo "" >> $GITHUB_STEP_SUMMARY
         echo "---" >> $GITHUB_STEP_SUMMARY
-        echo "## Proudly made by [![Bitovi](https://www.bitovi.com/hubfs/limbo-generated/imgs/logos/bitovi-logo-23.svg)](https://bitovi.com)" >> $GITHUB_STEP_SUMMARY
+        echo "# Proudly made by  [![Bitovi](https://www.bitovi.com/hubfs/limbo-generated/imgs/logos/bitovi-logo-23.svg)](https://bitovi.com)" >> $GITHUB_STEP_SUMMARY
         echo ""  >> $GITHUB_STEP_SUMMARY
         echo "Check the rest of our actions [here](https://github.com/marketplace?category=&type=actions&verification=&query=bitovi)!"  >> $GITHUB_STEP_SUMMARY
         echo ""  >> $GITHUB_STEP_SUMMARY

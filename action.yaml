@@ -187,6 +187,7 @@ runs:
       run: |
         echo "## It's published! :rocket:" >> $GITHUB_STEP_SUMMARY
         echo ${{ steps.apply.outputs.public_url }} >> $GITHUB_STEP_SUMMARY
+        echo "![Bitovi Logo](https://www.bitovi.com/hubfs/limbo-generated/imgs/logos/bitovi-logo-23.svg)" >> $GITHUB_STEP_SUMMARY
 
     - name: Print result
       if: ${{ success() && inputs.tf_action == 'destroy' && inputs.tf_state_bucket_destroy == 'true' }}

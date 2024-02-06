@@ -162,3 +162,9 @@ Would you like to see additional features?  [Create an issue](https://github.com
 
 ## License
 The scripts and documentation in this project are released under the [MIT License](https://github.com/bitovi/github-actions-deploy-static-site-to-aws/blob/main/LICENSE).
+
+# Provided by Bitovi
+[Bitovi](https://www.bitovi.com/) is a proud supporter of Open Source software.
+
+# We want to hear from you.
+Come chat with us about open source in our Bitovi community [Discord](https://discord.gg/zAHn4JBVcX)!

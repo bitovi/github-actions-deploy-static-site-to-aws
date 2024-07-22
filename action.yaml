@@ -35,6 +35,12 @@ inputs:
   tf_action: 
     desctiption: 'Option to run Terraform apply / destroy option. Will run plan if nothing defined.'
     required: false
+  tf_state_file_name:
+    description: 'Change this to be anything you want to. Carefull to be consistent here. A missing file could trigger recreation, or stepping over destruction of non-defined objects.'
+    required: false
+  tf_state_file_name_append:
+    description: 'Append a string to the tf-state-file. Setting this to `unique` will generate `tf-state-aws-unique`. Can co-exist with the tf_state_file_name variable. '
+    required: false
   tf_state_bucket:
     description: 'AWS S3 bucket to use for Terraform state. Defaults to `${org}-${repo}-{branch}-tf-state`'
     required: false
@@ -105,6 +111,8 @@ runs:
         AWS_RESOURCE_IDENTIFIER: ${{ inputs.aws_resource_identifier }}
         AWS_ADDITIONAL_TAGS: ${{ inputs.aws_additional_tags }}
         # TF
+        TF_STATE_FILE_NAME: ${{ inputs.tf_state_file_name }}
+        TF_STATE_FILE_NAME_APPEND: ${{ inputs.tf_state_file_name_append }}
         TF_STATE_BUCKET: ${{ inputs.tf_state_bucket }}
         TF_STATE_BUCKET_DESTROY: ${{ inputs.tf_state_bucket_destroy }}
         # Site

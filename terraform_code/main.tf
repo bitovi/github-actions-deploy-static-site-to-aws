@@ -167,6 +167,12 @@ resource "aws_cloudfront_distribution" "cdn_static_site_default_cert" {
     }
   }
 
+  custom_error_response {
+    error_code = 403
+    response_code = 200
+    response_page_path = "/index.html"
+  }
+
   viewer_certificate {
     cloudfront_default_certificate = true 
   }
@@ -211,6 +217,12 @@ resource "aws_cloudfront_distribution" "cdn_static_site" {
     }
   }
 
+  custom_error_response {
+    error_code = 403
+    response_code = 200
+    response_page_path = "/index.html"
+  }
+  
   aliases = [ var.aws_r53_root_domain_deploy ? "${var.aws_r53_domain_name}" : "${var.aws_r53_sub_domain_name}.${var.aws_r53_domain_name}" ]
 
   viewer_certificate {

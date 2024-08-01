@@ -168,7 +168,7 @@ resource "aws_cloudfront_distribution" "cdn_static_site_default_cert" {
   }
 
   dynamic "custom_error_response" {
-     for_each = length(var.aws_site_cdn_custom_error_codes) > 0 ? [var.aws_site_cdn_custom_error_codes] : []
+     for_each = length(local.aws_site_cdn_custom_error_codes) > 0 ? [local.aws_site_cdn_custom_error_codes] : []
 
      content {
        error_caching_min_ttl = try(custom_error_response.value.error_caching_min_ttl, null)
@@ -223,7 +223,7 @@ resource "aws_cloudfront_distribution" "cdn_static_site" {
   }
 
   dynamic "custom_error_response" {
-     for_each = length(var.aws_site_cdn_custom_error_codes) > 0 ? [var.aws_site_cdn_custom_error_codes] : []
+     for_each = length(local.aws_site_cdn_custom_error_codes) > 0 ? [local.aws_site_cdn_custom_error_codes] : []
 
      content {
        error_caching_min_ttl = try(custom_error_response.value.error_caching_min_ttl, null)
@@ -412,7 +412,7 @@ locals {
   )
 
   ### Converting JSON to map of strings as GH Actions don't accept map of strings
-  #string
+  aws_site_cdn_custom_error_codes = jsondecode(var.aws_site_cdn_custom_error_codes)
 
   ### Try looking up for the cert with different names
   acm_arn = try(data.aws_acm_certificate.issued["domain"].arn, try(data.aws_acm_certificate.issued["wildcard"].arn, data.aws_acm_certificate.issued["sub"].arn, ""))

@@ -45,8 +45,8 @@ variable "aws_site_cdn_enabled" {
 
 variable "aws_site_cdn_custom_error_codes" {
   description = "Custom error codes for site"
-  type        = map(string)
-  default     = {}
+  type        = string
+  default     = ""
 }
 
 variable "aws_r53_domain_name" {

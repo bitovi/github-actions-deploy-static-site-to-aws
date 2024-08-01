@@ -167,10 +167,15 @@ resource "aws_cloudfront_distribution" "cdn_static_site_default_cert" {
     }
   }
 
-  custom_error_response {
-    error_code = 403
-    response_code = 200
-    response_page_path = "/index.html"
+  dynamic "custom_error_response" {
+     for_each = length(var.aws_site_cdn_custom_error_codes) > 0 ? [var.aws_site_cdn_custom_error_codes] : []
+
+     content {
+       error_caching_min_ttl = try(aws_site_cdn_custom_error_codes.value.error_caching_min_ttl, null)
+       error_code            = aws_site_cdn_custom_error_codes.value.error_code
+       response_code         = try(aws_site_cdn_custom_error_codes.value.response_code, null)
+       response_page_path    = try(aws_site_cdn_custom_error_codes.value.response_page_path, null)
+     }
   }
 
   viewer_certificate {
@@ -217,10 +222,15 @@ resource "aws_cloudfront_distribution" "cdn_static_site" {
     }
   }
 
-  custom_error_response {
-    error_code = 403
-    response_code = 200
-    response_page_path = "/index.html"
+  dynamic "custom_error_response" {
+     for_each = length(var.aws_site_cdn_custom_error_codes) > 0 ? [var.aws_site_cdn_custom_error_codes] : []
+
+     content {
+       error_caching_min_ttl = try(aws_site_cdn_custom_error_codes.value.error_caching_min_ttl, null)
+       error_code            = aws_site_cdn_custom_error_codes.value.error_code
+       response_code         = try(aws_site_cdn_custom_error_codes.value.response_code, null)
+       response_page_path    = try(aws_site_cdn_custom_error_codes.value.response_page_path, null)
+     }
   }
   
   aliases = [ var.aws_r53_root_domain_deploy ? "${var.aws_r53_domain_name}" : "${var.aws_r53_sub_domain_name}.${var.aws_r53_domain_name}" ]

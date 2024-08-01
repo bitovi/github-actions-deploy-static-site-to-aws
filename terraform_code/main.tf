@@ -171,13 +171,13 @@ resource "aws_cloudfront_distribution" "cdn_static_site_default_cert" {
      for_each = length(var.aws_site_cdn_custom_error_codes) > 0 ? [var.aws_site_cdn_custom_error_codes] : []
 
      content {
-       error_caching_min_ttl = try(aws_site_cdn_custom_error_codes.value.error_caching_min_ttl, null)
-       error_code            = aws_site_cdn_custom_error_codes.value.error_code
-       response_code         = try(aws_site_cdn_custom_error_codes.value.response_code, null)
-       response_page_path    = try(aws_site_cdn_custom_error_codes.value.response_page_path, null)
+       error_caching_min_ttl = try(custom_error_response.value.error_caching_min_ttl, null)
+       error_code            = custom_error_response.value.error_code
+       response_code         = try(custom_error_response.value.response_code, null)
+       response_page_path    = try(custom_error_response.value.response_page_path, null)
      }
   }
-
+  
   viewer_certificate {
     cloudfront_default_certificate = true 
   }
@@ -226,10 +226,10 @@ resource "aws_cloudfront_distribution" "cdn_static_site" {
      for_each = length(var.aws_site_cdn_custom_error_codes) > 0 ? [var.aws_site_cdn_custom_error_codes] : []
 
      content {
-       error_caching_min_ttl = try(aws_site_cdn_custom_error_codes.value.error_caching_min_ttl, null)
-       error_code            = aws_site_cdn_custom_error_codes.value.error_code
-       response_code         = try(aws_site_cdn_custom_error_codes.value.response_code, null)
-       response_page_path    = try(aws_site_cdn_custom_error_codes.value.response_page_path, null)
+       error_caching_min_ttl = try(custom_error_response.value.error_caching_min_ttl, null)
+       error_code            = custom_error_response.value.error_code
+       response_code         = try(custom_error_response.value.response_code, null)
+       response_page_path    = try(custom_error_response.value.response_page_path, null)
      }
   }
   
@@ -410,6 +410,9 @@ locals {
     ) : 
     false
   )
+
+  ### Converting JSON to map of strings as GH Actions don't accept map of strings
+  #string
 
   ### Try looking up for the cert with different names
   acm_arn = try(data.aws_acm_certificate.issued["domain"].arn, try(data.aws_acm_certificate.issued["wildcard"].arn, data.aws_acm_certificate.issued["sub"].arn, ""))

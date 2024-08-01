@@ -168,14 +168,14 @@ resource "aws_cloudfront_distribution" "cdn_static_site_default_cert" {
   }
 
   dynamic "custom_error_response" {
-     for_each = length(local.aws_site_cdn_custom_error_codes) > 0 ? [local.aws_site_cdn_custom_error_codes] : []
+    for_each = { for idx, val in local.aws_site_cdn_custom_error_codes : idx => val }
 
-     content {
-       error_caching_min_ttl = try(custom_error_response.value.error_caching_min_ttl, null)
-       error_code            = custom_error_response.value.error_code
-       response_code         = try(custom_error_response.value.response_code, null)
-       response_page_path    = try(custom_error_response.value.response_page_path, null)
-     }
+    content {
+      error_caching_min_ttl = try(custom_error_response.value.error_caching_min_ttl, null)
+      error_code            = custom_error_response.value.error_code
+      response_code         = try(custom_error_response.value.response_code, null)
+      response_page_path    = try(custom_error_response.value.response_page_path, null)
+    }
   }
   
   viewer_certificate {
@@ -223,14 +223,14 @@ resource "aws_cloudfront_distribution" "cdn_static_site" {
   }
 
   dynamic "custom_error_response" {
-     for_each = length(local.aws_site_cdn_custom_error_codes) > 0 ? [local.aws_site_cdn_custom_error_codes] : []
+    for_each = { for idx, val in local.aws_site_cdn_custom_error_codes : idx => val }
 
-     content {
-       error_caching_min_ttl = try(custom_error_response.value.error_caching_min_ttl, null)
-       error_code            = custom_error_response.value.error_code
-       response_code         = try(custom_error_response.value.response_code, null)
-       response_page_path    = try(custom_error_response.value.response_page_path, null)
-     }
+    content {
+      error_caching_min_ttl = try(custom_error_response.value.error_caching_min_ttl, null)
+      error_code            = custom_error_response.value.error_code
+      response_code         = try(custom_error_response.value.response_code, null)
+      response_page_path    = try(custom_error_response.value.response_page_path, null)
+    }
   }
   
   aliases = [ var.aws_r53_root_domain_deploy ? "${var.aws_r53_domain_name}" : "${var.aws_r53_sub_domain_name}.${var.aws_r53_domain_name}" ]

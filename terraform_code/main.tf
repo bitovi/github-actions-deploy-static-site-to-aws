@@ -134,7 +134,7 @@ resource "aws_cloudfront_distribution" "cdn_static_site_default_cert" {
   enabled             = true
   is_ipv6_enabled     = true
   default_root_object = var.aws_site_root_object 
-  comment             = "CDN for ${var.aws_site_bucket_name} static"
+  comment             = "CDN for ${local.s3_bucket_name} static"
 
   origin {
     domain_name              = aws_s3_bucket.aws_site_website_bucket.bucket_regional_domain_name
@@ -189,7 +189,7 @@ resource "aws_cloudfront_distribution" "cdn_static_site" {
   enabled             = true
   is_ipv6_enabled     = true
   default_root_object = var.aws_site_root_object 
-  comment             = "CDN for ${var.aws_site_bucket_name}"
+  comment             = "CDN for ${local.s3_bucket_name}"
 
   origin {
     domain_name              = aws_s3_bucket.aws_site_website_bucket.bucket_regional_domain_name

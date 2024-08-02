@@ -33,7 +33,7 @@ inputs:
 
   # Terraform options
   tf_action: 
-    desctiption: 'Option to run Terraform apply / destroy option. Will run plan if nothing defined.'
+    description: 'Option to run Terraform apply / destroy option. Will run plan if nothing defined.'
     required: false
   tf_state_file_name:
     description: 'Change this to be anything you want to. Carefull to be consistent here. A missing file could trigger recreation, or stepping over destruction of non-defined objects.'
@@ -60,6 +60,9 @@ inputs:
     required: false
   aws_site_cdn_enabled:
     description: 'Enable or disables the use of CDN. Defaults to `false`.'
+    required: false
+  aws_site_cdn_custom_error_codes:
+    description: 'Customize error codes, Definition done with JSON variables'
     required: false
 
   # AWS Route53 Domains and Certificates
@@ -120,6 +123,7 @@ runs:
         AWS_SITE_ROOT_OBJECT: ${{ inputs.aws_site_root_object }}
         AWS_SITE_BUCKET_NAME: ${{ inputs.aws_site_bucket_name }}
         AWS_SITE_CDN_ENABLED: ${{ inputs.aws_site_cdn_enabled }}
+        AWS_SITE_CDN_CUSTOM_ERROR_CODES: ${{ inputs.aws_site_cdn_custom_error_codes }}
         # AWS Route53 Domains abd Certificates
         AWS_R53_DOMAIN_NAME: ${{ inputs.aws_r53_domain_name }}
         AWS_R53_SUB_DOMAIN_NAME: ${{ inputs.aws_r53_sub_domain_name }}

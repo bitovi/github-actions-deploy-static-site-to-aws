@@ -167,6 +167,17 @@ resource "aws_cloudfront_distribution" "cdn_static_site_default_cert" {
     }
   }
 
+  dynamic "custom_error_response" {
+    for_each = { for idx, val in local.aws_site_cdn_custom_error_codes : idx => val }
+
+    content {
+      error_caching_min_ttl = try(custom_error_response.value.error_caching_min_ttl, null)
+      error_code            = custom_error_response.value.error_code
+      response_code         = try(custom_error_response.value.response_code, null)
+      response_page_path    = try(custom_error_response.value.response_page_path, null)
+    }
+  }
+  
   viewer_certificate {
     cloudfront_default_certificate = true 
   }
@@ -211,6 +222,17 @@ resource "aws_cloudfront_distribution" "cdn_static_site" {
     }
   }
 
+  dynamic "custom_error_response" {
+    for_each = { for idx, val in local.aws_site_cdn_custom_error_codes : idx => val }
+
+    content {
+      error_caching_min_ttl = try(custom_error_response.value.error_caching_min_ttl, null)
+      error_code            = custom_error_response.value.error_code
+      response_code         = try(custom_error_response.value.response_code, null)
+      response_page_path    = try(custom_error_response.value.response_page_path, null)
+    }
+  }
+  
   aliases = [ var.aws_r53_root_domain_deploy ? "${var.aws_r53_domain_name}" : "${var.aws_r53_sub_domain_name}.${var.aws_r53_domain_name}" ]
 
   viewer_certificate {
@@ -388,6 +410,9 @@ locals {
     ) : 
     false
   )
+
+  ### Converting JSON to map of strings as GH Actions don't accept map of strings
+  aws_site_cdn_custom_error_codes = jsondecode(var.aws_site_cdn_custom_error_codes)
 
   ### Try looking up for the cert with different names
   acm_arn = try(data.aws_acm_certificate.issued["domain"].arn, try(data.aws_acm_certificate.issued["wildcard"].arn, data.aws_acm_certificate.issued["sub"].arn, ""))

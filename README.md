@@ -56,7 +56,7 @@ jobs:
 
     steps:
     - name: Create deploy-bucket
-      uses: bitovi/github-actions-deploy-static-site-to-aws@v0.2.2
+      uses: bitovi/github-actions-deploy-static-site-to-aws@v0.2.1
       with:
         aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -70,68 +70,6 @@ jobs:
         aws_r53_domain_name: example.com # You should own and have this domain available in R53
         aws_r53_sub_domain_name: site
         aws_r53_create_sub_cert: true # Will create and validate a cert for this sub-domain
-```
-
-### Advanced example
-```yaml
-name: Basic deploy
-on:
-  push:
-    branches: [ main ]
-
-jobs:
-  deploy-catalog:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Create deploy-bucket
-        uses: bitovi/github-actions-deploy-static-site-to-aws@v0.2.2
-        with:
-          aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws_default_region: us-east-1
-
-          aws_site_source_folder: packages/catalog/dist
-          tf_state_file_name_append: catalog
-
-          tf_action: 'apply'
-          tf_state_bucket: 'some-custom-bucket'
-          tf_state_bucket_destroy: true
-
-          aws_site_cdn_enabled: true
-          aws_site_cdn_custom_error_codes: '[{\"error_caching_min_ttl\":\"0\",\"error_code\":\"403\",\"response_code\":\"200\",\"response_page_path\":\"/index.html\"},{\"error_caching_min_ttl\":\"0\",\"error_code\":\"404\",\"response_code\":\"404\",\"response_page_path\":\"/custom_404.html\"}]'
-
-          aws_r53_domain_name: bitovi-sandbox.com
-          aws_r53_sub_domain_name: catalog-mfe
-          aws_r53_create_sub_cert: true
-
-          aws_site_bucket_name: catalog-mfe
-
-  deploy-marketing:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Create deploy-bucket
-        uses: bitovi/github-actions-deploy-static-site-to-aws@v0.2.2
-        with:
-          aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws_default_region: us-east-1
-
-          checkout: false
-          aws_site_source_folder: packages/marketing/dist
-          tf_state_file_name_append: marketing
-
-          tf_action: 'apply'
-          tf_state_bucket: 'some-custom-bucket'
-          tf_state_bucket_destroy: true
-
-          aws_site_cdn_enabled: true
-          aws_site_cdn_custom_error_codes: '[{\"error_caching_min_ttl\":\"0\",\"error_code\":\"403\",\"response_code\":\"200\",\"response_page_path\":\"/index.html\"},{\"error_caching_min_ttl\":\"0\",\"error_code\":\"404\",\"response_code\":\"404\",\"response_page_path\":\"/custom_404.html\"}]'
-
-          aws_r53_domain_name: bitovi-sandbox.com
-          aws_r53_sub_domain_name: marketing-mfe
-          aws_r53_create_sub_cert: true
-
-          aws_site_bucket_name: marketing-mfe
 ```
 
 ## Customizing
@@ -184,7 +122,6 @@ The following inputs can be used as `step.with` keys
 | `aws_site_root_object` | Boolean | Root object to be served as entry-point. Defaults to `index.html`. |
 | `aws_site_bucket_name` | String | AWS S3 bucket name to use for the public files. Defaults to `${org}-${repo}-{branch}-sp`. If using a R53 domain and not a CDN, bucket name will be the FQDN one. See note. |
 | `aws_site_cdn_enabled` | Boolean | Enable or disables the use of CDN. Defaults to `false`. |
-| `aws_site_cdn_custom_error_codes` | JSON | Custom error codes to define in CDN. Like `[{\"error_caching_min_ttl\":\"0\",\"error_code\":\"403\",\"response_code\":\"200\",\"response_page_path\":\"/index.html\"}]`. See [this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudfront_distribution.html#custom-error-response-arguments). |
 <hr/>
 <br/>
 

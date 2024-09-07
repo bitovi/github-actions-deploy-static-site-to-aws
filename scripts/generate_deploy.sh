@@ -90,6 +90,7 @@ aws_site_bucket_name=$(generate_var aws_site_bucket_name $AWS_SITE_BUCKET_NAME)
 aws_site_cdn_enabled=$(generate_var aws_site_cdn_enabled $AWS_SITE_CDN_ENABLED)
 aws_site_cdn_custom_error_codes=$(generate_var aws_site_cdn_custom_error_codes $AWS_SITE_CDN_CUSTOM_ERROR_CODES)
 aws_site_root_object=$(generate_var aws_site_root_object $AWS_SITE_ROOT_OBJECT)
+aws_site_error_document=$(generate_var aws_site_error_document $AWS_SITE_ERROR_DOCUMENT)
 aws_r53_domain_name=$(generate_var aws_r53_domain_name $AWS_R53_DOMAIN_NAME)
 aws_r53_root_domain_deploy=$(generate_var aws_r53_root_domain_deploy $AWS_R53_ROOT_DOMAIN_DEPLOY)
 #aws_r53_enable_cert=$(generate_var aws_r53_enable_cert $AWS_R53_ENABLE_CERT)
@@ -110,6 +111,7 @@ $aws_site_bucket_name
 $aws_site_cdn_enabled
 $aws_site_cdn_custom_error_codes
 $aws_site_root_object
+$aws_site_error_document
 $aws_r53_domain_name
 $aws_r53_sub_domain_name
 $aws_r53_root_domain_deploy

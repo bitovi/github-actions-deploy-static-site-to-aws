@@ -9,6 +9,10 @@ resource "aws_s3_bucket_website_configuration" "aws_site_website_bucket" {
   index_document {
     suffix = var.aws_site_root_object
   }
+
+  error_document {
+    key = var.aws_site_error_document
+  }
 }
 
 ## Only create this two IF -> R53 FQDN provided and CDN is off - for www.* support

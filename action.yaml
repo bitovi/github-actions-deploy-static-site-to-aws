@@ -1,4 +1,4 @@
-name: 'Deploy static site to AWS S3'
+name: 'Deploy static site to AWS (S3+CDN+R53)'
 description: 'Deploy a website to an S3 bucket. Option to add Cloudfront, and deploy to a Route53 managed domain with certs.'
 branding:
   icon: upload-cloud

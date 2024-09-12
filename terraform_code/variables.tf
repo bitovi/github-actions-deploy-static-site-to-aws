@@ -34,7 +34,7 @@ variable "aws_site_root_object" {
 variable "aws_site_error_document" {
   description = "error document. Defaults to error.html"
   type        = string
-  default     = "error.html"
+  default     = ""
 }
 
 variable "aws_site_bucket_name" {

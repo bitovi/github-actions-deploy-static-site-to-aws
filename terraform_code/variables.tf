@@ -32,7 +32,7 @@ variable "aws_site_root_object" {
 }
 
 variable "aws_site_error_document" {
-  description = "error document. Defaults to error.html"
+  description = "error document. Defaults to empty"
   type        = string
   default     = ""
 }

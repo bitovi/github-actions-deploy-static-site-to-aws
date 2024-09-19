@@ -31,6 +31,12 @@ variable "aws_site_root_object" {
   default     = "index.html"
 }
 
+variable "aws_site_error_document" {
+  description = "error document. Defaults to empty"
+  type        = string
+  default     = ""
+}
+
 variable "aws_site_bucket_name" {
   description = "Bucket name where all the files will be stored."
   type        = string

@@ -181,7 +181,8 @@ The following inputs can be used as `step.with` keys
 | Name             | Type    | Description                        |
 |------------------|---------|------------------------------------|
 | `aws_site_source_folder` | String | Source folder for files to be published. Will ignore any hidden file. Defaults to root folder of the calling repo if nothing defined. |
-| `aws_site_root_object` | Boolean | Root object to be served as entry-point. Defaults to `index.html`. |
+| `aws_site_root_object` | String | Root object to be served as entry-point. Defaults to `index.html`. |
+| `aws_site_error_document` | String | 'Error document set to S3 website config. Defaults to none. Set value to enable it. |
 | `aws_site_bucket_name` | String | AWS S3 bucket name to use for the public files. Defaults to `${org}-${repo}-{branch}-sp`. If using a R53 domain and not a CDN, bucket name will be the FQDN one. See note. |
 | `aws_site_cdn_enabled` | Boolean | Enable or disables the use of CDN. Defaults to `false`. |
 | `aws_site_cdn_custom_error_codes` | JSON | Custom error codes to define in CDN. Like `[{\"error_caching_min_ttl\":\"0\",\"error_code\":\"403\",\"response_code\":\"200\",\"response_page_path\":\"/index.html\"}]`. See [this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudfront_distribution.html#custom-error-response-arguments). |

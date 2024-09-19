@@ -56,7 +56,7 @@ jobs:
 
     steps:
     - name: Create deploy-bucket
-      uses: bitovi/github-actions-deploy-static-site-to-aws@v0.2.2
+      uses: bitovi/github-actions-deploy-static-site-to-aws@v0.2.3
       with:
         aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -66,6 +66,7 @@ jobs:
         tf_state_bucket_destroy: true # If destroying, will remove the bucket
         
         aws_site_cdn_enabled: true
+        #aws_site_error_document: error.html # Optional error file
         
         aws_r53_domain_name: example.com # You should own and have this domain available in R53
         aws_r53_sub_domain_name: site
@@ -84,7 +85,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Create deploy-bucket
-        uses: bitovi/github-actions-deploy-static-site-to-aws@v0.2.2
+        uses: bitovi/github-actions-deploy-static-site-to-aws@v0.2.3
         with:
           aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -110,7 +111,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Create deploy-bucket
-        uses: bitovi/github-actions-deploy-static-site-to-aws@v0.2.2
+        uses: bitovi/github-actions-deploy-static-site-to-aws@v0.2.3
         with:
           aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}

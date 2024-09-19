@@ -10,8 +10,11 @@ resource "aws_s3_bucket_website_configuration" "aws_site_website_bucket" {
     suffix = var.aws_site_root_object
   }
 
-  error_document {
-    key = var.aws_site_error_document
+  dynamic "error_document" {
+    for_each = var.aws_site_error_document != "" ? [1] : []
+    content {
+      key = var.aws_site_error_document
+    }
   }
 }
 

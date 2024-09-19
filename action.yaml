@@ -56,7 +56,7 @@ inputs:
     description: 'Root object to be served as entry-point. Defaults to `index.html`'
     required: false
   aws_site_error_document:
-    description: 'Error document set to S3 website config. Defaults to `error.html`'
+    description: 'Error document set to S3 website config. Defaults to none.'
     required: false
   aws_site_bucket_name:
     description: ' AWS S3 bucket name to use for the public files. Defaults to `${org}-${repo}-{branch}-sp`'

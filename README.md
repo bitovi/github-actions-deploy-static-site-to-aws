@@ -9,9 +9,14 @@ This action will copy the files from the defined folder into an S3 bucket, defin
 ```mermaid
 graph TD;
     A[S3 Bucket] --> B[S3 Endpoint]
-    A -->|DNS| C[Direct S3 DNS] --> G[- No SSL\n- 63 chars FQDN limit]
-    A -->|CDN| D[CDN Public URL] --> H[- SSL\n- CND URL]
-    A -->|CDN + DNS| E[Public FQDN] --> I[- Owned SSL cert\n- Unlimited FQDN length]
+    A -->|DNS| C[Direct S3 DNS] 
+    C --> G["No SSL<br>63 chars FQDN limit"]
+
+    A -->|CDN| D[CDN Public URL] 
+    D --> H["SSL<br>CDN URL"]
+
+    A -->|CDN + DNS| E[Public FQDN] 
+    E --> I["Owned SSL cert<br>Unlimited FQDN length"]
 ```
 
 ## Requirements 

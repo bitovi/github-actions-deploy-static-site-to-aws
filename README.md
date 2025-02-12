@@ -187,6 +187,7 @@ The following inputs can be used as `step.with` keys
 | Name             | Type    | Description                        |
 |------------------|---------|------------------------------------|
 | `aws_site_source_folder` | String | Source folder for files to be published. Will ignore any hidden file. Defaults to root folder of the calling repo if nothing defined. |
+| `aws_site_source_include_hidden` | Boolean | Include hidden files in the source folder. Defaults to `false`. |
 | `aws_site_root_object` | String | Root object to be served as entry-point. Defaults to `index.html`. |
 | `aws_site_error_document` | String | Error document set to S3 website config. Defaults to none. Set value to enable it. |
 | `aws_site_bucket_name` | String | AWS S3 bucket name to use for the public files. Defaults to `${org}-${repo}-{branch}-sp`. If using a R53 domain and not a CDN, bucket name will be the FQDN one. See note. |

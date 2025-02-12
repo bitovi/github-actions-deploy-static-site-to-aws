@@ -33,10 +33,17 @@ echo "GITHUB_IDENTIFIER: [$GITHUB_IDENTIFIER]"
 GITHUB_IDENTIFIER_SS="$($GITHUB_ACTION_PATH/scripts/generate_identifier.sh 30)"
 echo "GITHUB_IDENTIFIER SS: [$GITHUB_IDENTIFIER_SS]"
 
-# Moving files, excluding hidden ones.
-SOURCE_FILES="$GITHUB_WORKSPACE/$AWS_SITE_SOURCE_FOLDER"
-rsync -av --exclude=".*" $SOURCE_FILES/ "${GITHUB_ACTION_PATH}/upload"
-SOURCE_FILES="${GITHUB_ACTION_PATH}/upload"
+if [[ $(alpha_only "$AWS_SITE_SOURCE_INCLUDE_HIDDEN") == "true" ]]; then
+  # Moving files, including hidden ones.
+  SOURCE_FILES="$GITHUB_WORKSPACE/$AWS_SITE_SOURCE_FOLDER"
+  rsync -av $SOURCE_FILES/ "${GITHUB_ACTION_PATH}/upload"
+  SOURCE_FILES="${GITHUB_ACTION_PATH}/upload"
+else
+  # Moving files, excluding hidden ones.
+  SOURCE_FILES="$GITHUB_WORKSPACE/$AWS_SITE_SOURCE_FOLDER"
+  rsync -av --exclude=".*" $SOURCE_FILES/ "${GITHUB_ACTION_PATH}/upload"
+  SOURCE_FILES="${GITHUB_ACTION_PATH}/upload"
+fi
 
 # Generate TF_STATE_BUCKET ID if empty 
 if [ -z "${TF_STATE_BUCKET}" ]; then

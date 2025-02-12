@@ -52,6 +52,9 @@ inputs:
   aws_site_source_folder:
     description: 'Source folder for files to be published. Will ignore any hidden file. Defaults to root folder of the calling repo if nothing defined.'
     required: true
+  aws_site_source_include_hidden:
+    description: 'Include hidden files in the source folder. Defaults to `false`'
+    required: false 
   aws_site_root_object:
     description: 'Root object to be served as entry-point. Defaults to `index.html`'
     required: false
@@ -123,6 +126,7 @@ runs:
         TF_STATE_BUCKET_DESTROY: ${{ inputs.tf_state_bucket_destroy }}
         # Site
         AWS_SITE_SOURCE_FOLDER: ${{ inputs.aws_site_source_folder }}
+        AWS_SITE_SOURCE_INCLUDE_HIDDEN: ${{ inputs.aws_site_source_include_hidden }}
         AWS_SITE_ROOT_OBJECT: ${{ inputs.aws_site_root_object }}
         AWS_SITE_ERROR_DOCUMENT: ${{ inputs.aws_site_error_document }}
         AWS_SITE_BUCKET_NAME: ${{ inputs.aws_site_bucket_name }}
@@ -142,7 +146,7 @@ runs:
         echo "::endgroup::"
 
     - name: Setup Terraform
-      uses: hashicorp/setup-terraform@v2
+      uses: hashicorp/setup-terraform@v3
 
     - name: Terraform Init
       id: init

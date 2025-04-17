@@ -240,7 +240,7 @@ resource "aws_cloudfront_distribution" "cdn_static_site" {
     }
   }
   
-  aliases = local.final_aliases
+  aliases = [ var.aws_site_cdn_aliases != "" ? var.aws_site_cdn_aliases :  var.aws_r53_root_domain_deploy ? "${var.aws_r53_domain_name}" : "${var.aws_r53_sub_domain_name}.${var.aws_r53_domain_name}" ]
 
   viewer_certificate {
     acm_certificate_arn      = local.selected_arn
@@ -255,12 +255,6 @@ resource "aws_cloudfront_distribution" "cdn_static_site" {
     aws_acm_certificate.root_domain,
     data.aws_acm_certificate.issued
   ]
-}
-
-locals {
-  decoded_aliases = var.aws_site_cdn_aliases != "{}" ? jsondecode(var.aws_site_cdn_aliases) : null
-  fallback_alias  = var.aws_r53_root_domain_deploy ? "${var.aws_r53_domain_name}" : "${var.aws_r53_sub_domain_name}.${var.aws_r53_domain_name}"
-  final_aliases = local.decoded_aliases != null ? local.decoded_aliases : [ local.fallback_alias ]
 }
 
 ### CDN Access control

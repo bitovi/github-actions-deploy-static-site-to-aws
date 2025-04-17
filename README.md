@@ -44,6 +44,7 @@ Setting `aws_r53_create_sub_cert` to `true` will create a certificate **just for
 
 > :warning: Be very careful here! **Created certificates are fully managed by Terraform**. Therefor **they will be destroyed upon stack destruction**.
 
+> :warning: See note about CDN with aliases if using certificates.
 ## Example usage
 
 Create `.github/workflow/deploy.yaml` with the following to build on push.
@@ -192,6 +193,7 @@ The following inputs can be used as `step.with` keys
 | `aws_site_error_document` | String | Error document set to S3 website config. Defaults to none. Set value to enable it. |
 | `aws_site_bucket_name` | String | AWS S3 bucket name to use for the public files. Defaults to `${org}-${repo}-{branch}-sp`. If using a R53 domain and not a CDN, bucket name will be the FQDN one. See note. |
 | `aws_site_cdn_enabled` | Boolean | Enable or disables the use of CDN. Defaults to `false`. |
+| `aws_site_cdn_aliases` | String | Extra CNAMEs (alternate domain names), if any, for this distribution. Defaults to defined domain if none passed. (See note). |
 | `aws_site_cdn_custom_error_codes` | JSON | Custom error codes to define in CDN. Like `[{\"error_caching_min_ttl\":\"0\",\"error_code\":\"403\",\"response_code\":\"200\",\"response_page_path\":\"/index.html\"}]`. See [this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudfront_distribution.html#custom-error-response-arguments). |
 <hr/>
 <br/>
@@ -228,6 +230,15 @@ Because of this reason, the length of the FQDN *MUST* be below 64 characters. Wi
 > :warning: HTTPS (TLS / SSL) will only be available if using CDN.
 
 In the case you are using domains and not using a CDN, no cert will be available, and length of the FQDN *MUST* be below 64 characters. Will be adjusted if it exceeds that limit. 
+
+## Certificates with CDN
+
+In the case you are using a custom domain name and need to support two alternate domain names, you can use the `aws_site_cdn_aliases`. 
+If using a certificate, keep in mind that you'll need to specify one that covers the domains being defined.  
+
+For example, if the CDN will support `site.bitovi.com` and `site.bitovi.tools`, the same certificate in should cover both *bitovi.com* and *bitovi.tools* domains. (Can use sub-domains too). In that case, you'll need to specify the certificate to use by defining the `aws_r53_cert_arn`.
+
+If they alternate domain names are child of the same domain, you can use a root cert for both. 
 
 ## Contributing
 We would love for you to contribute to [bitovi/github-actions-deploy-static-site-to-aws](https://github.com/bitovi/github-actions-deploy-static-site-to-aws).

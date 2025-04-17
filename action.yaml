@@ -67,6 +67,9 @@ inputs:
   aws_site_cdn_enabled:
     description: 'Enable or disables the use of CDN. Defaults to `false`.'
     required: false
+  aws_site_cdn_aliases:
+    description: 'Extra CNAMEs (alternate domain names), if any, for this distribution. Will default to defined domain if none passed.'
+    required: false
   aws_site_cdn_custom_error_codes:
     description: 'Customize error codes, Definition done with JSON variables'
     required: false
@@ -131,6 +134,7 @@ runs:
         AWS_SITE_ERROR_DOCUMENT: ${{ inputs.aws_site_error_document }}
         AWS_SITE_BUCKET_NAME: ${{ inputs.aws_site_bucket_name }}
         AWS_SITE_CDN_ENABLED: ${{ inputs.aws_site_cdn_enabled }}
+        AWS_SITE_CDN_ALIASES: ${{ inputs.aws_site_cdn_aliases }}
         AWS_SITE_CDN_CUSTOM_ERROR_CODES: ${{ inputs.aws_site_cdn_custom_error_codes }}
         # AWS Route53 Domains abd Certificates
         AWS_R53_DOMAIN_NAME: ${{ inputs.aws_r53_domain_name }}

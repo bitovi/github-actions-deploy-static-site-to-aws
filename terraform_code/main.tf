@@ -240,7 +240,7 @@ resource "aws_cloudfront_distribution" "cdn_static_site" {
     }
   }
   
-  aliases = [ var.aws_r53_root_domain_deploy ? "${var.aws_r53_domain_name}" : "${var.aws_r53_sub_domain_name}.${var.aws_r53_domain_name}" ]
+  aliases =  var.aws_site_cdn_aliases != "" ? local.parsed_aliases : [ var.aws_r53_root_domain_deploy ? "${var.aws_r53_domain_name}" : "${var.aws_r53_sub_domain_name}.${var.aws_r53_domain_name}" ]
 
   viewer_certificate {
     acm_certificate_arn      = local.selected_arn
@@ -256,6 +256,11 @@ resource "aws_cloudfront_distribution" "cdn_static_site" {
     data.aws_acm_certificate.issued
   ]
 }
+
+locals {
+  parsed_aliases = [for n in split(",", var.aws_site_cdn_aliases) : (n)] 
+}
+
 
 ### CDN Access control
 resource "aws_cloudfront_origin_access_control" "default" {

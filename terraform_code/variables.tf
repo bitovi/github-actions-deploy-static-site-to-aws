@@ -49,6 +49,12 @@ variable "aws_site_cdn_enabled" {
   default     = false
 }
 
+variable "aws_site_cdn_aliases" {
+  description = "Aliases or CNAMES for CDN"
+  type        = string
+  default     = ""
+}
+
 variable "aws_site_cdn_custom_error_codes" {
   description = "Custom error codes for site"
   type        = string

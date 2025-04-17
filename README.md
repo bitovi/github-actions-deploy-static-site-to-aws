@@ -236,7 +236,7 @@ In the case you are using domains and not using a CDN, no cert will be available
 In the case you are using a custom domain name and need to support two alternate domain names, you can use the `aws_site_cdn_aliases`. 
 If using a certificate, keep in mind that you'll need to specify one that covers the domains being defined.  
 
-For example, if the CDN will support `site.bitovi.com` and `site.bitovi.tools`, the same certificate in should cover both *bitovi.com* and *bitovi.tools* domains. (Can use sub-domains too). In that case, you'll need to specify the certificate to use by defining the `aws_r53_cert_arn`.
+For example, if the CDN will support `site.bitovi.com` and `site.bitovi.tools`, the same certificate must should cover both *bitovi.com* and *bitovi.tools* domains. (You can use sub-domains too). In that case, you'll need to specify the certificate by defining the `aws_r53_cert_arn`.
 
 If they alternate domain names are child of the same domain, you can use a root cert for both. 
 

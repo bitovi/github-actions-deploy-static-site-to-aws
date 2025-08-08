@@ -20,12 +20,12 @@ resource "aws_s3_bucket_website_configuration" "aws_site_website_bucket" {
 
 ## Only create this two IF -> R53 FQDN provided and CDN is off - for www.* support
 resource "aws_s3_bucket" "aws_site_website_bucket_www" {
-  count  = var.aws_site_cdn_enabled ? 0 : var.aws_r53_root_domain_deploy ? 1 : 0 
+  count  = var.aws_site_cdn_enabled ? 0 : var.aws_r53_root_domain_deploy ? 1 : 0
   bucket = "www.${local.s3_bucket_name}"
 }
 
 resource "aws_s3_bucket_website_configuration" "aws_site_website_bucket_www" {
-  count  = var.aws_site_cdn_enabled ? 0 : var.aws_r53_root_domain_deploy ? 1 : 0 
+  count  = var.aws_site_cdn_enabled ? 0 : var.aws_r53_root_domain_deploy ? 1 : 0
   bucket = aws_s3_bucket.aws_site_website_bucket_www[0].id
   redirect_all_requests_to {
     host_name = local.s3_bucket_name
@@ -37,15 +37,15 @@ resource "aws_s3_bucket_public_access_block" "aws_site_website_bucket" {
   bucket                  = aws_s3_bucket.aws_site_website_bucket.id
   block_public_policy     = false
   restrict_public_buckets = false
-  depends_on = [ aws_s3_bucket.aws_site_website_bucket ]
+  depends_on              = [aws_s3_bucket.aws_site_website_bucket]
 }
 ## Same, but if www bucket is created
 resource "aws_s3_bucket_public_access_block" "aws_site_website_bucket_www" {
-  count  = var.aws_site_cdn_enabled ? 0 : var.aws_r53_root_domain_deploy ? 1 : 0 
+  count                   = var.aws_site_cdn_enabled ? 0 : var.aws_r53_root_domain_deploy ? 1 : 0
   bucket                  = aws_s3_bucket.aws_site_website_bucket_www[0].id
   block_public_policy     = false
   restrict_public_buckets = false
-  depends_on = [ aws_s3_bucket.aws_site_website_bucket_www ]
+  depends_on              = [aws_s3_bucket.aws_site_website_bucket_www]
 }
 
 # Tool to identify file types
@@ -72,14 +72,14 @@ resource "aws_s3_object" "aws_site_website_bucket" {
 data "aws_iam_policy_document" "aws_site_bucket_public_access_dns" {
   count = var.aws_site_cdn_enabled ? 0 : 1
   statement {
-    actions = ["s3:GetObject"]
+    actions   = ["s3:GetObject"]
     resources = ["${aws_s3_bucket.aws_site_website_bucket.arn}/*"]
     principals {
       identifiers = ["*"]
-      type = "AWS"
+      type        = "AWS"
     }
   }
-  depends_on = [ aws_s3_bucket_public_access_block.aws_site_website_bucket ]
+  depends_on = [aws_s3_bucket_public_access_block.aws_site_website_bucket]
 }
 
 # Policy failed due to bucket not fully created. Added this delay for it. 
@@ -95,7 +95,7 @@ resource "null_resource" "delay" {
 }
 
 resource "aws_s3_bucket_policy" "aws_site_website_bucket_policy_dns" {
-  count = var.aws_site_cdn_enabled ? 0 : 1
+  count  = var.aws_site_cdn_enabled ? 0 : 1
   bucket = aws_s3_bucket.aws_site_website_bucket.id
   policy = data.aws_iam_policy_document.aws_site_bucket_public_access_dns[0].json
   depends_on = [
@@ -122,14 +122,14 @@ data "aws_iam_policy_document" "aws_site_website_bucket" {
       values   = length(aws_cloudfront_distribution.cdn_static_site) > 0 ? [aws_cloudfront_distribution.cdn_static_site[0].arn] : [aws_cloudfront_distribution.cdn_static_site_default_cert[0].arn]
     }
   }
-  depends_on = [ aws_s3_bucket_public_access_block.aws_site_website_bucket ]
+  depends_on = [aws_s3_bucket_public_access_block.aws_site_website_bucket]
 }
 
 resource "aws_s3_bucket_policy" "aws_site_website_bucket_policy" {
-  count  = var.aws_site_cdn_enabled ? 1 : 0
-  bucket = aws_s3_bucket.aws_site_website_bucket.id
-  policy = data.aws_iam_policy_document.aws_site_website_bucket[0].json
-  depends_on = [ aws_s3_bucket_public_access_block.aws_site_website_bucket ]
+  count      = var.aws_site_cdn_enabled ? 1 : 0
+  bucket     = aws_s3_bucket.aws_site_website_bucket.id
+  policy     = data.aws_iam_policy_document.aws_site_website_bucket[0].json
+  depends_on = [aws_s3_bucket_public_access_block.aws_site_website_bucket]
 }
 
 
@@ -137,14 +137,14 @@ resource "aws_s3_bucket_policy" "aws_site_website_bucket_policy" {
 
 ### CDN Without DNS
 resource "aws_cloudfront_distribution" "cdn_static_site_default_cert" {
-  count               = var.aws_site_cdn_enabled ? ( local.cert_available ? 0 : 1 ) : 0
+  count               = var.aws_site_cdn_enabled ? (local.cert_available ? 0 : 1) : 0
   enabled             = true
   is_ipv6_enabled     = true
-  default_root_object = var.aws_site_root_object 
+  default_root_object = var.aws_site_root_object
   comment             = "CDN for ${local.s3_bucket_name} static"
 
   origin {
-    domain_name              = aws_s3_bucket.aws_site_website_bucket.bucket_regional_domain_name
+    domain_name              = aws_s3_bucket.aws_site_website_bucket.website_endpoint
     origin_id                = "aws_site_bucket_origin"
     origin_access_control_id = aws_cloudfront_origin_access_control.default[0].id
   }
@@ -184,18 +184,18 @@ resource "aws_cloudfront_distribution" "cdn_static_site_default_cert" {
       response_page_path    = try(custom_error_response.value.response_page_path, null)
     }
   }
-  
+
   viewer_certificate {
-    cloudfront_default_certificate = true 
+    cloudfront_default_certificate = true
   }
 }
 
 ### CDN with custom DNS
 resource "aws_cloudfront_distribution" "cdn_static_site" {
-  count               = var.aws_site_cdn_enabled ? ( local.cert_available ? 1 : 0 ) : 0
+  count               = var.aws_site_cdn_enabled ? (local.cert_available ? 1 : 0) : 0
   enabled             = true
   is_ipv6_enabled     = true
-  default_root_object = var.aws_site_root_object 
+  default_root_object = var.aws_site_root_object
   comment             = "CDN for ${local.s3_bucket_name}"
 
   origin {
@@ -239,8 +239,8 @@ resource "aws_cloudfront_distribution" "cdn_static_site" {
       response_page_path    = try(custom_error_response.value.response_page_path, null)
     }
   }
-  
-  aliases =  var.aws_site_cdn_aliases != "" ? local.parsed_aliases : [ var.aws_r53_root_domain_deploy ? "${var.aws_r53_domain_name}" : "${var.aws_r53_sub_domain_name}.${var.aws_r53_domain_name}" ]
+
+  aliases = var.aws_site_cdn_aliases != "" ? local.parsed_aliases : [var.aws_r53_root_domain_deploy ? "${var.aws_r53_domain_name}" : "${var.aws_r53_sub_domain_name}.${var.aws_r53_domain_name}"]
 
   viewer_certificate {
     acm_certificate_arn      = local.selected_arn
@@ -258,14 +258,14 @@ resource "aws_cloudfront_distribution" "cdn_static_site" {
 }
 
 locals {
-  parsed_aliases = [for n in split(",", var.aws_site_cdn_aliases) : (n)] 
+  parsed_aliases = [for n in split(",", var.aws_site_cdn_aliases) : (n)]
 }
 
 
 ### CDN Access control
 resource "aws_cloudfront_origin_access_control" "default" {
   count                             = var.aws_site_cdn_enabled ? 1 : 0
-  name                              = "${local.s3_bucket_name}"
+  name                              = local.s3_bucket_name
   description                       = "Cloudfront OAC for ${local.s3_bucket_name} - ${var.aws_resource_identifier}"
   origin_access_control_origin_type = "s3"
   signing_behavior                  = "always"
@@ -326,8 +326,8 @@ resource "aws_route53_record" "www-a" {
 ###
 
 locals {
-  r53_alias_name = var.aws_site_cdn_enabled ? try(aws_cloudfront_distribution.cdn_static_site[0].domain_name,"") : aws_s3_bucket_website_configuration.aws_site_website_bucket.website_domain
-  r53_alias_id   = var.aws_site_cdn_enabled ? try(aws_cloudfront_distribution.cdn_static_site[0].hosted_zone_id,"") : aws_s3_bucket.aws_site_website_bucket.hosted_zone_id
+  r53_alias_name = var.aws_site_cdn_enabled ? try(aws_cloudfront_distribution.cdn_static_site[0].domain_name, "") : aws_s3_bucket_website_configuration.aws_site_website_bucket.website_domain
+  r53_alias_id   = var.aws_site_cdn_enabled ? try(aws_cloudfront_distribution.cdn_static_site[0].hosted_zone_id, "") : aws_s3_bucket.aws_site_website_bucket.hosted_zone_id
 }
 
 # CERTIFICATE STUFF
@@ -336,7 +336,7 @@ data "aws_acm_certificate" "issued" {
   for_each = local.cert_available && local.fqdn_provided ? {
     "domain" : var.aws_r53_domain_name,
     "wildcard" : "*.${var.aws_r53_domain_name}"
-    "sub": "${var.aws_r53_sub_domain_name}.${var.aws_r53_domain_name}"
+    "sub" : "${var.aws_r53_sub_domain_name}.${var.aws_r53_domain_name}"
   } : {}
   domain = var.aws_r53_domain_name
 }
@@ -368,13 +368,13 @@ resource "aws_acm_certificate_validation" "root_domain" {
 
 # This block will create and validate the sub domain cert ONLY
 resource "aws_acm_certificate" "sub_domain" {
-  count             = var.aws_r53_enable_cert ? (var.aws_r53_create_sub_cert ? (var.aws_r53_domain_name != "" ? (var.aws_r53_sub_domain_name != "" ? (var.aws_r53_create_root_cert ?  0 : 1 ) : 0) : 0) : 0) :0
+  count             = var.aws_r53_enable_cert ? (var.aws_r53_create_sub_cert ? (var.aws_r53_domain_name != "" ? (var.aws_r53_sub_domain_name != "" ? (var.aws_r53_create_root_cert ? 0 : 1) : 0) : 0) : 0) : 0
   domain_name       = "${var.aws_r53_sub_domain_name}.${var.aws_r53_domain_name}"
   validation_method = "DNS"
 }
 
 resource "aws_route53_record" "sub_domain" {
-  count           = var.aws_r53_enable_cert ? (var.aws_r53_create_sub_cert ? (var.aws_r53_domain_name != "" ? (var.aws_r53_sub_domain_name != "" ? (var.aws_r53_create_root_cert ?  0 : 1 ) : 0) : 0) : 0) :0
+  count           = var.aws_r53_enable_cert ? (var.aws_r53_create_sub_cert ? (var.aws_r53_domain_name != "" ? (var.aws_r53_sub_domain_name != "" ? (var.aws_r53_create_root_cert ? 0 : 1) : 0) : 0) : 0) : 0
   allow_overwrite = true
   name            = tolist(aws_acm_certificate.sub_domain[0].domain_validation_options)[0].resource_record_name
   records         = [tolist(aws_acm_certificate.sub_domain[0].domain_validation_options)[0].resource_record_value]
@@ -384,7 +384,7 @@ resource "aws_route53_record" "sub_domain" {
 }
 
 resource "aws_acm_certificate_validation" "sub_domain" {
-  count                   = var.aws_r53_enable_cert ? (var.aws_r53_create_sub_cert ? (var.aws_r53_domain_name != "" ? (var.aws_r53_create_root_cert ?  0 : 1) : 0) : 0) :0
+  count                   = var.aws_r53_enable_cert ? (var.aws_r53_create_sub_cert ? (var.aws_r53_domain_name != "" ? (var.aws_r53_create_root_cert ? 0 : 1) : 0) : 0) : 0
   certificate_arn         = aws_acm_certificate.sub_domain[0].arn
   validation_record_fqdns = [for record in aws_route53_record.sub_domain : record.fqdn]
 }
@@ -393,14 +393,14 @@ resource "aws_acm_certificate_validation" "sub_domain" {
 ### Some locals for parsing details
 locals {
   selected_arn = (
-    var.aws_r53_enable_cert && local.fqdn_provided ? 
+    var.aws_r53_enable_cert && local.fqdn_provided ?
     (var.aws_r53_cert_arn != "" ? var.aws_r53_cert_arn :
       (!var.aws_r53_create_root_cert ?
         (!var.aws_r53_create_sub_cert ?
           (local.fqdn_provided ? local.acm_arn : "")
           : aws_acm_certificate.sub_domain[0].arn
         ) : aws_acm_certificate.root_domain[0].arn
-      ) 
+      )
     ) : ""
   )
   cert_available = (
@@ -419,7 +419,7 @@ locals {
     (var.aws_r53_sub_domain_name != "" ?
       true :
       var.aws_r53_root_domain_deploy ? true : false
-    ) : 
+    ) :
     false
   )
 
@@ -436,8 +436,8 @@ locals {
 
   # IF FQDN bucket length exceeds 63 chars, will use default identifier
   s3_bucket_name = local.fqdn_provided ? local.r53_fqdn : local.s3_default_name
-  
-  s3_default_name = var.aws_site_bucket_name != "" ? ( length(var.aws_site_bucket_name) < 63 ? var.aws_site_bucket_name : "${var.aws_resource_identifier}-sp") : "${var.aws_resource_identifier}-sp"
+
+  s3_default_name = var.aws_site_bucket_name != "" ? (length(var.aws_site_bucket_name) < 63 ? var.aws_site_bucket_name : "${var.aws_resource_identifier}-sp") : "${var.aws_resource_identifier}-sp"
 
   r53_fqdn = var.aws_r53_root_domain_deploy ? var.aws_r53_domain_name : local.fqdn_bucket_name
 
@@ -446,23 +446,23 @@ locals {
   aws_r53_fqdn_full  = "${var.aws_r53_sub_domain_name}.${var.aws_r53_domain_name}"
   aws_r53_fqdn_short = "${var.aws_resource_identifier_supershort}.${var.aws_r53_domain_name}"
   # Get lengths of the different bucket names strings
-  aws_r53_fqdn_full_length = length(local.aws_r53_fqdn_full)
+  aws_r53_fqdn_full_length  = length(local.aws_r53_fqdn_full)
   aws_r53_fqdn_short_length = length("${var.aws_resource_identifier_supershort}.${var.aws_r53_domain_name}")
   # IF the shortest string is still too long, get how much char's we should remove and do so.
-  aws_r53_fqdn_ss_remove = tonumber( local.aws_r53_fqdn_short_length - 63 > 0 ? local.aws_r53_fqdn_short_length - 63 : 0 )
-  aws_r53_fqdn_ss = substr(local.aws_r53_fqdn_short, 0, local.aws_r53_fqdn_ss_remove)
+  aws_r53_fqdn_ss_remove = tonumber(local.aws_r53_fqdn_short_length - 63 > 0 ? local.aws_r53_fqdn_short_length - 63 : 0)
+  aws_r53_fqdn_ss        = substr(local.aws_r53_fqdn_short, 0, local.aws_r53_fqdn_ss_remove)
   ####
 
   # Final URL Generator
-  cdn_site_url = var.aws_site_cdn_enabled ? ( local.selected_arn != "" ? coalesce(aws_cloudfront_distribution.cdn_static_site[0].aliases...) : aws_cloudfront_distribution.cdn_static_site_default_cert[0].domain_name ) : ""
+  cdn_site_url = var.aws_site_cdn_enabled ? (local.selected_arn != "" ? coalesce(aws_cloudfront_distribution.cdn_static_site[0].aliases...) : aws_cloudfront_distribution.cdn_static_site_default_cert[0].domain_name) : ""
   # Set to shorten url variable
   s3_endpoint = aws_s3_bucket_website_configuration.aws_site_website_bucket.website_endpoint
 
   #url = local.fqdn_provided ? local.r53_fqdn : (var.aws_site_cdn_enabled ? local.cdn_site_url : local.s3_endpoint )
 
-  url = var.aws_site_cdn_enabled ? local.cdn_site_url : ( local.fqdn_provided ? local.r53_fqdn : local.s3_endpoint )
+  url = var.aws_site_cdn_enabled ? local.cdn_site_url : (local.fqdn_provided ? local.r53_fqdn : local.s3_endpoint)
 
-  protocol = local.cert_available ? ( var.aws_site_cdn_enabled ?  "https://" : "http://" ) : "http://" 
+  protocol = local.cert_available ? (var.aws_site_cdn_enabled ? "https://" : "http://") : "http://"
 
   public_url = "${local.protocol}${local.url}"
 }

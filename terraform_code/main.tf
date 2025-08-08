@@ -37,6 +37,8 @@ resource "aws_s3_bucket_public_access_block" "aws_site_website_bucket" {
   bucket                  = aws_s3_bucket.aws_site_website_bucket.id
   block_public_policy     = false
   restrict_public_buckets = false
+  block_public_acls       = false
+  ignore_public_acls      = false
   depends_on              = [aws_s3_bucket.aws_site_website_bucket]
 }
 ## Same, but if www bucket is created
@@ -45,6 +47,8 @@ resource "aws_s3_bucket_public_access_block" "aws_site_website_bucket_www" {
   bucket                  = aws_s3_bucket.aws_site_website_bucket_www[0].id
   block_public_policy     = false
   restrict_public_buckets = false
+  block_public_acls       = false
+  ignore_public_acls      = false
   depends_on              = [aws_s3_bucket.aws_site_website_bucket_www]
 }
 
@@ -110,16 +114,12 @@ resource "aws_s3_bucket_policy" "aws_site_website_bucket_policy_dns" {
 data "aws_iam_policy_document" "aws_site_website_bucket" {
   count = var.aws_site_cdn_enabled ? 1 : 0
   statement {
+    sid       = "AllowPublicReadForWebsite"
     actions   = ["s3:GetObject"]
     resources = ["${aws_s3_bucket.aws_site_website_bucket.arn}/*"]
     principals {
-      type        = "Service"
-      identifiers = ["cloudfront.amazonaws.com"]
-    }
-    condition {
-      test     = "StringEquals"
-      variable = "aws:SourceArn"
-      values   = length(aws_cloudfront_distribution.cdn_static_site) > 0 ? [aws_cloudfront_distribution.cdn_static_site[0].arn] : [aws_cloudfront_distribution.cdn_static_site_default_cert[0].arn]
+      type        = "AWS"
+      identifiers = ["*"]
     }
   }
   depends_on = [aws_s3_bucket_public_access_block.aws_site_website_bucket]

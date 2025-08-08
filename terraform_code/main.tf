@@ -144,7 +144,7 @@ resource "aws_cloudfront_distribution" "cdn_static_site_default_cert" {
   comment             = "CDN for ${local.s3_bucket_name} static"
 
   origin {
-    domain_name              = aws_s3_bucket.aws_site_website_bucket.website_endpoint
+    domain_name              = aws_s3_bucket_website_configuration.aws_site_website_bucket.website_endpoint
     origin_id                = "aws_site_bucket_origin"
     origin_access_control_id = aws_cloudfront_origin_access_control.default[0].id
   }
@@ -199,7 +199,7 @@ resource "aws_cloudfront_distribution" "cdn_static_site" {
   comment             = "CDN for ${local.s3_bucket_name}"
 
   origin {
-    domain_name              = aws_s3_bucket.aws_site_website_bucket.bucket_regional_domain_name
+    domain_name              = aws_s3_bucket_website_configuration.aws_site_website_bucket.website_endpoint
     origin_id                = "aws_site_bucket_origin"
     origin_access_control_id = aws_cloudfront_origin_access_control.default[0].id
   }

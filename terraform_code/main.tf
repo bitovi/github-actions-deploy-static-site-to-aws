@@ -144,9 +144,15 @@ resource "aws_cloudfront_distribution" "cdn_static_site_default_cert" {
   comment             = "CDN for ${local.s3_bucket_name} static"
 
   origin {
-    domain_name              = aws_s3_bucket_website_configuration.aws_site_website_bucket.website_endpoint
-    origin_id                = "aws_site_bucket_origin"
-    origin_access_control_id = aws_cloudfront_origin_access_control.default[0].id
+    domain_name = aws_s3_bucket_website_configuration.aws_site_website_bucket.website_endpoint
+    origin_id   = "aws_site_bucket_origin"
+
+    custom_origin_config {
+      http_port              = 80
+      https_port             = 443
+      origin_protocol_policy = "http-only"
+      origin_ssl_protocols   = ["TLSv1.2"]
+    }
   }
 
   default_cache_behavior {
@@ -199,9 +205,15 @@ resource "aws_cloudfront_distribution" "cdn_static_site" {
   comment             = "CDN for ${local.s3_bucket_name}"
 
   origin {
-    domain_name              = aws_s3_bucket_website_configuration.aws_site_website_bucket.website_endpoint
-    origin_id                = "aws_site_bucket_origin"
-    origin_access_control_id = aws_cloudfront_origin_access_control.default[0].id
+    domain_name = aws_s3_bucket_website_configuration.aws_site_website_bucket.website_endpoint
+    origin_id   = "aws_site_bucket_origin"
+
+    custom_origin_config {
+      http_port              = 80
+      https_port             = 443
+      origin_protocol_policy = "http-only"
+      origin_ssl_protocols   = ["TLSv1.2"]
+    }
   }
 
   default_cache_behavior {

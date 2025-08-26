@@ -97,6 +97,7 @@ aws_site_bucket_name=$(generate_var aws_site_bucket_name $AWS_SITE_BUCKET_NAME)
 aws_site_cdn_enabled=$(generate_var aws_site_cdn_enabled $AWS_SITE_CDN_ENABLED)
 aws_site_cdn_aliases=$(generate_var aws_site_cdn_aliases $AWS_SITE_CDN_ALIASES)
 aws_site_cdn_custom_error_codes=$(generate_var aws_site_cdn_custom_error_codes $AWS_SITE_CDN_CUSTOM_ERROR_CODES)
+aws_site_cdn_response_headers_policy_id=$(generate_var aws_site_cdn_response_headers_policy_id $AWS_SITE_CDN_RESPONSE_HEADERS_POLICY_ID)
 aws_site_root_object=$(generate_var aws_site_root_object $AWS_SITE_ROOT_OBJECT)
 aws_site_error_document=$(generate_var aws_site_error_document $AWS_SITE_ERROR_DOCUMENT)
 aws_r53_domain_name=$(generate_var aws_r53_domain_name $AWS_R53_DOMAIN_NAME)
@@ -119,6 +120,7 @@ $aws_site_bucket_name
 $aws_site_cdn_enabled
 $aws_site_cdn_aliases
 $aws_site_cdn_custom_error_codes
+$aws_site_cdn_response_headers_policy_id
 $aws_site_root_object
 $aws_site_error_document
 $aws_r53_domain_name

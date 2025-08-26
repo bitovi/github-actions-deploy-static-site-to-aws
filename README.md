@@ -62,7 +62,7 @@ jobs:
 
     steps:
     - name: Create deploy-bucket
-      uses: bitovi/github-actions-deploy-static-site-to-aws@v0.2.3
+      uses: bitovi/github-actions-deploy-static-site-to-aws@v0.2.7
       with:
         aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -91,7 +91,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Create deploy-bucket
-        uses: bitovi/github-actions-deploy-static-site-to-aws@v0.2.3
+        uses: bitovi/github-actions-deploy-static-site-to-aws@v0.2.7
         with:
           aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -106,6 +106,7 @@ jobs:
 
           aws_site_cdn_enabled: true
           aws_site_cdn_custom_error_codes: '[{\"error_caching_min_ttl\":\"0\",\"error_code\":\"403\",\"response_code\":\"200\",\"response_page_path\":\"/index.html\"},{\"error_caching_min_ttl\":\"0\",\"error_code\":\"404\",\"response_code\":\"404\",\"response_page_path\":\"/custom_404.html\"}]'
+          aws_site_cdn_response_headers_policy_id: "eaab4381-ed33-4a86-88ca-d9558dc6cd63"
 
           aws_r53_domain_name: bitovi-sandbox.com
           aws_r53_sub_domain_name: catalog-mfe
@@ -117,7 +118,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Create deploy-bucket
-        uses: bitovi/github-actions-deploy-static-site-to-aws@v0.2.3
+        uses: bitovi/github-actions-deploy-static-site-to-aws@v0.2.7
         with:
           aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -195,7 +196,7 @@ The following inputs can be used as `step.with` keys
 | `aws_site_cdn_enabled` | Boolean | Enable or disables the use of CDN. Defaults to `false`. |
 | `aws_site_cdn_aliases` | String | Extra CNAMEs (alternate domain names), if any, for this distribution. Defaults to defined domain if none passed. (See note). |
 | `aws_site_cdn_custom_error_codes` | JSON | Custom error codes to define in CDN. Like `[{\"error_caching_min_ttl\":\"0\",\"error_code\":\"403\",\"response_code\":\"200\",\"response_page_path\":\"/index.html\"}]`. See [this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudfront_distribution.html#custom-error-response-arguments). |
-| `aws_site_cdn_response_headers_policy_id` | String | Comma separated list of response headers policy IDs for CloudFront. Eg. `Managed-CORS-with-preflight-and-SecurityHeadersPolicy` is `67f7725c-6f97-4210-82d7-5512b31e9d42`. |
+| `aws_site_cdn_response_headers_policy_id` | String | Comma separated list of response headers policy IDs for CloudFront. Eg. `Managed-CORS-with-preflight-and-SecurityHeadersPolicy` is `eaab4381-ed33-4a86-88ca-d9558dc6cd63`. |
 <hr/>
 <br/>
 

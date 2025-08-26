@@ -31,6 +31,12 @@ variable "aws_site_root_object" {
   default     = "index.html"
 }
 
+variable "aws_site_error_document" {
+  description = "Error document. Defaults to none"
+  type        = string
+  default     = ""
+}
+
 variable "aws_site_bucket_name" {
   description = "Bucket name where all the files will be stored."
   type        = string
@@ -41,6 +47,18 @@ variable "aws_site_cdn_enabled" {
   description = "Enable or not CDN for site"
   type        = bool
   default     = false
+}
+
+variable "aws_site_cdn_aliases" {
+  description = "Aliases or CNAMES for CDN"
+  type        = string
+  default     = ""
+}
+
+variable "aws_site_cdn_custom_error_codes" {
+  description = "Custom error codes for site"
+  type        = string
+  default     = "{}"
 }
 
 variable "aws_r53_domain_name" {

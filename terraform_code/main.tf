@@ -9,6 +9,13 @@ resource "aws_s3_bucket_website_configuration" "aws_site_website_bucket" {
   index_document {
     suffix = var.aws_site_root_object
   }
+
+  dynamic "error_document" {
+    for_each = var.aws_site_error_document != "" ? [1] : []
+    content {
+      key = var.aws_site_error_document
+    }
+  }
 }
 
 ## Only create this two IF -> R53 FQDN provided and CDN is off - for www.* support
@@ -134,7 +141,7 @@ resource "aws_cloudfront_distribution" "cdn_static_site_default_cert" {
   enabled             = true
   is_ipv6_enabled     = true
   default_root_object = var.aws_site_root_object 
-  comment             = "CDN for ${var.aws_site_bucket_name} static"
+  comment             = "CDN for ${local.s3_bucket_name} static"
 
   origin {
     domain_name              = aws_s3_bucket.aws_site_website_bucket.bucket_regional_domain_name
@@ -167,6 +174,17 @@ resource "aws_cloudfront_distribution" "cdn_static_site_default_cert" {
     }
   }
 
+  dynamic "custom_error_response" {
+    for_each = { for idx, val in local.aws_site_cdn_custom_error_codes : idx => val }
+
+    content {
+      error_caching_min_ttl = try(custom_error_response.value.error_caching_min_ttl, null)
+      error_code            = custom_error_response.value.error_code
+      response_code         = try(custom_error_response.value.response_code, null)
+      response_page_path    = try(custom_error_response.value.response_page_path, null)
+    }
+  }
+  
   viewer_certificate {
     cloudfront_default_certificate = true 
   }
@@ -178,7 +196,7 @@ resource "aws_cloudfront_distribution" "cdn_static_site" {
   enabled             = true
   is_ipv6_enabled     = true
   default_root_object = var.aws_site_root_object 
-  comment             = "CDN for ${var.aws_site_bucket_name}"
+  comment             = "CDN for ${local.s3_bucket_name}"
 
   origin {
     domain_name              = aws_s3_bucket.aws_site_website_bucket.bucket_regional_domain_name
@@ -211,7 +229,18 @@ resource "aws_cloudfront_distribution" "cdn_static_site" {
     }
   }
 
-  aliases = [ var.aws_r53_root_domain_deploy ? "${var.aws_r53_domain_name}" : "${var.aws_r53_sub_domain_name}.${var.aws_r53_domain_name}" ]
+  dynamic "custom_error_response" {
+    for_each = { for idx, val in local.aws_site_cdn_custom_error_codes : idx => val }
+
+    content {
+      error_caching_min_ttl = try(custom_error_response.value.error_caching_min_ttl, null)
+      error_code            = custom_error_response.value.error_code
+      response_code         = try(custom_error_response.value.response_code, null)
+      response_page_path    = try(custom_error_response.value.response_page_path, null)
+    }
+  }
+  
+  aliases =  var.aws_site_cdn_aliases != "" ? local.parsed_aliases : [ var.aws_r53_root_domain_deploy ? "${var.aws_r53_domain_name}" : "${var.aws_r53_sub_domain_name}.${var.aws_r53_domain_name}" ]
 
   viewer_certificate {
     acm_certificate_arn      = local.selected_arn
@@ -228,11 +257,16 @@ resource "aws_cloudfront_distribution" "cdn_static_site" {
   ]
 }
 
+locals {
+  parsed_aliases = [for n in split(",", var.aws_site_cdn_aliases) : (n)] 
+}
+
+
 ### CDN Access control
 resource "aws_cloudfront_origin_access_control" "default" {
   count                             = var.aws_site_cdn_enabled ? 1 : 0
-  name                              = "${var.aws_resource_identifier_supershort} - Cloudfront OAC"
-  description                       = "Cloudfront OAC for ${var.aws_resource_identifier}"
+  name                              = "${local.s3_bucket_name}"
+  description                       = "Cloudfront OAC for ${local.s3_bucket_name} - ${var.aws_resource_identifier}"
   origin_access_control_origin_type = "s3"
   signing_behavior                  = "always"
   signing_protocol                  = "sigv4"
@@ -388,6 +422,9 @@ locals {
     ) : 
     false
   )
+
+  ### Converting JSON to map of strings as GH Actions don't accept map of strings
+  aws_site_cdn_custom_error_codes = jsondecode(var.aws_site_cdn_custom_error_codes)
 
   ### Try looking up for the cert with different names
   acm_arn = try(data.aws_acm_certificate.issued["domain"].arn, try(data.aws_acm_certificate.issued["wildcard"].arn, data.aws_acm_certificate.issued["sub"].arn, ""))

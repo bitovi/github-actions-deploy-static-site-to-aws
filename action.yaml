@@ -33,7 +33,13 @@ inputs:
 
   # Terraform options
   tf_action: 
-    desctiption: 'Option to run Terraform apply / destroy option. Will run plan if nothing defined.'
+    description: 'Option to run Terraform apply / destroy option. Will run plan if nothing defined.'
+    required: false
+  tf_state_file_name:
+    description: 'Change this to be anything you want to. Carefull to be consistent here. A missing file could trigger recreation, or stepping over destruction of non-defined objects.'
+    required: false
+  tf_state_file_name_append:
+    description: 'Append a string to the tf-state-file. Setting this to `unique` will generate `tf-state-aws-unique`. Can co-exist with the tf_state_file_name variable. '
     required: false
   tf_state_bucket:
     description: 'AWS S3 bucket to use for Terraform state. Defaults to `${org}-${repo}-{branch}-tf-state`'
@@ -46,14 +52,26 @@ inputs:
   aws_site_source_folder:
     description: 'Source folder for files to be published. Will ignore any hidden file. Defaults to root folder of the calling repo if nothing defined.'
     required: true
+  aws_site_source_include_hidden:
+    description: 'Include hidden files in the source folder. Defaults to `false`'
+    required: false 
   aws_site_root_object:
     description: 'Root object to be served as entry-point. Defaults to `index.html`'
+    required: false
+  aws_site_error_document:
+    description: 'Error document set to S3 website config. Defaults to none.'
     required: false
   aws_site_bucket_name:
     description: ' AWS S3 bucket name to use for the public files. Defaults to `${org}-${repo}-{branch}-sp`'
     required: false
   aws_site_cdn_enabled:
     description: 'Enable or disables the use of CDN. Defaults to `false`.'
+    required: false
+  aws_site_cdn_aliases:
+    description: 'Extra CNAMEs (alternate domain names), if any, for this distribution. Will default to defined domain if none passed.'
+    required: false
+  aws_site_cdn_custom_error_codes:
+    description: 'Customize error codes, Definition done with JSON variables'
     required: false
 
   # AWS Route53 Domains and Certificates
@@ -85,11 +103,11 @@ runs:
   steps:
     - name: Checkout
       if: ${{ inputs.checkout == 'true' }}
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
     - name: Configure AWS Credentials
       if: ${{ inputs.aws_access_key_id != '' }}
-      uses: aws-actions/configure-aws-credentials@v3
+      uses: aws-actions/configure-aws-credentials@v4
       with:
         aws-access-key-id: ${{ inputs.aws_access_key_id }}
         aws-secret-access-key: ${{ inputs.aws_secret_access_key }}
@@ -105,13 +123,19 @@ runs:
         AWS_RESOURCE_IDENTIFIER: ${{ inputs.aws_resource_identifier }}
         AWS_ADDITIONAL_TAGS: ${{ inputs.aws_additional_tags }}
         # TF
+        TF_STATE_FILE_NAME: ${{ inputs.tf_state_file_name }}
+        TF_STATE_FILE_NAME_APPEND: ${{ inputs.tf_state_file_name_append }}
         TF_STATE_BUCKET: ${{ inputs.tf_state_bucket }}
         TF_STATE_BUCKET_DESTROY: ${{ inputs.tf_state_bucket_destroy }}
         # Site
         AWS_SITE_SOURCE_FOLDER: ${{ inputs.aws_site_source_folder }}
+        AWS_SITE_SOURCE_INCLUDE_HIDDEN: ${{ inputs.aws_site_source_include_hidden }}
         AWS_SITE_ROOT_OBJECT: ${{ inputs.aws_site_root_object }}
+        AWS_SITE_ERROR_DOCUMENT: ${{ inputs.aws_site_error_document }}
         AWS_SITE_BUCKET_NAME: ${{ inputs.aws_site_bucket_name }}
         AWS_SITE_CDN_ENABLED: ${{ inputs.aws_site_cdn_enabled }}
+        AWS_SITE_CDN_ALIASES: ${{ inputs.aws_site_cdn_aliases }}
+        AWS_SITE_CDN_CUSTOM_ERROR_CODES: ${{ inputs.aws_site_cdn_custom_error_codes }}
         # AWS Route53 Domains abd Certificates
         AWS_R53_DOMAIN_NAME: ${{ inputs.aws_r53_domain_name }}
         AWS_R53_SUB_DOMAIN_NAME: ${{ inputs.aws_r53_sub_domain_name }}
@@ -126,7 +150,7 @@ runs:
         echo "::endgroup::"
 
     - name: Setup Terraform
-      uses: hashicorp/setup-terraform@v2
+      uses: hashicorp/setup-terraform@v3
 
     - name: Terraform Init
       id: init

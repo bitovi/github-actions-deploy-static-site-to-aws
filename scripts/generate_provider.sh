@@ -10,6 +10,19 @@ set -e
 
 echo "In generate_provider.sh"
 
+function generate_tf_state_file_name () {
+  if [ -n "$TF_STATE_FILE_NAME" ]; then
+    filename="$TF_STATE_FILE_NAME"
+  else
+    filename="tf-state-$1"
+  fi
+
+  if [ -n "$TF_STATE_FILE_NAME_APPEND" ]; then
+    filename="${filename}-${TF_STATE_FILE_NAME_APPEND}"
+  fi
+  echo $filename
+}
+
 echo "
 terraform {
   required_providers {
@@ -26,7 +39,7 @@ terraform {
   backend \"s3\" {
     region  = \"${AWS_DEFAULT_REGION}\"
     bucket  = \"${TF_STATE_BUCKET}\"
-    key     = \"tf-state-site\"
+    key     = \"$(generate_tf_state_file_name site)\"
     encrypt = true #AES-256encryption
   }
 }

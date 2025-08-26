@@ -135,6 +135,12 @@ resource "aws_s3_bucket_policy" "aws_site_website_bucket_policy" {
 
 ### CDN 
 
+locals {
+  aws_site_cdn_response_headers_policy_id = var.aws_site_cdn_response_headers_policy_id != "" ? [
+    for n in split(",", var.aws_site_cdn_response_headers_policy_id) : (n)
+  ] : []
+}
+
 ### CDN Without DNS
 resource "aws_cloudfront_distribution" "cdn_static_site_default_cert" {
   count               = var.aws_site_cdn_enabled ? ( local.cert_available ? 0 : 1 ) : 0
@@ -165,6 +171,7 @@ resource "aws_cloudfront_distribution" "cdn_static_site_default_cert" {
         forward = "none"
       }
     }
+    response_headers_policy_id = length(local.aws_site_cdn_response_headers_policy_id) > 0 ? local.aws_site_cdn_response_headers_policy_id[0] : null
   }
 
   restrictions {
@@ -220,6 +227,7 @@ resource "aws_cloudfront_distribution" "cdn_static_site" {
         forward = "none"
       }
     }
+    response_headers_policy_id = length(local.aws_site_cdn_response_headers_policy_id) > 0 ? local.aws_site_cdn_response_headers_policy_id[0] : null
   }
 
   restrictions {

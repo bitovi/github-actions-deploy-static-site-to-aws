@@ -61,6 +61,12 @@ variable "aws_site_cdn_custom_error_codes" {
   default     = "{}"
 }
 
+variable "aws_site_cdn_response_headers_policy_id" {
+  description = "Comma separated list of response headers policy IDs for CloudFront. Eg. Managed-CORS-with-preflight-and-SecurityHeadersPolicy is 67f7725c-6f97-4210-82d7-5512b31e9d42."
+  type        = string
+  default     = ""
+}
+
 variable "aws_r53_domain_name" {
   description = "root domain name without any subdomains"
   type        = string

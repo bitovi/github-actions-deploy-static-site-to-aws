@@ -195,6 +195,7 @@ The following inputs can be used as `step.with` keys
 | `aws_site_cdn_enabled` | Boolean | Enable or disables the use of CDN. Defaults to `false`. |
 | `aws_site_cdn_aliases` | String | Extra CNAMEs (alternate domain names), if any, for this distribution. Defaults to defined domain if none passed. (See note). |
 | `aws_site_cdn_custom_error_codes` | JSON | Custom error codes to define in CDN. Like `[{\"error_caching_min_ttl\":\"0\",\"error_code\":\"403\",\"response_code\":\"200\",\"response_page_path\":\"/index.html\"}]`. See [this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudfront_distribution.html#custom-error-response-arguments). |
+| `aws_site_cdn_response_headers_policy_id` | String | Comma separated list of response headers policy IDs for CloudFront. Eg. `Managed-CORS-with-preflight-and-SecurityHeadersPolicy` is `67f7725c-6f97-4210-82d7-5512b31e9d42`. |
 <hr/>
 <br/>
 

@@ -67,6 +67,24 @@ variable "aws_site_cdn_response_headers_policy_id" {
   default     = ""
 }
 
+variable "aws_site_cdn_min_ttl" {
+  description = "Minimum amount of time (in seconds) that objects stay in CloudFront cache before CloudFront forwards another request to the origin. Default is 0."
+  type        = number
+  default     = 0
+}
+
+variable "aws_site_cdn_default_ttl" {
+  description = "Default amount of time (in seconds) that an object is in a CloudFront cache before CloudFront forwards another request to the origin. Default is 86400 (24 hours)."
+  type        = number
+  default     = 0
+}
+
+variable "aws_site_cdn_max_ttl" {
+  description = "Maximum amount of time (in seconds) that an object is in a CloudFront cache before CloudFront forwards another request to the origin. Default is 31536000 (365 days)."
+  type        = number
+  default     = 0
+}
+
 variable "aws_r53_domain_name" {
   description = "root domain name without any subdomains"
   type        = string

@@ -76,6 +76,15 @@ inputs:
   aws_site_cdn_response_headers_policy_id:
     description: 'Comma separated list of response headers policy IDs for CloudFront. Eg. Managed-CORS-with-preflight-and-SecurityHeadersPolicy is 67f7725c-6f97-4210-82d7-5512b31e9d42.'
     required: false
+  aws_site_cdn_min_ttl:
+    description: 'Minimum TTL (in seconds) for CloudFront cache. Default is 0.'
+    required: false
+  aws_site_cdn_default_ttl:
+    description: 'Default TTL (in seconds) for CloudFront cache. Default is 86400 (24 hours).'
+    required: false
+  aws_site_cdn_max_ttl:
+    description: 'Maximum TTL (in seconds) for CloudFront cache. Default is 31536000 (365 days).'
+    required: false
 
   # AWS Route53 Domains and Certificates
   aws_r53_domain_name:
@@ -140,6 +149,9 @@ runs:
         AWS_SITE_CDN_ALIASES: ${{ inputs.aws_site_cdn_aliases }}
         AWS_SITE_CDN_CUSTOM_ERROR_CODES: ${{ inputs.aws_site_cdn_custom_error_codes }}
         AWS_SITE_CDN_RESPONSE_HEADERS_POLICY_ID: ${{ inputs.aws_site_cdn_response_headers_policy_id }}
+        AWS_SITE_CDN_MIN_TTL: ${{ inputs.aws_site_cdn_min_ttl }}
+        AWS_SITE_CDN_DEFAULT_TTL: ${{ inputs.aws_site_cdn_default_ttl }}
+        AWS_SITE_CDN_MAX_TTL: ${{ inputs.aws_site_cdn_max_ttl }}
         # AWS Route53 Domains abd Certificates
         AWS_R53_DOMAIN_NAME: ${{ inputs.aws_r53_domain_name }}
         AWS_R53_SUB_DOMAIN_NAME: ${{ inputs.aws_r53_sub_domain_name }}

@@ -197,6 +197,9 @@ The following inputs can be used as `step.with` keys
 | `aws_site_cdn_aliases` | String | Extra CNAMEs (alternate domain names), if any, for this distribution. Defaults to defined domain if none passed. (See note). |
 | `aws_site_cdn_custom_error_codes` | JSON | Custom error codes to define in CDN. Like `[{\"error_caching_min_ttl\":\"0\",\"error_code\":\"403\",\"response_code\":\"200\",\"response_page_path\":\"/index.html\"}]`. See [this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudfront_distribution.html#custom-error-response-arguments). |
 | `aws_site_cdn_response_headers_policy_id` | String | Comma separated list of response headers policy IDs for CloudFront. Eg. `Managed-CORS-with-preflight-and-SecurityHeadersPolicy` is `eaab4381-ed33-4a86-88ca-d9558dc6cd63`. |
+| `aws_site_cdn_min_ttl` | Number | Minimum TTL (in seconds) for CloudFront cache. Default is `0`. |
+| `aws_site_cdn_default_ttl` | Number | Default TTL (in seconds) for CloudFront cache. (CloudFront default is `86400` - 24 hours), but defaults to `0` (disabled) |
+| `aws_site_cdn_max_ttl` | Number | Maximum TTL (in seconds) for CloudFront cache. (CloudFront default is `31536000` 365 days), but defaults to `0` (disabled). |
 <hr/>
 <br/>
 
@@ -242,6 +245,23 @@ For example, if the CDN will support `site.bitovi.com` and `site.bitovi.tools`, 
 If that's the case, `aws_site_cdn_aliases` should be set to: `site.bitovi.com,site.bitovi.tools` (Comma separated, no spaces).
 
 If they alternate domain names are child of the same domain, you can use a root cert for both. 
+
+## CloudFront Caching
+
+For deployments or applications that rotate files on each deployment, the default cache TTL settings help ensure a smooth transition between deployments:
+
+- **`aws_site_cdn_default_ttl`**: Set to 24 hours (86400 seconds)
+- **`aws_site_cdn_max_ttl`**: Set to 365 days (31536000 seconds)
+
+These settings allow CloudFront to cache files even after they've been deleted from S3, reducing 404 errors during deployment transitions. Files remain cached at edge locations for the specified TTL period, giving users time to gradually transition to the new version.
+
+Example with custom TTL settings:
+```yaml
+aws_site_cdn_enabled: true
+aws_site_cdn_min_ttl: 0
+aws_site_cdn_default_ttl: 172800  # 48 hours
+aws_site_cdn_max_ttl: 604800      # 7 days
+```
 
 ## Contributing
 We would love for you to contribute to [bitovi/github-actions-deploy-static-site-to-aws](https://github.com/bitovi/github-actions-deploy-static-site-to-aws).

@@ -156,9 +156,9 @@ resource "aws_cloudfront_distribution" "cdn_static_site_default_cert" {
   }
 
   default_cache_behavior {
-    min_ttl                = 0
-    default_ttl            = 0
-    max_ttl                = 0
+    min_ttl                = var.aws_site_cdn_min_ttl
+    default_ttl            = var.aws_site_cdn_default_ttl
+    max_ttl                = var.aws_site_cdn_max_ttl
     viewer_protocol_policy = "redirect-to-https"
 
     allowed_methods  = ["GET", "HEAD", "OPTIONS"]
@@ -212,9 +212,9 @@ resource "aws_cloudfront_distribution" "cdn_static_site" {
   }
 
   default_cache_behavior {
-    min_ttl                = 0
-    default_ttl            = 0
-    max_ttl                = 0
+    min_ttl                = var.aws_site_cdn_min_ttl
+    default_ttl            = var.aws_site_cdn_default_ttl
+    max_ttl                = var.aws_site_cdn_max_ttl
     viewer_protocol_policy = "redirect-to-https"
 
     allowed_methods  = ["GET", "HEAD", "OPTIONS"]

@@ -216,6 +216,7 @@ runs:
       shell: bash
       env: 
         TF_STATE_BUCKET: ${{ inputs.tf_state_bucket }}
+        AWS_RESOURCE_IDENTIFIER: ${{ inputs.aws_resource_identifier }}
       run:  |
         echo "::group::Purge and delete tf-state bucket"
         $GITHUB_ACTION_PATH/scripts/destroy_tf_state_bucket.sh

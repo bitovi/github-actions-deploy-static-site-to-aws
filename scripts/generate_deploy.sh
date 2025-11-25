@@ -48,7 +48,7 @@ fi
 # Generate TF_STATE_BUCKET ID if empty 
 if [ -z "${TF_STATE_BUCKET}" ]; then
   #  Add trailing id depending on name length - See AWS S3 bucket naming rules
-  if [[ ${#GITHUB_IDENTIFIER} < 55 ]]; then
+  if [[ ${#GITHUB_IDENTIFIER} -lt 55 ]]; then
     export TF_STATE_BUCKET="${GITHUB_IDENTIFIER}-tf-state"
   else
     export TF_STATE_BUCKET="${GITHUB_IDENTIFIER}-tf"

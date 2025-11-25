@@ -2,6 +2,11 @@
 
 set -e
 
+# Constants
+readonly MAX_FQDN_LENGTH_WITH_CERT=64
+readonly SHORT_IDENTIFIER_LENGTH=30
+readonly MIN_BUCKET_NAME_FOR_TF_STATE_SUFFIX=55
+
 echo "In $0"
 
 function alpha_only() {
@@ -30,25 +35,20 @@ fi
 GITHUB_IDENTIFIER="$($GITHUB_ACTION_PATH/scripts/generate_identifier.sh)"
 echo "GITHUB_IDENTIFIER: [$GITHUB_IDENTIFIER]"
 
-GITHUB_IDENTIFIER_SS="$($GITHUB_ACTION_PATH/scripts/generate_identifier.sh 30)"
+GITHUB_IDENTIFIER_SS="$($GITHUB_ACTION_PATH/scripts/generate_identifier.sh $SHORT_IDENTIFIER_LENGTH)"
 echo "GITHUB_IDENTIFIER SS: [$GITHUB_IDENTIFIER_SS]"
 
-if [[ $(alpha_only "$AWS_SITE_SOURCE_INCLUDE_HIDDEN") == "true" ]]; then
-  # Moving files, including hidden ones.
-  SOURCE_FILES="$GITHUB_WORKSPACE/$AWS_SITE_SOURCE_FOLDER"
-  rsync -av $SOURCE_FILES/ "${GITHUB_ACTION_PATH}/upload"
-  SOURCE_FILES="${GITHUB_ACTION_PATH}/upload"
-else
-  # Moving files, excluding hidden ones.
-  SOURCE_FILES="$GITHUB_WORKSPACE/$AWS_SITE_SOURCE_FOLDER"
-  rsync -av --exclude=".*" $SOURCE_FILES/ "${GITHUB_ACTION_PATH}/upload"
-  SOURCE_FILES="${GITHUB_ACTION_PATH}/upload"
-fi
+# Moving files, including or excluding hidden ones based on setting
+SOURCE_FILES="$GITHUB_WORKSPACE/$AWS_SITE_SOURCE_FOLDER"
+EXCLUDE_HIDDEN=""
+[[ $(alpha_only "$AWS_SITE_SOURCE_INCLUDE_HIDDEN") != "true" ]] && EXCLUDE_HIDDEN="--exclude=.*"
+rsync -av $EXCLUDE_HIDDEN "$SOURCE_FILES/" "${GITHUB_ACTION_PATH}/upload"
+SOURCE_FILES="${GITHUB_ACTION_PATH}/upload"
 
 # Generate TF_STATE_BUCKET ID if empty 
 if [ -z "${TF_STATE_BUCKET}" ]; then
   #  Add trailing id depending on name length - See AWS S3 bucket naming rules
-  if [[ ${#GITHUB_IDENTIFIER} -lt 55 ]]; then
+  if [[ ${#GITHUB_IDENTIFIER} -lt $MIN_BUCKET_NAME_FOR_TF_STATE_SUFFIX ]]; then
     export TF_STATE_BUCKET="${GITHUB_IDENTIFIER}-tf-state"
   else
     export TF_STATE_BUCKET="${GITHUB_IDENTIFIER}-tf"
@@ -73,14 +73,14 @@ aws_r53_sub_domain_name=
 if [ -n "${AWS_R53_SUB_DOMAIN_NAME}" ]; then
   aws_r53_sub_domain_name="aws_r53_sub_domain_name = \"${AWS_R53_SUB_DOMAIN_NAME}\""
   concatenated_string="${AWS_R53_SUB_DOMAIN_NAME}.${AWS_R53_DOMAIN_NAME}"
-  if [ ${#concatenated_string} -gt 64 ] && [[ $(alpha_only "$AWS_R53_CREATE_SUB_CERT") == "true" ]] ; then
-    echo "Length of FQDN exceeds 64 characters. Reduce length of it."
-    echo "You can use a root domain cert with a wildcard or define one through the inputs."
+  if [ ${#concatenated_string} -gt $MAX_FQDN_LENGTH_WITH_CERT ] && [[ $(alpha_only "$AWS_R53_CREATE_SUB_CERT") == "true" ]] ; then
+    echo "::error::Length of FQDN exceeds ${MAX_FQDN_LENGTH_WITH_CERT} characters: ${concatenated_string} (${#concatenated_string} characters)"
+    echo "::error::Reduce the length of the FQDN, use a root domain cert with a wildcard, or define one through the aws_r53_cert_arn input."
     exit 64
   fi
 else
   concatenated_string="${GITHUB_IDENTIFIER}.${AWS_R53_DOMAIN_NAME}"
-  if [ ${#concatenated_string} -gt 64 ] && [[ $(alpha_only "$AWS_R53_CREATE_SUB_CERT") == "true" ]] ; then
+  if [ ${#concatenated_string} -gt $MAX_FQDN_LENGTH_WITH_CERT ] && [[ $(alpha_only "$AWS_R53_CREATE_SUB_CERT") == "true" ]] ; then
       aws_r53_sub_domain_name="aws_r53_sub_domain_name = \"${GITHUB_IDENTIFIER_SS}\""
   else
       aws_r53_sub_domain_name="aws_r53_sub_domain_name = \"${GITHUB_IDENTIFIER}\""

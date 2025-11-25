@@ -2,8 +2,9 @@
 
 GitHub action to deploy anything into a bucket, adding the options to add a CDN and use a Domain (if hosted in Route53) with certificates.
 
-This action will copy the files from the defined folder into an S3 bucket, defining the content type and serving ALL OF THEM PUBLICLY. 
+This action will copy the files from the defined folder into an S3 bucket, defining the content type and serving ALL OF THEM PUBLICLY.
 ![alt](https://bitovi-gha-pixel-tracker-deployment-main.bitovi-sandbox.com/pixel/EygNpwnlUFDGHYseXNYGL)
+
 ## Action main options graph
 
 ```mermaid
@@ -19,22 +20,25 @@ graph TD;
     E --> I["Owned SSL cert<br>Unlimited FQDN length"]
 ```
 
-## Requirements 
+## Requirements
 
 1. Files to publish
 2. An AWS Account
 3. If domain and cert wanted, registered domain in AWS.
 
 ### 1. Files to publish
+
 Will grab everything defined in `aws_site_source_folder` and push it to a bucket.
 
 Define `aws_site_root_object` if different than `index.html`.
 
 ### 2. An AWS account
+
 You'll need [Access Keys](https://docs.aws.amazon.com/powershell/latest/userguide/pstools-appendix-sign-up.html) from an [AWS account](https://aws.amazon.com/premiumsupport/knowledge-center/create-and-activate-aws-account/)
 
 ### 3. CERTIFICATES - Only for AWS Managed domains with Route53
-If `aws_r53_domain_name` is defined, we will look up for a certificate with the name of that domain (eg. `example.com`). We expect that certificate to contain both `example.com` and `*.example.com`. 
+
+If `aws_r53_domain_name` is defined, we will look up for a certificate with the name of that domain (eg. `example.com`). We expect that certificate to contain both `example.com` and `*.example.com`.
 
 Setting `aws_r53_create_root_cert` to `true` will create this certificate with both `example.com` and `*.example.com` for you, and validate them. (DNS validation).
 
@@ -45,11 +49,13 @@ Setting `aws_r53_create_sub_cert` to `true` will create a certificate **just for
 > :warning: Be very careful here! **Created certificates are fully managed by Terraform**. Therefor **they will be destroyed upon stack destruction**.
 
 > :warning: See note about CDN with aliases if using certificates.
+>
 ## Example usage
 
 Create `.github/workflow/deploy.yaml` with the following to build on push.
 
 ### Example usage
+
 ```yaml
 name: Basic deploy
 on:
@@ -80,6 +86,7 @@ jobs:
 ```
 
 ### Advanced example
+
 ```yaml
 name: Basic deploy
 on:
@@ -145,6 +152,7 @@ jobs:
 ## Customizing
 
 ### Inputs
+
 1. [Action defaults](#action-defaults-inputs)
 1. [AWS](#aws-inputs)
 1. [Terraform options](#terraform-options-inputs)
@@ -156,13 +164,16 @@ The following inputs can be used as `step.with` keys
 <br/>
 
 #### **Action defaults Inputs**
+
 | Name             | Type    | Description                        |
 |------------------|---------|------------------------------------|
 | `checkout` | Boolean | Set to `false` if the code is already checked out. (Default is `true`). |
+
 <hr/>
 <br/>
 
 #### **AWS Inputs**
+
 | Name             | Type    | Description                        |
 |------------------|---------|------------------------------------|
 | `aws_access_key_id` | String | AWS access key ID |
@@ -171,10 +182,12 @@ The following inputs can be used as `step.with` keys
 | `aws_role_to_assume` | String | AWS Role to assume. Default is empty. |
 | `aws_resource_identifier` | String | Set to override the AWS resource identifier for the deployment. Defaults to `${GITHUB_ORG_NAME}-${GITHUB_REPO_NAME}-${GITHUB_BRANCH_NAME}`. Use with destroy to destroy specific resources. |
 | `additional_tags` | JSON | Add additional tags to the terraform [default tags](https://www.hashicorp.com/blog/default-tags-in-the-terraform-aws-provider), any tags put here will be added to all provisioned resources.|
+
 <hr/>
 <br/>
 
 #### **Terraform options inputs**
+
 | Name             | Type    | Description                        |
 |------------------|---------|------------------------------------|
 | `tf_action` | String | Option to run Terraform `apply` / `destroy` action. Will run `plan` if nothing defined. |
@@ -182,10 +195,12 @@ The following inputs can be used as `step.with` keys
 | `tf_state_file_name_append` | String | Appends a string to the tf-state-file. Setting this to `unique` will generate `tf-state-aws-unique`. (Can co-exist with `tf_state_file_name`) |
 | `tf_state_bucket` | String | AWS S3 bucket name to use for Terraform state. Defaults to `${org}-${repo}-{branch}-tf-state` |
 | `tf_state_bucket_destroy` | Boolean | Force purge and deletion of S3 bucket defined if terraform destroy action succeded. |
+
 <hr/>
 <br/>
 
 #### **Site Settings inputs**
+
 | Name             | Type    | Description                        |
 |------------------|---------|------------------------------------|
 | `aws_site_source_folder` | String | Source folder for files to be published. Will ignore any hidden file. Defaults to root folder of the calling repo if nothing defined. |
@@ -200,10 +215,12 @@ The following inputs can be used as `step.with` keys
 | `aws_site_cdn_min_ttl` | Number | Minimum TTL (in seconds) for CloudFront cache. Default is `0`. |
 | `aws_site_cdn_default_ttl` | Number | Default TTL (in seconds) for CloudFront cache. (CloudFront default is `86400` - 24 hours), but defaults to `0` (disabled) |
 | `aws_site_cdn_max_ttl` | Number | Maximum TTL (in seconds) for CloudFront cache. (CloudFront default is `31536000` 365 days), but defaults to `0` (disabled). |
+
 <hr/>
 <br/>
 
 #### **Certificate Inputs**
+
 | Name             | Type    | Description                        |
 |------------------|---------|------------------------------------|
 | `aws_r53_domain_name` | String | Define the root domain name for the application. e.g. `bitovi.com`. |
@@ -212,39 +229,39 @@ The following inputs can be used as `step.with` keys
 | `aws_r53_cert_arn` | String | Define the certificate ARN to use for the application. |
 | `aws_r53_create_root_cert` | Boolean | Generates and manage the root cert for the application. Default is `false`. |
 | `aws_r53_create_sub_cert` | Boolean | Generates and manage the sub-domain certificate for the application. Default is `false`. |
+
 <hr/>
 <br/>
 
-
 ## Note about resource identifiers
 
-Most resources will contain the tag `${GITHUB_ORG_NAME}-${GITHUB_REPO_NAME}-${GITHUB_BRANCH_NAME}`, some of them, even the resource name after. 
+Most resources will contain the tag `${GITHUB_ORG_NAME}-${GITHUB_REPO_NAME}-${GITHUB_BRANCH_NAME}`, some of them, even the resource name after.
 We limit this to a 60 characters string because some AWS resources have a length limit and short it if needed.
 
 We use the kubernetes style for this. For example, kubernetes -> k(# of characters)s -> k8s. And so you might see some compressions are made.
 
-For some specific resources, we have a 32 characters limit. If the identifier length exceeds this number after compression, we remove the middle part and replace it for a hash made up from the string itself. 
+For some specific resources, we have a 32 characters limit. If the identifier length exceeds this number after compression, we remove the middle part and replace it for a hash made up from the string itself.
 
 ## Note about bucket names
 
-As a default, the bucket name will be `${GITHUB_ORG_NAME}-${GITHUB_REPO_NAME}-${GITHUB_BRANCH_NAME}-sp`. 
+As a default, the bucket name will be `${GITHUB_ORG_NAME}-${GITHUB_REPO_NAME}-${GITHUB_BRANCH_NAME}-sp`.
 
 But, in the case you add a Route53 domain and no CDN, the bucket name must match the FQDN defined, like `site.example.com`. If setting `aws_r53_root_domain_deploy`, two buckets will be created. `www.{aws_r53_domain_name}`and `{aws_r53_domain_name}`. Traffic from www bucket will be forwarded to the main bucket.
 Because of this reason, the length of the FQDN *MUST* be below 64 characters. Will try using the provided FQDN, if none provided, fallback to `resource-identifier.{aws_r53_domain_name}` of the compressed one. IF it still exceeds the limit, will remove as many as needed.
 
 > :warning: HTTPS (TLS / SSL) will only be available if using CDN.
 
-In the case you are using domains and not using a CDN, no cert will be available, and length of the FQDN *MUST* be below 64 characters. Will be adjusted if it exceeds that limit. 
+In the case you are using domains and not using a CDN, no cert will be available, and length of the FQDN *MUST* be below 64 characters. Will be adjusted if it exceeds that limit.
 
 ## Certificates with CDN
 
-In the case you are using a custom domain name and need to support two alternate domain names, you can use the `aws_site_cdn_aliases`. 
+In the case you are using a custom domain name and need to support two alternate domain names, you can use the `aws_site_cdn_aliases`.
 If using a certificate, keep in mind that you'll need to specify one that covers the domains being defined.  
 
 For example, if the CDN will support `site.bitovi.com` and `site.bitovi.tools`, the same certificate must cover both *bitovi.com* and *bitovi.tools* domains. (You can use sub-domains too). In that case, you'll need to specify the certificate by defining the `aws_r53_cert_arn`.
 If that's the case, `aws_site_cdn_aliases` should be set to: `site.bitovi.com,site.bitovi.tools` (Comma separated, no spaces).
 
-If they alternate domain names are child of the same domain, you can use a root cert for both. 
+If they alternate domain names are child of the same domain, you can use a root cert for both.
 
 ## CloudFront Caching
 
@@ -256,6 +273,7 @@ For deployments or applications that rotate files on each deployment, the defaul
 These settings allow CloudFront to cache files even after they've been deleted from S3, reducing 404 errors during deployment transitions. Files remain cached at edge locations for the specified TTL period, giving users time to gradually transition to the new version.
 
 Example with custom TTL settings:
+
 ```yaml
 aws_site_cdn_enabled: true
 aws_site_cdn_min_ttl: 0
@@ -264,6 +282,7 @@ aws_site_cdn_max_ttl: 604800      # 7 days
 ```
 
 ## IAM AWS Permissions
+
 Follow the principle of least privilege:
 
 ```json
@@ -294,14 +313,18 @@ Follow the principle of least privilege:
 ```
 
 ## Contributing
+
 We would love for you to contribute to [bitovi/github-actions-deploy-static-site-to-aws](https://github.com/bitovi/github-actions-deploy-static-site-to-aws).
 Would you like to see additional features?  [Create an issue](https://github.com/bitovi/github-actions-deploy-static-site-to-aws/issues/new) or a [Pull Requests](https://github.com/bitovi/github-actions-deploy-static-site-to-aws/pulls). We love discussing solutions!
 
 ## License
+
 The scripts and documentation in this project are released under the [MIT License](https://github.com/bitovi/github-actions-deploy-static-site-to-aws/blob/main/LICENSE).
 
 # Provided by Bitovi
+
 [Bitovi](https://www.bitovi.com/) is a proud supporter of Open Source software.
 
-# We want to hear from you.
+# We want to hear from you
+
 Come chat with us about open source in our Bitovi community [Discord](https://discord.gg/zAHn4JBVcX)!

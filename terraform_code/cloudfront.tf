@@ -134,7 +134,7 @@ resource "aws_cloudfront_distribution" "cdn_static_site" {
 ### CDN Access control
 resource "aws_cloudfront_origin_access_control" "default" {
   count                             = var.aws_site_cdn_enabled ? 1 : 0
-  name                              = "${local.s3_bucket_name}"
+  name                              = local.s3_bucket_name
   description                       = "Cloudfront OAC for ${local.s3_bucket_name} - ${var.aws_resource_identifier}"
   origin_access_control_origin_type = "s3"
   signing_behavior                  = "always"

@@ -48,10 +48,10 @@ locals {
 
   fqdn_bucket_name = local.aws_r53_fqdn_full_length > 63 ? local.aws_r53_fqdn_short_length > 63 ? local.aws_r53_fqdn_ss : local.aws_r53_fqdn_short : local.aws_r53_fqdn_full
   # Generate fqdn names
-  aws_r53_fqdn_full        = "${var.aws_r53_sub_domain_name}.${var.aws_r53_domain_name}"
-  aws_r53_fqdn_short       = "${var.aws_resource_identifier_supershort}.${var.aws_r53_domain_name}"
+  aws_r53_fqdn_full  = "${var.aws_r53_sub_domain_name}.${var.aws_r53_domain_name}"
+  aws_r53_fqdn_short = "${var.aws_resource_identifier_supershort}.${var.aws_r53_domain_name}"
   # Get lengths of the different bucket names strings
-  aws_r53_fqdn_full_length = length(local.aws_r53_fqdn_full)
+  aws_r53_fqdn_full_length  = length(local.aws_r53_fqdn_full)
   aws_r53_fqdn_short_length = length("${var.aws_resource_identifier_supershort}.${var.aws_r53_domain_name}")
   # IF the shortest string is still too long, get how much char's we should remove and do so.
   aws_r53_fqdn_ss_remove = tonumber(local.aws_r53_fqdn_short_length - 63 > 0 ? local.aws_r53_fqdn_short_length - 63 : 0)

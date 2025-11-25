@@ -144,11 +144,11 @@ variable "app_branch_name" {
 
 locals {
   aws_tags = {
-    AWSResourceIdentifier     = "${var.aws_resource_identifier}"
-    GitHubOrgName             = "${var.app_org_name}"
-    GitHubRepoName            = "${var.app_repo_name}"
-    GitHubBranchName          = "${var.app_branch_name}"
-    GitHubAction              = "bitovi/github-actions-deploy-static-site-to-aws"
-    created_with              = "terraform"
+    AWSResourceIdentifier = "${var.aws_resource_identifier}"
+    GitHubOrgName         = "${var.app_org_name}"
+    GitHubRepoName        = "${var.app_repo_name}"
+    GitHubBranchName      = "${var.app_branch_name}"
+    GitHubAction          = "bitovi/github-actions-deploy-static-site-to-aws"
+    created_with          = "terraform"
   }
 }

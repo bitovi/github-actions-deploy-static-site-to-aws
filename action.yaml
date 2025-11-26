@@ -152,7 +152,7 @@ runs:
         AWS_SITE_CDN_MIN_TTL: ${{ inputs.aws_site_cdn_min_ttl }}
         AWS_SITE_CDN_DEFAULT_TTL: ${{ inputs.aws_site_cdn_default_ttl }}
         AWS_SITE_CDN_MAX_TTL: ${{ inputs.aws_site_cdn_max_ttl }}
-        # AWS Route53 Domains abd Certificates
+        # AWS Route53 Domains and Certificates
         AWS_R53_DOMAIN_NAME: ${{ inputs.aws_r53_domain_name }}
         AWS_R53_SUB_DOMAIN_NAME: ${{ inputs.aws_r53_sub_domain_name }}
         AWS_R53_ROOT_DOMAIN_DEPLOY: ${{ inputs.aws_r53_root_domain_deploy }}
@@ -216,6 +216,7 @@ runs:
       shell: bash
       env: 
         TF_STATE_BUCKET: ${{ inputs.tf_state_bucket }}
+        AWS_RESOURCE_IDENTIFIER: ${{ inputs.aws_resource_identifier }}
       run:  |
         echo "::group::Purge and delete tf-state bucket"
         $GITHUB_ACTION_PATH/scripts/destroy_tf_state_bucket.sh

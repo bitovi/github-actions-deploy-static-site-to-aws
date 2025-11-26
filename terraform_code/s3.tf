@@ -66,6 +66,14 @@ resource "aws_s3_object" "aws_site_website_bucket" {
   content = each.value.content
 
   etag = each.value.digests.md5
+
+  # Dynamic block for cache control - applies to every file when CDN default TTL is set
+  dynamic "metadata" {
+    for_each = var.aws_site_cdn_default_ttl > 0 ? [1] : []
+    content {
+      Cache-Control = "public, max-age=${var.aws_site_cdn_default_ttl}"
+    }
+  }
 }
 
 ### IAM Policies definitions

@@ -41,7 +41,7 @@ function shorten_identifier() {
         current_match_first_character=${current_match:0:1}
         # get last letter
         current_match_last_character=${current_match: -1}
-        # gete match length
+        # get match length
         current_match_length=${#current_match}
 
         if (( current_match_length <= 3 )) ; then

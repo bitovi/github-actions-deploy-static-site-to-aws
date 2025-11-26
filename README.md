@@ -293,18 +293,44 @@ Follow the principle of least privilege:
       "Effect": "Allow",
       "Action": [
         "s3:CreateBucket",
+        "s3:DeleteBucket",
         "s3:PutObject",
         "s3:GetObject",
         "s3:DeleteObject",
         "s3:ListBucket",
-        "cloudfront:CreateDistribution",
-        "cloudfront:GetDistribution",
-        "cloudfront:UpdateDistribution",
-        "cloudfront:DeleteDistribution",
+        "s3:PutBucketPolicy",
+        "s3:DeleteBucketPolicy",
+        "s3:PutBucketWebsite",
+        "s3:PutBucketPublicAccessBlock"
+      ],
+      "Resource": [
+        "arn:aws:s3:::${BUCKET_NAME}",
+        "arn:aws:s3:::${BUCKET_NAME}/*"
+      ]
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "cloudfront:*"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
         "route53:ChangeResourceRecordSets",
+        "route53:GetChange",
+        "route53:ListResourceRecordSets"
+      ],
+      "Resource": "arn:aws:route53:::hostedzone/${HOSTED_ZONE_ID}"
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
         "acm:RequestCertificate",
         "acm:DescribeCertificate",
-        "acm:DeleteCertificate"
+        "acm:DeleteCertificate",
+        "acm:ListCertificates"
       ],
       "Resource": "*"
     }

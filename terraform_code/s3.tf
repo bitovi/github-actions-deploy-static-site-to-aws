@@ -68,7 +68,7 @@ resource "aws_s3_object" "aws_site_website_bucket" {
   etag = each.value.digests.md5
 
   metadata = var.aws_site_cdn_default_ttl > 0 ? {
-    "Cache-Control" = "public, max-age=${var.aws_site_cdn_default_ttl}"
+    "cache-control" = "public, max-age=${var.aws_site_cdn_default_ttl}"
   } : null
 }
 

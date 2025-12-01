@@ -68,7 +68,7 @@ jobs:
 
     steps:
     - name: Create deploy-bucket
-      uses: bitovi/github-actions-deploy-static-site-to-aws@v0.2.7
+      uses: bitovi/github-actions-deploy-static-site-to-aws@v0
       with:
         aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -98,7 +98,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Create deploy-bucket
-        uses: bitovi/github-actions-deploy-static-site-to-aws@v0.2.7
+        uses: bitovi/github-actions-deploy-static-site-to-aws@v0
         with:
           aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -125,7 +125,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Create deploy-bucket
-        uses: bitovi/github-actions-deploy-static-site-to-aws@v0.2.7
+        uses: bitovi/github-actions-deploy-static-site-to-aws@v0
         with:
           aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -271,6 +271,7 @@ For deployments or applications that rotate files on each deployment, the defaul
 - **`aws_site_cdn_max_ttl`**: Set to 365 days (31536000 seconds)
 
 These settings allow CloudFront to cache files even after they've been deleted from S3, reducing 404 errors during deployment transitions. Files remain cached at edge locations for the specified TTL period, giving users time to gradually transition to the new version.
+Additionally, each uploaded object includes a `cache_control` header that matches the value of `aws_site_cdn_default_ttl`.
 
 Example with custom TTL settings:
 

@@ -54,7 +54,6 @@ module "template_files" {
   base_dir = var.aws_site_source_folder
 }
 
-# Will upload each file to the bucket, defining content-type
 resource "aws_s3_object" "aws_site_website_bucket" {
   for_each = module.template_files.files
 
@@ -66,6 +65,8 @@ resource "aws_s3_object" "aws_site_website_bucket" {
   content = each.value.content
 
   etag = each.value.digests.md5
+
+  cache_control = var.aws_site_cdn_default_ttl > 0 ? "public, max-age=${var.aws_site_cdn_default_ttl}" : null
 }
 
 ### IAM Policies definitions

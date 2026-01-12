@@ -10,7 +10,7 @@
 #}
 
 data "aws_acm_certificate" "issued" {
-  for_each = (!var.aws_r53_create_root_cert && !var.aws_r53_create_sub_cert && var.aws_r53_domain_name != "") ? {
+  for_each = (var.aws_r53_enable_cert && !var.aws_r53_create_root_cert && !var.aws_r53_create_sub_cert && var.aws_r53_domain_name != "") ? {
     "domain"   = var.aws_r53_domain_name,
     "wildcard" = "*.${var.aws_r53_domain_name}",
     "sub"      = "${var.aws_r53_sub_domain_name}.${var.aws_r53_domain_name}"
@@ -69,9 +69,4 @@ resource "aws_acm_certificate_validation" "sub_domain" {
   count                   = var.aws_r53_enable_cert ? (var.aws_r53_create_sub_cert && !var.aws_r53_create_root_cert && var.aws_r53_domain_name != "" && var.aws_r53_sub_domain_name != "" ? 1 : 0) : 0
   certificate_arn         = aws_acm_certificate.sub_domain[0].arn
   validation_record_fqdns = [for record in aws_route53_record.sub_domain : record.fqdn]
-}
-
-### Try looking up for the cert with different names
-locals {
-  acm_arn = try(data.aws_acm_certificate.issued["domain"].arn, try(data.aws_acm_certificate.issued["wildcard"].arn, data.aws_acm_certificate.issued["sub"].arn, ""))
 }

@@ -52,7 +52,7 @@ locals {
 
   url = var.aws_site_cdn_enabled ? local.cdn_site_url : (local.fqdn_provided ? local.r53_fqdn : local.s3_endpoint)
 
-  protocol = var.aws_r53_enable_cert ? var.aws_r53_cert_arn != "" ? "https://" : try(module.aws_certificates[0].selected_arn, "") != "" ? "https://" : "http://" : "http://"
+  protocol = var.aws_r53_enable_cert ? var.aws_r53_cert_arn != "" ? "https://" : local.selected_arn != "" ? "https://" : "http://" : "http://"
 
   public_url = "${local.protocol}${local.url}"
 }

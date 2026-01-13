@@ -20,7 +20,7 @@ data "aws_acm_certificate" "issued" {
 
 # This block will create and validate the root domain and www cert
 resource "aws_acm_certificate" "root_domain" {
-  count           = var.aws_r53_enable_cert ? (var.aws_r53_domain_name != "" && var.aws_r53_create_root_cert ? 1 : 0) : 0
+  count                     = var.aws_r53_enable_cert ? (var.aws_r53_domain_name != "" && var.aws_r53_create_root_cert ? 1 : 0) : 0
   domain_name               = var.aws_r53_domain_name
   subject_alternative_names = ["*.${var.aws_r53_domain_name}", "${var.aws_r53_domain_name}"]
   validation_method         = "DNS"

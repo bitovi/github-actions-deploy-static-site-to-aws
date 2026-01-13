@@ -9,7 +9,7 @@ locals {
 
 ### CDN Without DNS
 resource "aws_cloudfront_distribution" "cdn_static_site_default_cert" {
-  count               = var.aws_site_cdn_enabled && local.selected_arn == "" ? 1 : 0 #? (var.aws_r53_enable_cert && var.aws_r53_domain_name != "" ? 0 : 1) : 0
+  count               = var.aws_site_cdn_enabled && !local.custom_cert ? 1 : 0 #? (var.aws_r53_enable_cert && var.aws_r53_domain_name != "" ? 0 : 1) : 0
   enabled             = true
   is_ipv6_enabled     = true
   default_root_object = var.aws_site_root_object
@@ -65,7 +65,7 @@ resource "aws_cloudfront_distribution" "cdn_static_site_default_cert" {
 
 ### CDN with custom DNS
 resource "aws_cloudfront_distribution" "cdn_static_site" {
-  count               = var.aws_site_cdn_enabled  && local.selected_arn != "" ? 1 : 0 # (var.aws_r53_enable_cert && var.aws_r53_domain_name != "" ? 1 : 0) : 0
+  count               = var.aws_site_cdn_enabled  && local.custom_cert ? 1 : 0 # (var.aws_r53_enable_cert && var.aws_r53_domain_name != "" ? 1 : 0) : 0
   enabled             = true
   is_ipv6_enabled     = true
   default_root_object = var.aws_site_root_object

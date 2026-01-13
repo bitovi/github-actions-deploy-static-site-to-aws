@@ -12,13 +12,17 @@ locals {
   )
 
   selected_arn = (
-    var.aws_r53_enable_cert && local.fqdn_provided ? (
+    #var.aws_r53_enable_cert && local.fqdn_provided ? (
       var.aws_r53_cert_arn != "" ? var.aws_r53_cert_arn :
       var.aws_r53_create_root_cert ? aws_acm_certificate.root_domain[0].arn :
       var.aws_r53_create_sub_cert ? aws_acm_certificate.sub_domain[0].arn :
       local.fqdn_provided ? local.acm_arn :
-    "")
-    : ""
+    ""#)
+    #: ""
+  )
+
+  custom_cert = (
+    var.aws_r53_create_sub_cert || var.aws_r53_create_root_cert || var.aws_r53_cert_arn != "" ? true : false
   )
 
   ### Converting JSON to map of strings as GH Actions don't accept map of strings

@@ -1,14 +1,5 @@
 # CERTIFICATE STUFF
 
-#data "aws_acm_certificate" "issued" {
-#  for_each = local.cert_available && local.fqdn_provided ? {
-#    "domain" : var.aws_r53_domain_name,
-#    "wildcard" : "*.${var.aws_r53_domain_name}"
-#    "sub" : "${var.aws_r53_sub_domain_name}.${var.aws_r53_domain_name}"
-#  } : {}
-#  domain = var.aws_r53_domain_name
-#}
-
 data "aws_acm_certificate" "issued" {
   for_each = (var.aws_r53_enable_cert && !var.aws_r53_create_root_cert && !var.aws_r53_create_sub_cert && var.aws_r53_domain_name != "") ? {
     "domain"   = var.aws_r53_domain_name,

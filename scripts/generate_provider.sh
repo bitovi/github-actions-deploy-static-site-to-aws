@@ -44,7 +44,7 @@ function generate_tf_state_file_name () {
 #  }
 #}
 
-if [ "$LOCALSTACK" = "TRUE" ]; then
+if [ "$LOCALSTACK" = "true" ]; then
   cat <<EOF > "${GITHUB_ACTION_PATH}/terraform_code/provider.tf"
 terraform {
   required_providers {

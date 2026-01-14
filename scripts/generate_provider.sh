@@ -58,11 +58,8 @@ terraform {
     }
   }
 
-  backend "s3" {
-    region  = "${AWS_DEFAULT_REGION}"
-    bucket  = "${TF_STATE_BUCKET}"
-    key     = "$(generate_tf_state_file_name site)"
-    encrypt = true #AES-256encryption
+  backend "local" {
+    path = "terraform.tfstate"
   }
 }
 
@@ -98,8 +95,11 @@ terraform {
     }
   }
 
-  backend "local" {
-    path = "terraform.tfstate"
+  backend "s3" {
+    region  = "${AWS_DEFAULT_REGION}"
+    bucket  = "${TF_STATE_BUCKET}"
+    key     = "$(generate_tf_state_file_name site)"
+    encrypt = true #AES-256encryption
   }
 }
 

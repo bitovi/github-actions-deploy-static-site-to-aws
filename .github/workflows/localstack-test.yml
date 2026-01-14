@@ -1,0 +1,127 @@
+name: LocalStack Terraform Test
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  test-with-localstack:
+    runs-on: ubuntu-latest
+    services:
+      localstack:
+        image: localstack/localstack:latest
+        ports:
+          - 4566:4566
+        options: >-
+          --health-cmd="curl -f http://localhost:4566/_localstack/health || exit 1"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+    env:
+      AWS_ACCESS_KEY_ID: test
+      AWS_SECRET_ACCESS_KEY: test
+      AWS_DEFAULT_REGION: us-east-1
+      AWS_ENDPOINT_URL: http://localhost:4566
+      TF_VAR_aws_access_key: test
+      TF_VAR_aws_secret_key: test
+      TF_VAR_aws_region: us-east-1
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.6.6
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      #- name: Configure AWS CLI for LocalStack
+      #  run: |
+      #    aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
+      #    aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
+      #    aws configure set region $AWS_DEFAULT_REGION
+
+      - name: Run Terraform Init
+        working-directory: ./terraform_code
+        run: terraform init -backend=false
+
+      - name: Run Terraform Plan
+        working-directory: ./terraform_code
+        run: terraform plan -var "aws_access_key=$AWS_ACCESS_KEY_ID" -var "aws_secret_key=$AWS_SECRET_ACCESS_KEY" -var "aws_region=$AWS_DEFAULT_REGION" -var "endpoint_url=$AWS_ENDPOINT_URL"
+
+      - name: Run Terraform Apply
+        working-directory: ./terraform_code
+        run: terraform apply -auto-approve -var "aws_access_key=$AWS_ACCESS_KEY_ID" -var "aws_secret_key=$AWS_SECRET_ACCESS_KEY" -var "aws_region=$AWS_DEFAULT_REGION" -var "endpoint_url=$AWS_ENDPOINT_URL"
+
+      - name: Validate resources in LocalStack
+        run: |
+          aws --endpoint-url=$AWS_ENDPOINT_URL s3 ls
+          # Add more aws cli checks as needed
+
+  test-action-full-options:
+        runs-on: ubuntu-latest
+        needs: test-with-localstack
+        strategy:
+          matrix:
+            tf_action: [apply, apply, destroy]
+            aws_site_cdn_enabled: ['true', 'true', 'false']
+            aws_r53_root_domain_deploy: ['false', 'true', 'false']
+        services:
+          localstack:
+            image: localstack/localstack:latest
+            ports:
+              - 4566:4566
+            options: >-
+              --health-cmd="curl -f http://localhost:4566/_localstack/health || exit 1"
+              --health-interval=10s
+              --health-timeout=5s
+              --health-retries=5
+        env:
+          AWS_ACCESS_KEY_ID: test
+          AWS_SECRET_ACCESS_KEY: test
+          AWS_DEFAULT_REGION: us-east-1
+          AWS_ENDPOINT_URL: http://localhost:4566
+        steps:
+          - name: Checkout code
+            uses: actions/checkout@v4
+
+          - name: Run action with matrix options
+            uses: ./
+            with:
+              checkout: 'true'
+              aws_access_key_id: test
+              aws_secret_access_key: test
+              aws_default_region: us-east-1
+              aws_role_to_assume: ''
+              aws_resource_identifier: 'test-identifier'
+              aws_additional_tags: '{"env":"test","team":"dev"}'
+              tf_action: ${{ matrix.tf_action }}
+              tf_state_file_name: 'test-tf-state'
+              tf_state_file_name_append: 'unique'
+              tf_state_bucket: 'test-tf-state-bucket'
+              tf_state_bucket_destroy: 'true'
+              aws_site_source_folder: 'site'
+              aws_site_source_include_hidden: 'true'
+              aws_site_root_object: 'index.html'
+              aws_site_error_document: 'error.html'
+              aws_site_bucket_name: 'test-site-bucket'
+              aws_site_cdn_enabled: ${{ matrix.aws_site_cdn_enabled }}
+              aws_site_cdn_aliases: 'test.example.com'
+              aws_site_cdn_custom_error_codes: '{"404":"NotFound"}'
+              aws_site_cdn_response_headers_policy_id: '67f7725c-6f97-4210-82d7-5512b31e9d42'
+              aws_site_cdn_min_ttl: '0'
+              aws_site_cdn_default_ttl: '86400'
+              aws_site_cdn_max_ttl: '31536000'
+              aws_r53_domain_name: 'example.com'
+              aws_r53_sub_domain_name: 'test'
+              aws_r53_root_domain_deploy: ${{ matrix.aws_r53_root_domain_deploy }}
+              aws_r53_cert_arn: 'arn:aws:acm:us-east-1:123456789012:certificate/abcdefg'
+              aws_r53_create_root_cert: 'true'
+              aws_r53_create_sub_cert: 'true'

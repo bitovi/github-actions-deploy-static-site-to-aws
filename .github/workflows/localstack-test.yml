@@ -93,6 +93,13 @@ jobs:
           - name: Checkout code
             uses: actions/checkout@v4
 
+          - name: Pre-create Terraform needed resources
+            run: |
+              aws --endpoint-url=$AWS_ENDPOINT_URL s3 mb s3://test-site-bucket
+              aws --endpoint-url=$AWS_ENDPOINT_URL route53 create-hosted-zone \
+                  --name example.local \
+                  --caller-reference $(date +%s)
+
           - name: Run action with matrix options
             uses: ./
             with:
@@ -112,7 +119,7 @@ jobs:
               aws_site_cdn_min_ttl: '0'
               aws_site_cdn_default_ttl: '86400'
               aws_site_cdn_max_ttl: '31536000'
-              aws_r53_domain_name: 'example.com'
+              aws_r53_domain_name: 'example.local'
               aws_r53_sub_domain_name: 'test'
               aws_r53_root_domain_deploy: ${{ matrix.aws_r53_root_domain_deploy }}
               aws_r53_cert_arn: 'arn:aws:acm:us-east-1:123456789012:certificate/abcdefg'

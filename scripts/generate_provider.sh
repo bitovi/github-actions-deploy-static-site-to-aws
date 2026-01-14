@@ -70,7 +70,7 @@ provider "aws" {
   access_key                  = "${AWS_ACCESS_KEY_ID}"
   secret_key                  = "${AWS_SECRET_ACCESS_KEY}"
   region                      = "${AWS_DEFAULT_REGION}"
-  s3_force_path_style         = true
+  s3_use_path_style           = true
   skip_credentials_validation = true
   skip_metadata_api_check     = true
   skip_requesting_account_id  = true

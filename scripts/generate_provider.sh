@@ -23,29 +23,88 @@ function generate_tf_state_file_name () {
   echo $filename
 }
 
-echo "
+#echo "
+#terraform {
+#  required_providers {
+#    aws = {
+#      source  = \"hashicorp/aws\"
+#      version = \"~> 4.30\"
+#    }
+#    random = {
+#      source  = \"hashicorp/random\"
+#      version = \">= 2.2\"
+#    }
+#  }
+#
+#  backend \"s3\" {
+#    region  = \"${AWS_DEFAULT_REGION}\"
+#    bucket  = \"${TF_STATE_BUCKET}\"
+#    key     = \"$(generate_tf_state_file_name site)\"
+#    encrypt = true #AES-256encryption
+#  }
+#}
+
+if [ "$LOCALSTACK" = "true" ]; then
+  cat <<EOF > "${GITHUB_ACTION_PATH}/terraform_code/provider.tf"
 terraform {
   required_providers {
     aws = {
-      source  = \"hashicorp/aws\"
-      version = \"~> 4.30\"
+      source  = "hashicorp/aws"
+      version = "~> 4.30"
     }
     random = {
-      source  = \"hashicorp/random\"
-      version = \">= 2.2\"
+      source  = "hashicorp/random"
+      version = ">= 2.2"
     }
   }
 
-  backend \"s3\" {
-    region  = \"${AWS_DEFAULT_REGION}\"
-    bucket  = \"${TF_STATE_BUCKET}\"
-    key     = \"$(generate_tf_state_file_name site)\"
+  backend "local" {
+    path = "terraform.tfstate"
+  }
+}
+
+provider "aws" {
+  access_key                  = "${AWS_ACCESS_KEY_ID}"
+  secret_key                  = "${AWS_SECRET_ACCESS_KEY}"
+  region                      = "${AWS_DEFAULT_REGION}"
+  s3_use_path_style           = true
+  skip_credentials_validation = true
+  skip_metadata_api_check     = true
+  skip_requesting_account_id  = true
+  endpoints {
+    s3         = "${AWS_ENDPOINT_URL}"
+    cloudfront = "${AWS_ENDPOINT_URL}"
+    route53    = "${AWS_ENDPOINT_URL}"
+    acm        = "${AWS_ENDPOINT_URL}"
+    iam        = "${AWS_ENDPOINT_URL}"
+    sts        = "${AWS_ENDPOINT_URL}"
+  }
+}
+EOF
+else
+  cat <<EOF > "${GITHUB_ACTION_PATH}/terraform_code/provider.tf"
+terraform {
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 4.30"
+    }
+    random = {
+      source  = "hashicorp/random"
+      version = ">= 2.2"
+    }
+  }
+
+  backend "s3" {
+    region  = "${AWS_DEFAULT_REGION}"
+    bucket  = "${TF_STATE_BUCKET}"
+    key     = "$(generate_tf_state_file_name site)"
     encrypt = true #AES-256encryption
   }
 }
 
-provider \"aws\" {
-  region = \"${AWS_DEFAULT_REGION}\"
+provider "aws" {
+  region = "${AWS_DEFAULT_REGION}"
   default_tags {
     tags = merge(
       local.aws_tags,
@@ -53,4 +112,5 @@ provider \"aws\" {
     )
   }
 }
-" > "${GITHUB_ACTION_PATH}/terraform_code/provider.tf"
+EOF
+fi
